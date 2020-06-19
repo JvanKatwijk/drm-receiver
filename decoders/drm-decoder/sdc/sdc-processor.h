@@ -48,8 +48,6 @@ public:
 	                 	int16_t);
 		~sdcProcessor	(void);
 	bool	processSDC	        (theSignal *v);
-	uint8_t	getSDCmode		(void);
-	uint8_t	getRMflag		(void);
 private:
 	bool	processSDC_QAM4		(theSignal *v);
 	bool	processSDC_QAM16	(theSignal *v);

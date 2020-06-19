@@ -261,8 +261,8 @@ restart:
 	            threeinaRow ++;
 	         }
 	               
-	         show_services (theState. getnrAudio (),
-	                        theState. getnrData ());
+	         show_services (getnrAudio (&theState),
+	                        getnrData (&theState));
 	         blockCount	= 0;
 //
 //	if we seem to have the start of a superframe, we
@@ -355,12 +355,12 @@ int16_t	   K_max		= Kmax (m -> Mode, m -> Spectrum);
 }
 
 bool	frameProcessor::isLastFrame (stateDescriptor *f) {
-uint8_t	val	= f -> getIdentity ();
+uint8_t	val	= f -> frameIdentity;
 	return ((val & 03) == 02);
 }
 
 bool	frameProcessor::isFirstFrame (stateDescriptor *f) {
-uint8_t	val	= f -> getIdentity ();
+uint8_t	val	= f -> frameIdentity;
 	return ((val & 03) == 0) || ((val & 03) == 03);
 }
 
@@ -489,7 +489,7 @@ int	cnt	= 0;
 //
 //	just for readability
 uint8_t	frameProcessor::getSpectrum	(stateDescriptor *f) {
-uint8_t val = f -> getSpectrumBits ();
+uint8_t val = f -> spectrumBits;
 	return val <= 3 ? val : 3;
 }
 //
@@ -521,5 +521,25 @@ sdcProcessor  my_sdcProcessor (theDecoder, theState, sdcCells (modeInf));
 	}
 
 	return my_sdcProcessor. processSDC (sdcVector); 
+}
+
+int16_t	frameProcessor::getnrAudio	(stateDescriptor *theState) {
+int16_t i;
+int16_t	amount	= 0;
+
+	for (i = 0; i < theState -> numofStreams; i ++)
+	   if (theState -> streams [i]. soort == stateDescriptor::AUDIO_STREAM)
+	      amount ++;
+	return amount;
+}
+
+int16_t	frameProcessor::getnrData	(stateDescriptor *theState) {
+int16_t i;
+int16_t	amount	= 0;
+
+	for (i = 0; i < theState ->  numofStreams; i ++)
+	   if (theState -> streams [i]. soort == stateDescriptor::DATA_STREAM)
+	      amount ++;
+	return amount;
 }
 

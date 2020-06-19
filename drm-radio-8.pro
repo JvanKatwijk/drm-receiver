@@ -512,9 +512,6 @@ drm-decoder-old {
 	                   ./decoders/drm-decoder/utilities/qam4-metrics.h \
 	                   ./decoders/drm-decoder/utilities/deinterleaver.h \
 	                   ./decoders/drm-decoder/parameters/msc-config.h \
-	                   ./decoders/drm-decoder/parameters/fac-data.h \
-	                   ./decoders/drm-decoder/parameters/channelparameters.h \
-	                   ./decoders/drm-decoder/parameters/serviceparameters.h \
 	                   ./decoders/drm-decoder/parameters/puncture-tables.h \
 	                   ./decoders/drm-decoder/fac/fac-processor.h \
 	                   ./decoders/drm-decoder/sdc/sdc-streamer.h \
@@ -557,9 +554,6 @@ drm-decoder-old {
 	                   ./decoders/drm-decoder/utilities/qam4-metrics.cpp \
  	                   ./decoders/drm-decoder/utilities/deinterleaver.cpp \
 	                   ./decoders/drm-decoder/parameters/msc-config.cpp \
-	                   ./decoders/drm-decoder/parameters/fac-data.cpp \
-	                   ./decoders/drm-decoder/parameters/channelparameters.cpp \
-	                   ./decoders/drm-decoder/parameters/serviceparameters.cpp \
 	                   ./decoders/drm-decoder/parameters/puncture-tables.cpp \
 	                   ./decoders/drm-decoder/fac/fac-processor.cpp \
 	                   ./decoders/drm-decoder/sdc/sdc-streamer.cpp \

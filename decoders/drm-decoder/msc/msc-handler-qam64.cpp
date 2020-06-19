@@ -57,7 +57,7 @@ int32_t	highProtected, lowProtected;
 	      denom += theState -> getRp (theState -> protLevelA, i);
 	   denom *= 2 * RYlcm;
 	   N1	= int16_t (ceil ((8.0 * lengthA) / denom)) * RYlcm;
-	   N2	= theState	-> muxSize () - N1;
+	   N2	= theState	-> muxSize - N1;
 	   Y13mapper_high	= new Mapper (2 * N1, 13);
 	   Y21mapper_high	= new Mapper (2 * N1, 21);
 	   Y13mapper_low	= new Mapper (2 * N2, 13);
@@ -65,7 +65,7 @@ int32_t	highProtected, lowProtected;
 	}
 	else {
 	   N1	= 0;
-	   N2	= theState	-> muxSize ();
+	   N2	= theState	-> muxSize;
 	   Y13mapper_high	= NULL;
 	   Y21mapper_high	= NULL;
 	   Y13mapper_low	= new Mapper (2 * N2, 13);
@@ -126,27 +126,27 @@ uint8_t	bits_0  [stream_0 -> highBits () + stream_0 -> lowBits ()];
 //uint8_t	bits_0a  [stream_0 -> highBits () + stream_0 -> lowBits ()];
 uint8_t	bits_1  [stream_1 -> highBits () + stream_1 -> lowBits ()];
 uint8_t	bits_2  [stream_2 -> highBits () + stream_2 -> lowBits ()];
-metrics Y0 [2 * theState -> muxSize ()];
-metrics Y1 [2 * theState -> muxSize ()];
-metrics Y2 [2 * theState -> muxSize ()];
+metrics Y0 [2 * theState -> muxSize];
+metrics Y1 [2 * theState -> muxSize];
+metrics Y2 [2 * theState -> muxSize];
 int32_t	i;
 //
-uint8_t	level_0 [2 * theState -> muxSize ()];
-uint8_t	level_1 [2 * theState -> muxSize ()];
-uint8_t	level_2 [2 * theState -> muxSize ()];
+uint8_t	level_0 [2 * theState -> muxSize];
+uint8_t	level_1 [2 * theState -> muxSize];
+uint8_t	level_2 [2 * theState -> muxSize];
 
 	for (i = 0; i < qam64Roulette; i ++) {
-	   myDecoder. computemetrics (v, theState -> muxSize (),
+	   myDecoder. computemetrics (v, theState -> muxSize,
 	                                   0, Y0,
 	                                   i > 0,
 	                                   level_0, level_1, level_2);
 	   stream_0	-> process (Y0, bits_0, level_0);
-	   myDecoder. computemetrics (v, theState -> muxSize (),
+	   myDecoder. computemetrics (v, theState -> muxSize,
 	                                   1, Y1, 
 	                                   i > 0,
 	                                   level_0, level_1, level_2);
 	   stream_1	-> process (Y1, bits_1, level_1);
-	   myDecoder. computemetrics (v, theState -> muxSize (),
+	   myDecoder. computemetrics (v, theState -> muxSize,
 	                                   2, Y2,
 	                                   true,
 	                                   level_0, level_1, level_2);	

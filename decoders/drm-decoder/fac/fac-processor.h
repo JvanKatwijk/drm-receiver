@@ -58,14 +58,14 @@ private:
 	checkCRC	theCRC;
 	qam4_metrics	myMetrics;
 	viterbi_drm	deconvolver;
-	void		fromSamplestoBits (theSignal *, uint8_t *);
-	void		fac_Metrics	(theSignal *, int32_t, metrics *);
-	void		interpretFac	(uint8_t *, stateDescriptor *);
-	void		set_programType	(uint8_t *, stateDescriptor *);
-	void		set_serviceLanguage (uint8_t *, stateDescriptor *);
-	void		set_serviceParameters (uint8_t *, stateDescriptor *);
-	void		set_channelParameters (uint8_t *, stateDescriptor *);
-
+	void		fromSamplestoBits	(theSignal *, uint8_t *);
+//	void		fac_Metrics		(theSignal *, int32_t, metrics *);
+	void		interpretFac		(uint8_t *, stateDescriptor *);
+	void		set_serviceParameters	(uint8_t *, stateDescriptor *);
+	void		set_channelParameters	(uint8_t *, stateDescriptor *);
+	void		set_serviceLanguage	(int, uint8_t *, stateDescriptor *);
+	void		set_serviceDescriptor	(int, uint8_t *, stateDescriptor *);
+	int16_t		mscCells		(uint8_t, uint8_t);
 signals:
 	void		showSNR		(float);
 };

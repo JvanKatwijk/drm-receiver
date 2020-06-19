@@ -98,6 +98,9 @@ private:
 	bool		processSDC	(smodeInfo	*modeInf,
 	                                 myArray<theSignal>*theRawData,
                                          stateDescriptor *my_facData);
+
+	int16_t		getnrAudio	(stateDescriptor *);
+	int16_t		getnrData	(stateDescriptor *);
 signals:
 	void		setTimeSync	(bool);
 	void		setFACSync	(bool);

@@ -90,8 +90,8 @@ int16_t	index;
 	         master, SLOT (show_stationLabel (const QString &)));
 	connect (this, SIGNAL (show_timeLabel    (const QString &)),
 	         master, SLOT (show_timeLabel    (const QString &)));
-	rmFlag	= getRMflag ();
-	SDCmode	= getSDCmode ();
+	rmFlag	= theState	-> RMflag;
+	SDCmode	= theState	-> sdcMode;
 	qammode	= (rmFlag == 0 && SDCmode == 0) ? stateDescriptor::QAM16 :
 	                                          stateDescriptor::QAM4;
 	if (qammode == stateDescriptor::QAM4) {
@@ -194,14 +194,6 @@ int16_t i;
 	return theState -> set;
 }
 //
-
-uint8_t	sdcProcessor::getSDCmode	(void) {
-	return theState	-> getSDCmode ();
-}
-
-uint8_t	sdcProcessor::getRMflag		(void) {
-	return theState	-> getRMflag ();
-}
 
 //
 //	The data in the SDC vector is organised as
@@ -312,8 +304,10 @@ uint8_t	language [3], country [2];
 	      for (i = 0; i < lengthofBody; i ++) 
 	          s. append (get_SDCBits (v, 4 + 8 * i, 8));
 	      s. append (char (0));
-//	      if (lengthofBody > 1) 
-//	         theState -> streams [shortId]. serviceName = s;
+	      if (lengthofBody > 1) {
+	         char *s2 = s. toLatin1 (). data ();
+	         strcpy (theState -> streams [shortId]. serviceName, s2);
+	      }
 	      show_stationLabel (QString (s));
 	      return;
 
@@ -459,6 +453,4 @@ uint8_t	language [3], country [2];
 	      return;
 	}
 }
-//
-
 

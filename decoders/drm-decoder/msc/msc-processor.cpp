@@ -48,13 +48,17 @@
 	this	-> QAMMode	= theState	-> QAMMode;
 	my_dataProcessor	= new dataProcessor (theState, drmMaster);
 
-	this	-> muxsampleLength	= theState -> mscCells  () / 3;
+	this	-> muxsampleLength	= theState -> mscCells / 3;
 	this	-> muxsampleBuf	= new theSignal [muxsampleLength];
 	this	-> tempBuffer	= new theSignal [muxsampleLength];
-	if (theState -> muxDepth () > 1)
+//	if (theState -> muxDepth () > 1)
+//	   this -> my_deInterleaver =
+//	                     new deInterleaver_long (muxsampleLength, 
+//	                                             theState -> muxDepth ());
+	if (theState -> interleaverDepth > 1)
 	   this -> my_deInterleaver =
-	                     new deInterleaver_long (muxsampleLength,
-	                                             theState -> muxDepth ());
+	                     new deInterleaver_long (muxsampleLength, 
+	                                             theState -> interleaverDepth);
 	else
 	   this -> my_deInterleaver =
 	                     new deInterleaver (muxsampleLength);
@@ -126,9 +130,9 @@ void	mscProcessor::newFrame		(stateDescriptor *theState) {
 //	At the end of a superframe, this function is called.
 //	simple check:
 void	mscProcessor::endofFrame	(void) {
-	if (theState -> mscCells () != 3 * muxsampleLength + bufferP)
+	if (theState -> mscCells != 3 * muxsampleLength + bufferP)
 	   fprintf (stderr, " E R R O R %d %d %d\n",
-	                   theState -> mscCells (),
+	                   theState -> mscCells,
 	                   3 * muxsampleLength + bufferP,
 	                   bufferP);
 	bufferP	= 0;

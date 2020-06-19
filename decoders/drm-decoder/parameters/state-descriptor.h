@@ -49,39 +49,31 @@ enum	{
 		stateDescriptor	(drmDecoder *, uint8_t, uint8_t);
 		~stateDescriptor	(void);
 	void		cleanUp		(void);
-	int16_t		getIdentity	(void);
-	uint8_t		getRMflag	(void);
-	uint8_t		getSpectrumBits	(void);
-	uint8_t		getSDCmode	(void);
-	int16_t		muxSize		(void);
-	int16_t		muxDepth	(void);
-	int16_t		mscCells	(void);
-	int16_t		getnrAudio	(void);
-	int16_t		getnrData	(void);
-
-	void		protLevel	(uint8_t, int16_t, int16_t *, int16_t *);
+	void		protLevel	(uint8_t, int16_t,
+	                                           int16_t *, int16_t *);
+	void		protLevel_qam16	(uint8_t, int16_t,
+	                                           int16_t *, int16_t *);
+	void		protLevel_qam64	(uint8_t, int16_t,
+	                                           int16_t *, int16_t *);
 	float		getRp		(uint8_t, int16_t);
 	int16_t		getRYlcm_64	(int16_t);
 	int16_t		getRYlcm_16	(int16_t);
 
 	bool		set;
 	drmDecoder	*master;
-	uint8_t		Mode;		// set by constructor
-	uint8_t		Spectrum;	// set by constructor
-
-	bool		FAC_crc;
-	bool		SDC_crc;
-
-	uint8_t		SDCMode;
+	uint8_t		Mode;		// set by frameProcessor
+	uint8_t		Spectrum;	// set by frameProcessor
+	uint8_t		spectrumBits;	// set by facProcessor
+	int16_t		frameIdentity;
+	int		muxSize;
+	int		mscCells;
+	uint8_t		sdcMode;
 	bool		RMflag;
-//	bool		notSupported;
-	int16_t		interleaving;
+//	int16_t		interleaving;
 	int16_t		MSC_QAM;
 //	int16_t		hierarchical;
-	int16_t		SDC_QAM;
+//	int16_t		SDC_QAM;
 	int16_t		reconfigurationhappens;
-	int16_t		FrameIdentity;
-	uint8_t		spectrumBits;
 
 	int16_t		mscMode;	// gezet door FAC
 	bool		currentConfig;	// gezet door FAC
@@ -94,11 +86,12 @@ enum	{
 	int16_t		interleaverDepth;// gezet door FAC
 	int16_t		audioServices;
 	int16_t		dataServices;
-	const char	*theLanguage;
-	const char	*theProgrammeType;
-	bool		AudioService;
 	struct {
 	   bool		inUse;
+	   char		serviceName [256];
+	   char	*	theLanguage;
+	   char	*	theProgrammeType;
+	   bool		isAudio;
 	   uint8_t	soort;		// AUDIO or DATA
 	   uint8_t	shortId;	// identification
 	   bool		selected;
