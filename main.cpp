@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2017
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -50,8 +50,8 @@ QString fileName;
 	return fileName;
 }
 
-#define	DEFAULT_INI	".sw-radio.ini"
-#define	STATION_LIST	".sw-radio-stations.bin"
+#define	DEFAULT_INI	".drm-radio.ini"
+#define	STATION_LIST	".drm-radio-stations.bin"
 #define	BAND_PLAN	".sw-bandplan.xml"
 
 int	main (int argc, char **argv) {
@@ -112,7 +112,7 @@ QString	bandplanFile	= QDir::homePath ();
         MyRadioInterface = new RadioInterface (ISettings,
 	                                       stationList,
 	                                       &my_bandPlan,
-	                                       192000, 12000);
+	                                       192000, 24000);
 	MyRadioInterface -> show ();
         a. exec ();
 /*

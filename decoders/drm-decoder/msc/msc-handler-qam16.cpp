@@ -29,6 +29,7 @@
 #include	"mapper.h"
 #include	"basics.h"
 #include	"prbs.h"
+#include	"protlevels.h"
 //
 //	For each of the "levels" (qam16 => 2 levels), we create a
 //	separate handler. From "samples to bitstreams" is done here
@@ -56,10 +57,13 @@ float	denom;
 	if (lengthA != 0) {	// two real levels
 //	apply formula from section 7.2.1. to compute the number
 //	of MSC cells for the higher protected part given in bytes
-	   RYlcm	= theState -> getRYlcm_16 (theState -> protLevelA);
+//	   RYlcm	= theState -> getRYlcm_16 (theState -> protLevelA);
+	   RYlcm	= getRYlcm_16 (theState -> protLevelA);
 	   denom	= 0;
 	   for (i = 0; i < 2; i ++)
-	      denom += theState -> getRp (theState -> protLevelA, i);
+//	      denom += theState -> getRp (theState -> protLevelA, i);
+//	      denom += theState -> getRp_qam16 (theState -> protLevelA, i);
+	      denom += getRp_qam16 (theState -> protLevelA, i);
 	   denom	*= 2 * RYlcm;
 	   N1		= int16_t (ceil (8.0 * lengthA / denom) * RYlcm);
 //	   fprintf (stderr, "N1 = %d (lengthA = %d)\n", N1, lengthA);

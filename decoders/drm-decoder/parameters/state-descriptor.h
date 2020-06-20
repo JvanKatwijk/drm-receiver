@@ -49,15 +49,6 @@ enum	{
 		stateDescriptor	(drmDecoder *, uint8_t, uint8_t);
 		~stateDescriptor	(void);
 	void		cleanUp		(void);
-	void		protLevel	(uint8_t, int16_t,
-	                                           int16_t *, int16_t *);
-	void		protLevel_qam16	(uint8_t, int16_t,
-	                                           int16_t *, int16_t *);
-	void		protLevel_qam64	(uint8_t, int16_t,
-	                                           int16_t *, int16_t *);
-	float		getRp		(uint8_t, int16_t);
-	int16_t		getRYlcm_64	(int16_t);
-	int16_t		getRYlcm_16	(int16_t);
 
 	bool		set;
 	drmDecoder	*master;
@@ -69,10 +60,6 @@ enum	{
 	int		mscCells;
 	uint8_t		sdcMode;
 	bool		RMflag;
-//	int16_t		interleaving;
-	int16_t		MSC_QAM;
-//	int16_t		hierarchical;
-//	int16_t		SDC_QAM;
 	int16_t		reconfigurationhappens;
 
 	int16_t		mscMode;	// gezet door FAC
@@ -80,22 +67,21 @@ enum	{
 	uint8_t		protLevelA;	// gezet door SDC
 	uint8_t		protLevelB;	// gezet door SDC
 	int16_t		QAMMode;	// gezet door FAC
-	int16_t		numofStreams;	// computed by SDC
-	int16_t		dataLength;	// computed by SDC
-	int16_t		dataHigh;	// computed by SDC
 	int16_t		interleaverDepth;// gezet door FAC
 	int16_t		audioServices;
 	int16_t		dataServices;
+	int16_t		numofStreams;	// computed by SDC
+	int16_t		dataLength;	// computed by SDC
+	int16_t		dataHigh;	// computed by SDC
 	struct {
+	   uint8_t	shortId;	// identification
+	   uint8_t	streamId;
 	   bool		inUse;
 	   char		serviceName [256];
+	   bool		isAudio;
 	   char	*	theLanguage;
 	   char	*	theProgrammeType;
-	   bool		isAudio;
 	   uint8_t	soort;		// AUDIO or DATA
-	   uint8_t	shortId;	// identification
-	   bool		selected;
-	   uint8_t	streamId;
 	   int16_t	lengthHigh;
 	   int16_t	lengthLow;
 	   uint8_t	audioCoding;

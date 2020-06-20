@@ -1,5 +1,6 @@
 *.o
 .*.swp
+.qmake.stash
 build
 linux-bin
 

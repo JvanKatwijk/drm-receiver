@@ -395,6 +395,7 @@ drm-decoder {
 	                   ./decoders/drm-decoder/support/qam4-metrics.h \
 	                   ./decoders/drm-decoder/support/deinterleaver.h \
 	                   ./decoders/drm-decoder/support/matrix2.h \
+	                   ./decoders/drm-decoder/support/protlevels.h \
 	                   ./decoders/drm-decoder/parameters/state-descriptor.h \
 	                   ./decoders/drm-decoder/parameters/puncture-tables.h \
 	                   ./decoders/drm-decoder/fac/fac-tables.h \
@@ -442,6 +443,7 @@ drm-decoder {
 	                   ./decoders/drm-decoder/support/qam4-metrics.cpp \
  	                   ./decoders/drm-decoder/support/deinterleaver.cpp \
 	                   ./decoders/drm-decoder/support/matrix2.cpp \
+	                   ./decoders/drm-decoder/support/protlevels.cpp \
 	                   ./decoders/drm-decoder/parameters/state-descriptor.cpp \
 	                   ./decoders/drm-decoder/parameters/puncture-tables.cpp \
 	                   ./decoders/drm-decoder/fac/fac-tables.cpp \

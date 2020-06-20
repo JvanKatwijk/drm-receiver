@@ -57,8 +57,7 @@
 	                                 my_backendController (mr,
 	                                                       iqBuffer,
 	                                                       qam64Roulette),
-	                                                       theState (mr,
-	                                                                 1, 3) {
+	                                 theState (mr, 1, 3) {
 int16_t	i;
 	this	-> theDecoder	= mr;
 	this	-> buffer	= buffer;

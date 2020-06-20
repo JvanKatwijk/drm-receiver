@@ -5,6 +5,7 @@
  *    Lazy Chair Computing
  *
  *    This file is part of the SDR-J (JSDR).
+ *
  *    SDR-J is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -29,6 +30,7 @@
 #include	"mapper.h"
 #include	"basics.h"
 #include	"prbs.h"
+#include	"protlevels.h"
 
 //	In order to handle the A and B levels, we create a
 //	separate processor ("streamer") for the A and B parts of the stream.
@@ -52,9 +54,12 @@ int32_t	highProtected, lowProtected;
 
 	fprintf (stderr, "LengthA = %d, lengthB = %d\n", lengthA, lengthB);
 	if (lengthA != 0) {	// two real levels
-	   RYlcm = theState -> getRYlcm_64 (theState -> protLevelA);
+	   RYlcm = getRYlcm_64 (theState -> protLevelA);
+//	   RYlcm = theState -> getRYlcm_64 (theState -> protLevelA);
 	   for (i = 0; i < 3; i ++)
-	      denom += theState -> getRp (theState -> protLevelA, i);
+	      denom += getRp_qam64 (theState -> protLevelA, i);
+//	      denom += theState -> getRp_qam64 (theState -> protLevelA, i);
+//	      denom += theState -> getRp (theState -> protLevelA, i);
 	   denom *= 2 * RYlcm;
 	   N1	= int16_t (ceil ((8.0 * lengthA) / denom)) * RYlcm;
 	   N2	= theState	-> muxSize - N1;

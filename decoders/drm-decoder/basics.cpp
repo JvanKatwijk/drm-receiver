@@ -23,7 +23,7 @@
 #
 #include	"basics.h"
 #include	<math.h>
-#define	KK	1
+#define	KK	2
 
 int16_t	Ts_of (uint8_t Mode) {
 	switch (Mode) {
