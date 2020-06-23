@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of SDR-J.
+ *    This file is part of drm receiver
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -53,12 +53,11 @@
 	                                int16_t		nSymbols,
 	                                int8_t		windowDepth,
                                         int8_t 		qam64Roulette) :
-	                                 my_Reader (buffer, 16384, mr),
+	                                 my_Reader (buffer, 4 * 16384, mr),
 	                                 my_backendController (mr,
 	                                                       iqBuffer,
 	                                                       qam64Roulette),
 	                                 theState (mr, 1, 3) {
-int16_t	i;
 	this	-> theDecoder	= mr;
 	this	-> buffer	= buffer;
 	this	-> iqBuffer	= iqBuffer;
@@ -90,7 +89,6 @@ int16_t	i;
 }
 
 	frameProcessor::~frameProcessor (void) {
-int16_t	i;
 	my_Reader. stop ();
 	while (isRunning ())
 	   usleep (100);
@@ -150,6 +148,7 @@ restart:
 //	and create a reader/processor
 	   frequencySync (theDecoder, &my_Reader, &modeInf);
 
+	fprintf (stderr, "spectrum is gezet op %d\n", modeInf. Spectrum);
 	   setTimeSync	(true);
 	   show_Mode (modeInf. Mode);
 	   show_Spectrum (modeInf. Spectrum);
@@ -240,8 +239,12 @@ restart:
 
 //
 //	prepare for sdc processing
+//	Since computing the position of the sdc Cells depends (a.o)
+//	on FAC and other data cells, we better create the table here.
 	   sdcTable. resize (sdcCells (&modeInf));
 	   set_sdcCells (&modeInf);
+	   sdcProcessor my_sdcProcessor (theDecoder, &modeInf,
+	                                 &sdcTable, &theState);
 
 	   bool	firstTime	= true;
 	   float	offsetFractional	= 0;	//
@@ -253,8 +256,7 @@ restart:
 //	when we are here, we can start thinking about  SDC's and superframes
 //	The first frame of a superframe has an SDC part
 	      if (isFirstFrame (&theState)) {
-	         bool sdcOK = processSDC (&modeInf,
-	                                  &outbank, &theState);
+	         bool sdcOK = my_sdcProcessor. processSDC (&outbank);
 	         setSDCSync (sdcOK);
 	         if (sdcOK) {
 	            threeinaRow ++;
@@ -335,14 +337,12 @@ int16_t	   K_min		= Kmin (m -> Mode, m -> Spectrum);
 int16_t	   K_max		= Kmax (m -> Mode, m -> Spectrum);
 
 	if (isFirstFrame (&theState))
-//	if (blockno == 0)	// new superframe
 	   my_backendController. newFrame (&theState);
 
 	for (symbol = 0; symbol < symbolsperFrame (m -> Mode); symbol ++) {
 	   for (carrier = K_min; carrier <= K_max; carrier ++)
 	      if (isDatacell (&modeInf, symbol, carrier, blockno)) {
 	         my_backendController. addtoMux (blockno, teller ++,
-//	                                     outbank [symbol][carrier - K_min]);
 	                                     outbank -> element (symbol)[carrier - K_min]);
 	      }
 	}
@@ -391,25 +391,23 @@ bool	frameProcessor::isDatacell (smodeInfo *m,
 }
 
 int16_t	frameProcessor::sdcCells (smodeInfo *m) {
-int16_t	nQAM_SDC_cells	= 0;
-
 static
-int m1_table []	= {167, 190, 359, 405, 754};
+int m1_table []	= {167, 190, 359, 405, 754, 846};
 static
-int m2_table [] = {130, 150, 282, 322, 588};
+int m2_table [] = {130, 150, 282, 322, 588, 1500};
 
 	switch (m -> Mode) {
-	   case 1:
+	   case Mode_A:
 	      return m1_table [m -> Spectrum];
 
 	   default:
-	   case 2:
+	   case Mode_B:
 	      return m2_table [m -> Spectrum];
 
-	   case 3:
+	   case Mode_C:
 	      return 288;
 
-	   case 4:
+	   case Mode_D:
 	      return 152;
 	}
 	return 288;
@@ -474,7 +472,7 @@ int	cnt	= 0;
 	   }
 	}
 	   
-	if ((Mode == 3) || (Mode == 4)) {
+	if ((Mode == Mode_C) || (Mode == Mode_D)) {
 	   for (carrier = Kmin (Mode, Spectrum);
 	        carrier <= Kmax (Mode, Spectrum); carrier ++) 
 	      if (isSDCcell (modeInf, 2, carrier)) {
@@ -483,13 +481,15 @@ int	cnt	= 0;
 	         cnt ++;
 	      }
 	}
-}
 
+	fprintf (stderr, "for Mode %d, spectrum %d, we have %d sdc cells\n",
+	                       Mode, Spectrum, cnt);
+}
 //
 //	just for readability
 uint8_t	frameProcessor::getSpectrum	(stateDescriptor *f) {
 uint8_t val = f -> spectrumBits;
-	return val <= 3 ? val : 3;
+	return val <= 5 ? val : 3;
 }
 //
 
@@ -502,24 +502,6 @@ void    frameProcessor::frequencySync (drmDecoder *mr,
                                        Reader *my_Reader, smodeInfo *m) {
 freqSyncer my_Syncer (my_Reader, m, sampleRate, mr);
 	my_Syncer. frequencySync (m);
-}
-
-bool	frameProcessor::processSDC (smodeInfo	*modeInf,
-	                            myArray<theSignal>*outbank,
-	                            stateDescriptor *theState) {
-int16_t	valueIndex	= 0;
-theSignal sdcVector [sdcCells (modeInf)];
-sdcProcessor  my_sdcProcessor (theDecoder, theState, sdcCells (modeInf));
-
-	for (int i = 0; i < sdcCells (modeInf); i ++) {
-	   int symbol	= sdcTable [i]. symbol;
-	   int carrier	= sdcTable [i]. carrier;
-	   sdcVector [valueIndex ++] =
-	          outbank -> element (symbol)[carrier - Kmin (modeInf -> Mode,
-	                                              modeInf -> Spectrum)];
-	}
-
-	return my_sdcProcessor. processSDC (sdcVector); 
 }
 
 int16_t	frameProcessor::getnrAudio	(stateDescriptor *theState) {

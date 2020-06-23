@@ -2,29 +2,26 @@
 /*
  *    Copyright (C) 2008, 2009, 2010
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
+ *    This file is part of the drm decoder
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__FFT_FILTER
-#define	__FFT_FILTER
+#ifndef	__FFT_FILTER__
+#define	__FFT_FILTER__
 
 #include	"radio-constants.h"
 #include	"fir-filters.h"
@@ -36,7 +33,7 @@ public:
 			~fftFilter	(void);
 	void		setBand		(int32_t, int32_t, int32_t);
 	void		setLowPass	(int32_t, int32_t);
-	DSPCOMPLEX	Pass		(DSPCOMPLEX);
+	std::complex<float>	Pass		(std::complex<float>);
 	float		Pass		(float);
 
 private:
@@ -45,13 +42,13 @@ private:
 	int16_t		OverlapSize;
 	int16_t		NumofSamples;
 	common_fft	*MyFFT;
-	DSPCOMPLEX	*FFT_A;
+	std::complex<float>	*FFT_A;
 	common_ifft	*MyIFFT;
-	DSPCOMPLEX	*FFT_C;
+	std::complex<float>	*FFT_C;
 	common_fft	*FilterFFT;
-	DSPCOMPLEX	*filterVector;
+	std::complex<float>	*filterVector;
 	float		*RfilterVector;
-	DSPCOMPLEX	*Overloop;
+	std::complex<float>	*Overloop;
 	int32_t		inp;
 	float		*blackman;
 };

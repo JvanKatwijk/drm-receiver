@@ -24,13 +24,13 @@
 #include	"sdc-processor.h"
 #include	"drm-decoder.h"
 #include	"state-descriptor.h"
+#include	"referenceframe.h"
 #include	"prbs.h"
 #include	"sdc-include.h"
 #include	"sdc-streamer.h"
 #include	"qam16-metrics.h"
 #include	"qam4-metrics.h"
 #include	"viterbi-drm.h"
-#include	"drm-decoder.h"
 //
 //	the "processor" for extracting the SDC values from the
 //	(first) frame of a superframe encoded in QAM4/QAM16
@@ -54,7 +54,6 @@ int16_t table_56 [] = {
 	-1,	-1,	-1,	15,	-1
 };
 
-
 extern	int16_t	table_56 [];
 
 static	inline
@@ -65,42 +64,37 @@ int16_t	index;
 	return 4 + 8 * table_56 [index] + 16;
 }
 
-//static	inline
-//int16_t	getLengthofSDCData (uint8_t Mode, uint8_t Spectrum, uint8_t SDCMode) {
-//int16_t	index;
-//	index = (Mode - 1) * 10 + (SDCMode == 1 ? 5 : 0) + Spectrum;
-//	return table_56 [index];
-//}
 //
 //	Mode and Spectrum are given now. nrCells is
 //	determined by Mode and spectrum and stateDescriptor
 //	refers to the database structure
-	sdcProcessor::sdcProcessor (drmDecoder *master,
-	                            stateDescriptor	*theState,
-	                            int16_t 	nrCells):
+
+	sdcProcessor::sdcProcessor (drmDecoder	*master,
+	                            smodeInfo	*modeInf,
+	                            std::vector<sdcCell> * sdcTable,
+	                            stateDescriptor	*theState):
 	                                  theCRC (16, crcPolynome),
-	                                  Y13Mapper (2 * nrCells, 13),
-	                                  Y21Mapper (2 * nrCells, 21) {
+	                                  Y13Mapper (2 * sdcTable -> size (), 13),
+	                                  Y21Mapper (2 * sdcTable -> size () ,21) {
+	this	-> sdcTable	= sdcTable;
+	this	-> nrCells	= sdcTable	-> size ();
 	this	-> Mode		= theState	-> Mode;
 	this	-> Spectrum	= theState	-> Spectrum;
 	this	-> theState	= theState;
-	this	-> nrCells	= nrCells;
 //
-	connect (this, SIGNAL (show_stationLabel (const QString &)),
-	         master, SLOT (show_stationLabel (const QString &)));
+	connect (this, SIGNAL (show_stationLabel (const QString &, int)),
+	         master, SLOT (show_stationLabel (const QString &, int)));
 	connect (this, SIGNAL (show_timeLabel    (const QString &)),
 	         master, SLOT (show_timeLabel    (const QString &)));
 	rmFlag	= theState	-> RMflag;
 	SDCmode	= theState	-> sdcMode;
-	qammode	= (rmFlag == 0 && SDCmode == 0) ? stateDescriptor::QAM16 :
-	                                          stateDescriptor::QAM4;
-	if (qammode == stateDescriptor::QAM4) {
+	qammode	= (rmFlag == 0 && SDCmode == 0) ? QAM16 : QAM4;
+	if (qammode == QAM4) {
 //	   fprintf (stderr, "qammode = QAM4\n");
 	   my_qam4_metrics	= new qam4_metrics ();
 	   stream_0		= new SDC_streamer (1, 2, &Y21Mapper, nrCells);
+	   stream_1		= nullptr;
 	   lengthofSDC          = getLengthofSDC (Mode, Spectrum, SDCmode);
-
-	   stream_1		= NULL;
 	   thePRBS		= new prbs (stream_0 -> lengthOut ());
 	}
 	else {
@@ -117,7 +111,7 @@ int16_t	index;
 	sdcProcessor::~sdcProcessor (void) {
 	delete	thePRBS;
 	delete	stream_0;
-	if (qammode == stateDescriptor::QAM16) {
+	if (qammode == QAM16) {
 	   delete	my_qam16_metrics;
 	   delete	stream_1;
 	}
@@ -126,12 +120,21 @@ int16_t	index;
 }
 
 //	actual processing of a SDC block. 
-bool	sdcProcessor::processSDC (theSignal *v) {
+bool	sdcProcessor::processSDC (myArray<theSignal> *outbank) {
+int16_t valueIndex      = 0;
+theSignal sdcVector [sdcTable -> size ()];
 
-	if (qammode == stateDescriptor::QAM4) 
-	   return processSDC_QAM4 (v);
+        for (int i = 0; i < sdcTable -> size (); i ++) {
+           int symbol   = (*sdcTable) [i]. symbol;
+           int carrier  = (*sdcTable) [i]. carrier;
+           sdcVector [valueIndex ++] =
+                  outbank -> element (symbol)[carrier - Kmin (Mode, Spectrum)];
+        }
+
+	if (qammode == QAM4) 
+	   return processSDC_QAM4 (sdcVector);
 	else
-	   return processSDC_QAM16 (v);
+	   return processSDC_QAM16 (sdcVector);
 }
 
 bool	sdcProcessor::processSDC_QAM4 (theSignal *v) {
@@ -309,7 +312,7 @@ uint8_t	language [3], country [2];
 	         char *s2 = s. toLatin1 (). data ();
 	         strcpy (theState -> streams [shortId]. serviceName, s2);
 	      }
-	      show_stationLabel (QString (s));
+	      show_stationLabel (QString (s), shortId);
 	      return;
 
 	   case 2:	// conditional access parameters

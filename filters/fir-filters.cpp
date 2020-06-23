@@ -4,22 +4,21 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J.
+ *    This file is part of the drm receiver
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 
 #include	"fir-filters.h"
@@ -28,7 +27,7 @@
 #endif
 
 
-		Basic_FIR::Basic_FIR (int16_t size):
+		basicFIR::basicFIR (int16_t size):
 	                                   filterKernel (size),
 	                                   Buffer       (size) {
 	int16_t		i;
@@ -41,10 +40,10 @@
 	}
 }
 
-		Basic_FIR::~Basic_FIR (void) {
+		basicFIR::~basicFIR (void) {
 }
 //
-std::complex<float>	Basic_FIR::Pass (std::complex<float> z) {
+std::complex<float>	basicFIR::Pass (std::complex<float> z) {
 int16_t	i;
 std::complex<float>	tmp	= 0;
 
@@ -60,7 +59,7 @@ std::complex<float>	tmp	= 0;
 	return tmp;
 }
 
-float	Basic_FIR::Pass (float v) {
+float	basicFIR::Pass (float v) {
 int16_t		i;
 float	tmp	= 0;
 
@@ -76,7 +75,7 @@ float	tmp	= 0;
 	return tmp;
 }
 
-void	Basic_FIR::setTaps (int16_t len, float *itaps, float *qtaps) {
+void	basicFIR::setTaps (int16_t len, float *itaps, float *qtaps) {
 int16_t	i;
 
 	if (len != filterSize)
@@ -94,15 +93,15 @@ int16_t	i;
 	}
 }
 	      
-//FIR LowPass
 
-	LowPassFIR::LowPassFIR (int16_t firsize,
-	                        int32_t Fc, int32_t fs):Basic_FIR (firsize) {
+	lowpassFIR::lowpassFIR (int16_t firsize,
+	                        int32_t Fc, int32_t fs):
+	                                     basicFIR (firsize) {
 	sampleRate	= fs;
 	newKernel (Fc);
 }
 
-void	LowPassFIR::newKernel (int32_t Fc) {
+void	lowpassFIR::newKernel (int32_t Fc) {
 int16_t	i;
 float	tmp [filterSize];
 float	f	= (float)Fc / sampleRate;
@@ -126,23 +125,23 @@ float	sum	= 0.0;
 	   filterKernel [i] = std::complex<float> (tmp [i] / sum, 0);
 }
 
-	LowPassFIR::~LowPassFIR () {
+	lowpassFIR::~lowpassFIR () {
 }
 
-std::complex<float>	*LowPassFIR::getKernel (void) {
+std::complex<float>	*lowpassFIR::getKernel (void) {
 	return filterKernel. data ();
 }
 
 //=====================================================================
-//FIR HighPass
 
-	HighPassFIR::HighPassFIR (int16_t firsize,
-	                          int32_t Fc, int32_t fs):Basic_FIR (firsize) {
+	highpassFIR::highpassFIR (int16_t firsize,
+	                          int32_t Fc, int32_t fs):
+	                                          basicFIR (firsize) {
 	sampleRate	= fs;
 	newKernel (Fc);
 }
 
-void	HighPassFIR::newKernel (int32_t Fc) {
+void	highpassFIR::newKernel (int32_t Fc) {
 int16_t	i;
 float 	tmp [filterSize];
 float f	= (float)Fc / sampleRate;
@@ -168,19 +167,11 @@ float sum	= 0.0;
 	      filterKernel [i] = std::complex<float> (- tmp [i] / sum, 0);
 }
 
-	HighPassFIR::~HighPassFIR () {
+	highpassFIR::~highpassFIR () {
 }
 
 //===============================================================
 
-/*
- *	for the major bandpass filter, we use a simple basis,
- *	the FIR based on a blackman filter.
- *	The filter itself is somewhat more complex
- *	since we take negative frequencies into account
- *	based on the assumption that since we have I and Q
- *	signals, the spectrum is essentially a 0 .. 2N one
- */
 static
 float	Blackman (float *v, int fsize, float f) {
 int	i;
@@ -203,10 +194,7 @@ float		sum = 0;
 }
 
 static
-float	*BandPassKernel (float *v,
-	                         int16_t fsize,
-	                         float Fcl,
-	                         float Fch) {
+float	*bandpassKernel (float *v, int16_t fsize, float Fcl, float Fch) {
 float	sumA	= 0.0;
 float	sumB	= 0.0;
 int16_t	i;
@@ -232,23 +220,24 @@ float	tmp2 [fsize];
 	return v;
 }
 
-	BasicBandPass::BasicBandPass (int16_t firsize,
+	basicbandPass::basicbandPass (int16_t firsize,
 	                              int32_t low, int32_t high,
-	                              int32_t rate):Basic_FIR (firsize) {
+	                              int32_t rate):
+	                                      basicFIR (firsize) {
 float	t1 [firsize];
 int16_t		i;
 
 	sampleRate	= rate;
-	(void) BandPassKernel (t1, firsize, (float) low / rate,
+	(void) bandpassKernel (t1, firsize, (float) low / rate,
 	                                     (float) high / rate);
 	for (i = 0; i < filterSize; i ++)  
-	   filterKernel [i] = DSPCOMPLEX (t1 [i], t1 [i]);
+	   filterKernel [i] = std::complex<float> (t1 [i], t1 [i]);
 }
 
-	BasicBandPass::~BasicBandPass () {
+	basicbandPass::~basicbandPass () {
 }
 
-DSPCOMPLEX	*BasicBandPass::getKernel () {
+std::complex<float>	*basicbandPass::getKernel () {
 	return filterKernel. data ();
 }
 
@@ -261,7 +250,7 @@ DSPCOMPLEX	*BasicBandPass::getKernel () {
  */
 	bandpassFIR::bandpassFIR (int16_t firSize,
 	                          int32_t low, int32_t high,
-	                          int32_t fs):Basic_FIR (firSize) {
+	                          int32_t fs):basicFIR (firSize) {
 	sampleRate	= fs;
 	newKernel (low, high);
 }
@@ -291,8 +280,8 @@ int16_t	i;
 
 	for (i = 0; i < filterSize; i ++) {	// shifting
 	   float v = (i - filterSize / 2) * (2 * M_PI * shift);
-	   filterKernel [i] = DSPCOMPLEX (tmp [i] * cos (v) / sum, 
-	                                  tmp [i] * sin (v) / sum);
+	   filterKernel [i] = std::complex<float> (tmp [i] * cos (v) / sum, 
+	                                           tmp [i] * sin (v) / sum);
 	}
 }
 
@@ -320,7 +309,7 @@ int16_t	i;
 	   fsize = 20;
 	firsize		= fsize;
 	Kernel		= new float [fsize];
-	Buffer		= new DSPCOMPLEX [fsize];
+	Buffer		= new std::complex<float> [fsize];
 // 	we start with a small mu
 	this	-> mu = 0.20;
 	if (mu > 0 && mu < 1)
@@ -346,11 +335,11 @@ int16_t	i;
 
 // 	Passing here is more complex since we 
 // 	adapt the filtercoeeficients at the same time
-DSPCOMPLEX adaptiveFilter::Pass (DSPCOMPLEX z) {
-DSPCOMPLEX	tmp = 0;
+std::complex<float> adaptiveFilter::Pass (std::complex<float> z) {
+std::complex<float>	tmp = 0;
 int16_t		i;
 float	sum	= 0.0;
-DSPCOMPLEX	refSymbol	= Buffer [ip];
+std::complex<float>	refSymbol	= Buffer [ip];
 /*
  *	first filter with delayed elements
  *	Buffer is used in a circular way, with insertion and reading
@@ -395,7 +384,8 @@ DSPCOMPLEX	refSymbol	= Buffer [ip];
 	decimatingFIR::decimatingFIR (int16_t firSize,
 	                              int32_t low,
 	                              int32_t fs,
-	                              int16_t Dm):Basic_FIR (firSize) {
+	                              int16_t Dm):
+	                                   basicFIR (firSize) {
 
 	sampleRate		= fs;
 	decimationFactor	= Dm;
@@ -423,14 +413,15 @@ float	sum	= 0.0;
 	}
 
 	for (i = 0; i < filterSize; i ++)
-	   filterKernel [i] = DSPCOMPLEX (tmp [i] / sum, 0);
+	   filterKernel [i] = std::complex<float> (tmp [i] / sum, 0);
 }
 
 	decimatingFIR::decimatingFIR (int16_t firSize,
 	                              int32_t low,
 	                              int32_t high,
 	                              int32_t fs,
-	                              int16_t Dm):Basic_FIR (firSize) {
+	                              int16_t Dm):
+	                                   basicFIR (firSize) {
 
 	sampleRate		= fs;
 	decimationFactor	= Dm;
@@ -462,8 +453,8 @@ int16_t	i;
 //	and modulate the kernel
 	for (i = 0; i < filterSize; i ++) {	// shifting
 	   float v = (i - filterSize / 2) * (2 * M_PI * shift);
-	   filterKernel [i] = DSPCOMPLEX (tmp [i] * cos (v) / sum, 
-	                                  tmp [i] * sin (v) / sum);
+	   filterKernel [i] = std::complex<float> (tmp [i] * cos (v) / sum, 
+	                                           tmp [i] * sin (v) / sum);
 	}
 }
 
@@ -473,9 +464,10 @@ int16_t	i;
 //	The real cpu killer: this function is called once for every
 //	sample that comes from the dongle. So, it really should be
 //	optimized.
-bool	decimatingFIR::Pass (DSPCOMPLEX z, DSPCOMPLEX *z_out) {
+bool	decimatingFIR::Pass (std::complex<float> z,
+	                                 std::complex<float> *z_out) {
 int16_t		i;
-DSPCOMPLEX	tmp	= 0;
+std::complex<float>	tmp	= 0;
 int16_t		index;
 
 	Buffer [ip] = z;
@@ -500,19 +492,18 @@ int16_t		index;
 
 	ip = (ip + 1) % filterSize;
 	*z_out = tmp;
-//	*z_out = cdiv (tmp, filterSize);
 	return true;
 }
 
 bool	decimatingFIR::Pass (float z, float *z_out) {
 	if (++decimationCounter < decimationFactor) {
-	   Buffer [ip] = DSPCOMPLEX (z, 0);
+	   Buffer [ip] = std::complex<float> (z, 0);
 	   ip = (ip + 1) % filterSize;
 	   return false;
 	}
 
 	decimationCounter = 0;
-	*z_out = Basic_FIR::Pass (z);
+	*z_out = basicFIR::Pass (z);
 	return true;
 }
 
@@ -528,7 +519,7 @@ bool	decimatingFIR::Pass (float z, float *z_out) {
 	this	-> rate	= rate;
 	cosKernel	= new float [fsize];
 	sinKernel	= new float [fsize];
-	Buffer		= new DSPCOMPLEX [fsize];
+	Buffer		= new std::complex<float> [fsize];
 	adjustFilter (f);
 }
 
@@ -563,12 +554,12 @@ int16_t	i;
 	ip = 0;
 }
 
-DSPCOMPLEX	HilbertFilter::Pass (float a, float b) {
-	return Pass (DSPCOMPLEX (a, b));
+std::complex<float>	HilbertFilter::Pass (float a, float b) {
+	return Pass (std::complex<float> (a, b));
 }
 
-DSPCOMPLEX	HilbertFilter::Pass (DSPCOMPLEX z) {
-DSPCOMPLEX	tmp = 0;
+std::complex<float>	HilbertFilter::Pass (std::complex<float> z) {
+std::complex<float>	tmp = 0;
 float	re, im;
 int	i;
 
@@ -581,7 +572,7 @@ int	i;
 	      index += firsize;
 	   re = real (Buffer [index]);
 	   im = imag (Buffer [index]);
-	   tmp += DSPCOMPLEX (re * cosKernel [i], im * sinKernel [i]);
+	   tmp += std::complex<float> (re * cosKernel [i], im * sinKernel [i]);
 	}
 
 	return tmp;

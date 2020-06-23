@@ -93,8 +93,8 @@ float		offset	= 0;
 float	timeOffsetFractional;
 
 	buffer		-> waitfor (Ts + Ts / 2);
-//	float timedelay	= get_timeOffset (16, 12);
-	float timedelay	= offsetFractional;
+	float timedelay	= get_timeOffset (16, 6);
+//	float timedelay	= offsetFractional;
 	int d		= floor (timedelay + 0.5);
 	timeOffsetFractional	= timedelay - d;
 
@@ -105,8 +105,8 @@ float	timeOffsetFractional;
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
 	   temp [i] = cmul (one, 1 - timeOffsetFractional) +
 	                            cmul (two, timeOffsetFractional);
-//	   temp [i] = cmul (one, 1 - offsetFractional) +
-//	                            cmul (two, offsetFractional);
+	   temp [i] = cmul (one, 1 - offsetFractional) +
+	                            cmul (two, offsetFractional);
 	}
 
 //	And we shift the bufferpointer here
@@ -144,22 +144,15 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        float		angle,
 	                        float		clockOffset) {
 std::complex<float>	temp [Ts];
-int16_t		i;
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	if (firstTime) {		// set the values
-	   theAngle		= 0;
-	   sampleclockOffset	= 0;
-	}
-	else { 			// apparently tracking mode
-	   sampleclockOffset	= 0.9 * sampleclockOffset + 0.1 * clockOffset;
-	}
-
-	int timeOffsetInteger	= get_intOffset (0, 24, 8) / 2;
+	float tt		= get_timeOffset (24, 8);
+	int timeOffsetInteger	= floor (tt + 0.5);
+	offsetFractional	= tt - timeOffsetInteger;
 	int f	= (int)(floor (buffer -> currentIndex + 
 	                              timeOffsetInteger)) & bufMask;
 //	just linear interpolation
-	for (i = 0; i < Ts; i ++) {
+	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
 	   temp [i] = cmul (one, 1 - offsetFractional) +
@@ -168,20 +161,9 @@ int16_t		i;
 
 //	And we adjust the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & bufMask;
-//	correct the phase
-//
-//	If we are here for the first time, we compute an initial offset.
-	if (firstTime) {	// compute a vfo offset
-	   std::complex<float>c = std::complex<float> (0, 0);
-	   for (i = 0; i < Tg; i ++)
-	      c += conj (temp [Tu + i]) * temp [i];
-	   theAngle = arg (c);
-	}
-	else {
-	   std::complex<float>c =std::complex<float> (0, 0);
-	   theAngle	= theAngle - 0.05 * angle;
-	}
 
+//	correct the phase
+	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
 	float offset          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (offset != -offset) { // precaution to handle undefines
@@ -197,6 +179,7 @@ int16_t		i;
 	   theShifter. do_shift (temp, Ts,
 	                        100 * modeInf -> freqOffset_integer - offset);
 	}
+
 	if (++displayCount > 20) {
 	   displayCount = 0;
 	   show_coarseOffset	(initialFreq);

@@ -42,10 +42,10 @@
 class	referenceFrame;
 class	drmDecoder;
 
-typedef struct {
-	int	symbol;
-	int	carrier;
-} sdcCell;
+//typedef struct {
+//	int	symbol;
+//	int	carrier;
+//} sdcCell;
 
 extern	
 bool	isGaincell	(uint8_t, int16_t, int16_t);
@@ -95,10 +95,6 @@ private:
 
 	referenceFrame	*my_referenceFrame;
 	stateDescriptor theState;
-	bool		processSDC	(smodeInfo	*modeInf,
-	                                 myArray<theSignal>*theRawData,
-                                         stateDescriptor *my_facData);
-
 	int16_t		getnrAudio	(stateDescriptor *);
 	int16_t		getnrData	(stateDescriptor *);
 signals:

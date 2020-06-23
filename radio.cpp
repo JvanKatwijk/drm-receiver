@@ -248,8 +248,8 @@ QString	FrequencytoString (quint64 freq) {
 	   theDecoder	= new drmDecoder (decoderRate,
 	                                   audioData, settings);
 //	bind the signals in the decoder to some slots
-//	connect (theDecoder, SIGNAL (audioAvailable (int, int)),
-//	         this, SLOT (processAudio (int, int)));
+	connect (theDecoder, SIGNAL (audioAvailable (int, int)),
+	         this, SLOT (processAudio (int, int)));
 //	connect (theDecoder, SIGNAL (setDetectorMarker (int)),
 //	         this, SLOT (setDetectorMarker (int)));
 	theDevice	-> restartReader ();

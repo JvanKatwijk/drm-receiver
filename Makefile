@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"dd52b86\" -DHAVE_SDRPLAY -DHAVE_DRM_DECODER -DESTIMATOR_2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+DEFINES       = -DGITHASH=\"c2534c4\" -DHAVE_SDRPLAY -DHAVE_DRM_DECODER -DESTIMATOR_2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -isystem /usr/include/qt5/qwt -Idevices/sdrplay-handler -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtXml -isystem /usr/include/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib64/qt5/mkspecs/linux-g++
@@ -1602,7 +1602,8 @@ msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm
 		decoders/drm-decoder/parameters/puncture-tables.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		decoders/drm-decoder/support/mapper.h \
-		decoders/drm-decoder/support/prbs.h
+		decoders/drm-decoder/support/prbs.h \
+		decoders/drm-decoder/support/protlevels.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler-qam16.o decoders/drm-decoder/msc/msc-handler-qam16.cpp
 
 msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-handler-qam64.h \
@@ -1614,7 +1615,8 @@ msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm
 		decoders/drm-decoder/parameters/puncture-tables.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		decoders/drm-decoder/support/mapper.h \
-		decoders/drm-decoder/support/prbs.h
+		decoders/drm-decoder/support/prbs.h \
+		decoders/drm-decoder/support/protlevels.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler-qam64.o decoders/drm-decoder/msc/msc-handler-qam64.cpp
 
 msc-streamer.o: decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-streamer.h \
@@ -1623,7 +1625,8 @@ msc-streamer.o: decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/m
 		decoders/drm-decoder/basics.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		decoders/drm-decoder/support/viterbi-drm.h \
-		decoders/drm-decoder/support/mapper.h
+		decoders/drm-decoder/support/mapper.h \
+		decoders/drm-decoder/support/protlevels.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-streamer.o decoders/drm-decoder/msc/msc-streamer.cpp
 
 msc-handler.o: decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/msc/msc-handler.h \
@@ -1645,7 +1648,8 @@ data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-deco
 		ui_drmdecoder.h \
 		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
-		decoders/drm-decoder/data/packet-assembler.h
+		decoders/drm-decoder/data/packet-assembler.h \
+		decoders/drm-decoder/basics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data-processor.o decoders/drm-decoder/data/data-processor.cpp
 
 fec-handler.o: decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/fec-handler.h \

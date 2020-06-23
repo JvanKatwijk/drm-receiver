@@ -2,22 +2,22 @@
 /*
  *    Copyright (C) 2010, 2011, 2012
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the swradio
+ *    This file is part of the drm receiver
  *
- *    swradio is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    swradio is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with swradio; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -29,10 +29,10 @@
 
 class	HilbertFilter;
 
-class	Basic_FIR {
+class	basicFIR {
 public:
-		Basic_FIR	(int16_t);
-		~Basic_FIR	();
+		basicFIR	(int16_t);
+		~basicFIR	();
 std::complex<float>	Pass	(std::complex<float>);
 float		Pass		(float);
 void		setTaps		(int16_t len,
@@ -44,19 +44,19 @@ void		setTaps		(int16_t len,
 	int	sampleRate;
 };
 
-class	LowPassFIR : public Basic_FIR {
+class	lowpassFIR : public basicFIR {
 public:
-			LowPassFIR (int16_t,	// order
+			lowpassFIR (int16_t,	// order
 	                            int32_t, 	// cutoff frequency
 	                            int32_t	// samplerate
 	                           );
-			~LowPassFIR (void);
-	DSPCOMPLEX	*getKernel	(void);
+			~lowpassFIR (void);
+	std::complex<float>	*getKernel	(void);
 	void		newKernel	(int32_t);	// cutoff
 };
 //
 //	Both for lowpass band bandpass, we provide:
-class	decimatingFIR: public Basic_FIR {
+class	decimatingFIR: public basicFIR {
 public:
 		         decimatingFIR	(int16_t, int32_t, int32_t, int16_t);
 	                 decimatingFIR	(int16_t, int32_t, int32_t,
@@ -64,34 +64,34 @@ public:
 			~decimatingFIR	(void);
 	void		newKernel	(int32_t);
 	void		newKernel	(int32_t, int32_t);
-	bool		Pass	(DSPCOMPLEX, DSPCOMPLEX *);
+	bool		Pass	(std::complex<float>, std::complex<float> *);
 	bool		Pass	(float, float *);
 private:
 	int16_t	decimationFactor;
 	int16_t	decimationCounter;
 };
 
-class	HighPassFIR: public Basic_FIR {
+class	highpassFIR: public basicFIR {
 public:
-			HighPassFIR	(int16_t, int32_t, int32_t);
-			~HighPassFIR	(void);
+			highpassFIR	(int16_t, int32_t, int32_t);
+			~highpassFIR	(void);
 	void		newKernel	(int32_t);
 };
 
-class	bandpassFIR: public Basic_FIR {
+class	bandpassFIR: public basicFIR {
 public:
 			bandpassFIR	(int16_t, int32_t, int32_t, int32_t);
 			~bandpassFIR	(void);
-	DSPCOMPLEX	*getKernel	(void);
+	std::complex<float>	*getKernel	(void);
 	void		newKernel	(int32_t, int32_t);
 private:
 };
 
-class	BasicBandPass: public Basic_FIR {
+class	basicbandPass: public basicFIR {
 public:
-			BasicBandPass	(int16_t, int32_t, int32_t, int32_t);
-			~BasicBandPass	(void);
-	DSPCOMPLEX	*getKernel	(void);
+			basicbandPass	(int16_t, int32_t, int32_t, int32_t);
+			~basicbandPass	(void);
+	std::complex<float>	*getKernel	(void);
 private:
 };
 
@@ -99,30 +99,30 @@ class	adaptiveFilter {
 public:
 		adaptiveFilter	(int16_t, float);
 		~adaptiveFilter	();
-	DSPCOMPLEX	Pass		(DSPCOMPLEX);
+	std::complex<float>	Pass		(std::complex<float>);
 
 private:
 	int16_t		ip;
 	float		err;
 	float		mu;
 	int16_t		firsize;
-	float	*Kernel;
-	DSPCOMPLEX	*Buffer;
+	float		*Kernel;
+	std::complex<float>	*Buffer;
 };
 
 class HilbertFilter {
 public:
 		HilbertFilter	(int16_t, float, int32_t);
 		~HilbertFilter	();
-	DSPCOMPLEX	Pass		(DSPCOMPLEX);
-	DSPCOMPLEX	Pass		(float, float);
+	std::complex<float>	Pass		(std::complex<float>);
+	std::complex<float>	Pass		(float, float);
 private:
 	int16_t		ip;
 	int16_t		firsize;
 	int32_t		rate;
-	float	*cosKernel;
-	float	*sinKernel;
-	DSPCOMPLEX	*Buffer;
+	float		*cosKernel;
+	float		*sinKernel;
+	std::complex<float>	*Buffer;
 	void		adjustFilter	(float);
 };
 

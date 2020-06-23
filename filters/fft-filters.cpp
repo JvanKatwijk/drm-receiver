@@ -2,22 +2,22 @@
 /*
  *    Copyright (C) 2008, 2009, 2010
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J
+ *    This file is part of the drm receiver
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -45,7 +45,7 @@ int32_t	i;
 	filterVector	= FilterFFT	->	getVector ();
 	RfilterVector	= new float [fftSize];
 
-	Overloop	= new DSPCOMPLEX [OverlapSize];
+	Overloop	= new std::complex<float> [OverlapSize];
 	inp		= 0;
 	for (i = 0; i < fftSize; i ++) {
 	   FFT_A [i] = 0;
@@ -93,29 +93,26 @@ int16_t	i;
 //	Now the modulation
 	for (i = 0; i < filterDegree; i ++) {	// shifting
 	   float v = (i - filterDegree / 2) * (2 * M_PI * shift);
-	   filterVector [i] = DSPCOMPLEX (tmp [i] * cos (v) / sum, 
-	                                  tmp [i] * sin (v) / sum);
+	   filterVector [i] = std::complex<float> (tmp [i] * cos (v) / sum, 
+	                                           tmp [i] * sin (v) / sum);
 	}
 
 	memset (&filterVector [filterDegree], 0,
-	                (fftSize - filterDegree) * sizeof (DSPCOMPLEX));
+	              (fftSize - filterDegree) * sizeof (std::complex<float>));
 	FilterFFT	-> do_FFT ();
 	inp		= 0;
 }
 
 void	fftFilter::setLowPass (int32_t low, int32_t rate) {
 int32_t	i;
-LowPassFIR	*LowPass	= new LowPassFIR ((int16_t)filterDegree,
-	                                          low,
-	                                          rate);
+lowpassFIR	LowPass ((int16_t)filterDegree, low, rate);
 
 	for (i = 0; i < filterDegree; i ++)
-	   filterVector [i] = (LowPass -> getKernel ()) [i];
+	   filterVector [i] = (LowPass. getKernel ()) [i];
 	memset (&filterVector [filterDegree], 0,
-	                (fftSize - filterDegree) * sizeof (DSPCOMPLEX));
+	                (fftSize - filterDegree) * sizeof (std::complex<float>));
 	FilterFFT	-> do_FFT ();
 	inp	= 0;
-	delete LowPass;
 }
 
 float	fftFilter::Pass (float x) {
@@ -128,13 +125,13 @@ float	sample;
 	if (++inp >= NumofSamples) {
 	   inp = 0;
 	   memset (&FFT_A [NumofSamples], 0,
-	               (fftSize - NumofSamples) * sizeof (DSPCOMPLEX));
+	               (fftSize - NumofSamples) * sizeof (std::complex<float>));
 	   MyFFT	-> do_FFT ();
 
 	   for (j = 0; j < fftSize; j ++) {
 	      FFT_C [j] = FFT_A [j] * filterVector [j];
-              FFT_C [j] = DSPCOMPLEX (real (FFT_C [j]) * 10,
-                                      imag (FFT_C [j]) * 10);
+              FFT_C [j] = std::complex<float> (real (FFT_C [j]) * 10,
+                                               imag (FFT_C [j]) * 10);
 	   }
 
 	   MyIFFT	-> do_IFFT ();
@@ -147,8 +144,8 @@ float	sample;
 	return sample;
 }
 
-DSPCOMPLEX	fftFilter::Pass (DSPCOMPLEX z) {
-DSPCOMPLEX	sample;
+std::complex<float>	fftFilter::Pass (std::complex<float> z) {
+std::complex<float>	sample;
 int16_t		j;
 
 	sample	= FFT_C [inp];
@@ -157,7 +154,7 @@ int16_t		j;
 	if (++inp >= NumofSamples) {
 	   inp = 0;
 	   memset (&FFT_A [NumofSamples], 0,
-	               (fftSize - NumofSamples) * sizeof (DSPCOMPLEX));
+	               (fftSize - NumofSamples) * sizeof (std::complex<float>));
 	   MyFFT	-> do_FFT ();
 
 	   for (j = 0; j < fftSize; j ++) 

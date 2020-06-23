@@ -4,19 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J 
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the drm receiver
+ *
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	<stdio.h>
@@ -28,11 +29,39 @@
 #include	"basics.h"
 #include	"referenceframe.h"
 
-//	The freqsyncer will handle segments of size Ts,
-//	and do all kinds of frequency correction (timecorrection
-//	is done in the syncer) and it will give an estimate of
-//	the "coarse" //	frequency offset and a spectrum
 //
+struct testCells {
+	int	index;
+	int	phase;
+};
+
+struct testCells testCellsforModeA [] = {
+        {18, 205},
+        {54, 836},
+        {72, 215},
+        {-1, -1}
+};
+
+struct testCells testCellsforModeB [] = {
+        {16, 331},
+        {48, 651},
+        {64, 555},
+        {-1, -1}
+};
+
+struct testCells testCellsforModeC [] = {
+        {11, 214},
+        {33, 392},
+        {44, 242},
+        {-1, -1}
+};
+
+struct testCells testCellsforModeD [] = {
+        { 7, 788},
+        {21, 1014},
+        {28, 332},
+        {-1, -1}
+};
 //	The frequency shifter is in steps of 0.01 Hz
 	freqSyncer::freqSyncer (Reader		*b,
 	                        smodeInfo	*m,
@@ -52,20 +81,16 @@ int16_t	i;
 	this	-> N_symbols	= symbolsperFrame (Mode);
 
 //	for detecting pilots:
-	int16_t k_pilot [3];
 	int16_t cnt	= 0;
 
-	for (i = 0; i < Tu / 2; i ++) {
-	   if (isFreqCell (Mode, 0, i)) {
-	      k_pilot [cnt ++] = i;
-	      if (cnt > 3)
-	         fprintf (stderr, "Hellup\n");	// does not happen
-	   }
-	}
+	struct testCells *base =
+	            Mode == Mode_A ? testCellsforModeA :
+	            Mode == Mode_B ? testCellsforModeB :
+	            Mode == Mode_C ? testCellsforModeC : testCellsforModeD;
 
-	this	-> k_pilot1 = k_pilot [0] + Tu / 2;
-	this	-> k_pilot2 = k_pilot [1] + Tu / 2;
-	this	-> k_pilot3 = k_pilot [2] + Tu / 2;
+	this	-> k_pilot1 = base [0]. index + Tu / 2;
+	this	-> k_pilot2 = base [1]. index + Tu / 2;
+	this	-> k_pilot3 = base [2]. index + Tu / 2;
 
 	this	-> bufferIndex	= 0;
 	this	-> symbolBuffer	= new std::complex<float> *[N_symbols];
@@ -128,18 +153,23 @@ uint8_t	spectrum;
 	int32_t	binNumber;
 	binNumber = get_zeroBin (0);
 	m -> freqOffset_integer	= binNumber * sampleRate / Tu;
-//
-	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
-	for (i = 0; i < 4; i ++) 
+
+	fprintf (stderr, "bin 0 = %d\n", binNumber);
+//	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
+	for (i = 0; i <= 3; i ++) 
 	   occupancyIndicator [i] = get_spectrumOccupancy (i, binNumber);
 
 	float tmp1	= 0.0;
-	for (spectrum = 1; spectrum < 4; spectrum ++) {	
+	for (spectrum = 0; spectrum <= 3; spectrum ++) {	
+	   fprintf (stderr, "spectrum %d, indicator %f\n",
+	                     spectrum, occupancyIndicator [spectrum]);
 	   if (occupancyIndicator [spectrum] >= tmp1) {
 	      tmp1 = occupancyIndicator [spectrum];
 	      m -> Spectrum = spectrum;
 	   }
 	}
+	m -> Spectrum = 3;
+	fprintf (stderr, "spectrum wordt gezet op %d\n", m -> Spectrum);
 	return true;
 }
 
@@ -218,18 +248,31 @@ int16_t K_max_ = Kmax (Mode, spectrum);
 
 	for (i = 0; i < N_symbols; i ++) {
 //	near the carrier with the lowest index
-	   for (j = 0; j < 5; j ++) {
-	      tmp3 += real (symbolBuffer [i][K_min_indx - 4 - j] *
-	                    conj (symbolBuffer [i][K_min_indx - 4 - j]));
-	      tmp4 += real (symbolBuffer [i][K_min_indx + 4 + j] *
-	                    conj (symbolBuffer [i][K_min_indx + 4 + j]));
+	   for (j = 0; j < 10; j ++) {
+	      int ind1 = (K_min_indx - 2 - j) % Tu;
+	      int ind2 = (K_min_indx + 2 + j) % Tu;
+	      tmp3 += real (symbolBuffer [i][ind1] *
+	                                  conj (symbolBuffer [i][ind1]));
+	      tmp4 += real (symbolBuffer [i][ind2] *
+	                                  conj (symbolBuffer [i][ind2]));
+	
+//	      tmp3 += real (symbolBuffer [i][K_min_indx - 4 - j] *
+//	                    conj (symbolBuffer [i][K_min_indx - 4 - j]));
+//	      tmp4 += real (symbolBuffer [i][K_min_indx + 4 + j] *
+//	                    conj (symbolBuffer [i][K_min_indx + 4 + j]));
 	   }
 //	near the carrier with the highest index
-	   for (j = 0; j < 5; j ++) {
-	      tmp5 += real (symbolBuffer [i][K_max_indx - 4 - j] *
-	                    conj (symbolBuffer [i][K_max_indx - 4 - j]));
-	      tmp6 += real (symbolBuffer [i][K_max_indx + 4 + j] *
-	                    conj (symbolBuffer [i][K_max_indx + 4 + j]));
+	   for (j = 0; j < 20; j ++) {
+	      int ind1 = (K_max_indx - 2 - j) % Tu;
+	      int ind2 = (K_max_indx + 2 + j) % Tu;
+	      tmp5 += real (symbolBuffer [i][ind1] *
+	                                     conj (symbolBuffer [i][ind1]));
+	      tmp6 += real (symbolBuffer [i][ind2] *
+	                                     conj (symbolBuffer [i][ind2]));
+//	      tmp5 += real (symbolBuffer [i][K_max_indx - 4 - j] *
+//	                    conj (symbolBuffer [i][K_max_indx - 4 - j]));
+//	      tmp6 += real (symbolBuffer [i][K_max_indx + 4 + j] *
+//	                    conj (symbolBuffer [i][K_max_indx + 4 + j]));
 	   }
 	}
 
@@ -239,14 +282,8 @@ int16_t K_max_ = Kmax (Mode, spectrum);
 //	some safety measure, we assume that the data that is to
 //	supposed to be in the carriers with energy has substantially
 //	higher value that the "outside" data
-	if (tmp4 < 3 * tmp3)
-	   energy_ratio_K_min_to_K_min_p4 = 0;
-	else
-	   energy_ratio_K_min_to_K_min_p4 = tmp4 / tmp3;
-	if (tmp5 < 3 * tmp6)
-	   energy_ratio_K_max_to_K_max_p4 = 0;
-	else
-	   energy_ratio_K_max_to_K_max_p4 = tmp5 / tmp6;
+	energy_ratio_K_min_to_K_min_p4 = tmp4 / tmp3;
+	energy_ratio_K_max_to_K_max_p4 = tmp5 / tmp6;
 	return energy_ratio_K_max_to_K_max_p4 +
 	       energy_ratio_K_min_to_K_min_p4;
 }

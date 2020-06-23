@@ -112,7 +112,7 @@ QString	bandplanFile	= QDir::homePath ();
         MyRadioInterface = new RadioInterface (ISettings,
 	                                       stationList,
 	                                       &my_bandPlan,
-	                                       192000, 24000);
+	                                       2 * 96000, 1 * 12000);
 	MyRadioInterface -> show ();
         a. exec ();
 /*
