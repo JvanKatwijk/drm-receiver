@@ -190,9 +190,9 @@ uint8_t	audioCoding		= theState -> streams [mscIndex]. audioCoding;
 	switch (audioCoding) {
 	   case 0:		// AAC
 	      show_audioMode (QString ("AAC"));
-	      process_aac (v, mscIndex,
-	                   startHigh, lengthHigh,
-	                   startLow,  lengthLow);
+	      this -> process_aac (v, mscIndex,
+	                           startHigh, lengthHigh,
+	                           startLow,  lengthLow);
 	      return;
 
 	   case 1:		// CELP
@@ -290,8 +290,8 @@ int16_t outBuffer [8 * 960];
 static
 audioFrame f [20];
 void	dataProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
-	                           int16_t startHigh, int16_t lengthHigh,
-	                           int16_t startLow, int16_t lengthLow) {
+	                                 int16_t startHigh, int16_t lengthHigh,
+	                                 int16_t startLow, int16_t lengthLow) {
 int16_t	headerLength, i, j;
 int16_t	usedLength	= 0;
 int16_t	crcLength	= 1;
@@ -569,6 +569,21 @@ uint8_t	SBR_flag		= theState -> streams [mscIndex].
 uint8_t	audioMode		= theState -> streams [mscIndex].
 	                                                   audioMode;
 
+std::vector<uint8_t>audioDescriptor;
+
+uint8_t	xxx			= 0;
+
+	xxx	= theState -> streams [mscIndex]. audioCoding << 6;
+	xxx	|= theState -> streams [mscIndex]. SBR_flag << 5;
+	xxx	|= theState -> streams [mscIndex]. audioMode << 3;
+	xxx	|= theState -> streams [mscIndex]. audioSamplingRate;
+	audioDescriptor. push_back (xxx);
+
+	xxx	= theState -> streams [mscIndex]. textFlag << 7;
+	xxx	|= theState -> streams [mscIndex]. enhancementFlag << 6;
+	xxx	|= theState -> streams [mscIndex]. coderField << 1;
+	audioDescriptor. push_back (xxx);
+	
 	if (!my_aacDecoder.  checkfor (audioSamplingRate,
 	                                        SBR_flag, 
 	                                        audioMode)) {

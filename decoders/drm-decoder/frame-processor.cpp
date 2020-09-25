@@ -148,7 +148,7 @@ restart:
 //	and create a reader/processor
 	   frequencySync (theDecoder, &my_Reader, &modeInf);
 
-	fprintf (stderr, "spectrum is gezet op %d\n", modeInf. Spectrum);
+//	   fprintf (stderr, "spectrum is gezet op %d\n", modeInf. Spectrum);
 	   setTimeSync	(true);
 	   show_Mode (modeInf. Mode);
 	   show_Spectrum (modeInf. Spectrum);

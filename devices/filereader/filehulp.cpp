@@ -218,6 +218,7 @@ int64_t	nextStop;
 	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
 	         emit dataAvailable (theRate / 10);
 
+
 	      if (nextStop - getMyTime () > 0)
 	         usleep (nextStop - getMyTime ());
 	   }
@@ -282,11 +283,12 @@ int64_t	nextStop;
                                                  numofOutputs);
 	      }
 
-	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
+	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10) {
 	         emit dataAvailable (theRate / 10);
-	                                      
-	      if (nextStop - getMyTime () > 0)
-	         usleep (nextStop - getMyTime ());
+//	      if (nextStop - getMyTime () > 0)
+//	         usleep (nextStop - getMyTime ());
+	         usleep (100000);
+	      }
 	   }
 
 	   delete	bi;

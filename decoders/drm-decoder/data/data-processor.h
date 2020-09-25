@@ -47,9 +47,7 @@ public:
 		dataProcessor	(stateDescriptor *, drmDecoder *);
 		~dataProcessor	(void);
 	void	process		(uint8_t *, int16_t);
-enum	{
-	S_AAC, S_CELPT, S_HVXC
-};
+enum	{S_AAC, S_CELPT, S_HVXC};
 	void	selectDataService	(int16_t);
 	void	selectAudioService	(int16_t);
 private:

@@ -87,8 +87,6 @@ int16_t	symbs;
 	         this, SLOT (selectChannel_3 (void)));
 	connect (channel_4, SIGNAL (clicked (void)),
 	         this, SLOT (selectChannel_4 (void)));
-	connect (filterSelector, SIGNAL (activated (const QString &)),
-	         this, SLOT (selectFilter (const QString &)));
 	theFilter	= &Filter_10;
 	running			= true;
 
