@@ -74,9 +74,7 @@ uint32_t y;
 	dataProcessor::dataProcessor	(stateDescriptor *theState,
 	                                 drmDecoder *drm):
 	                                      my_messageProcessor (drm) ,
-	                                      my_aacDecoder (drm),
-	                                      upFilter_24000 (5, 12000, 48000),
-	                                      upFilter_12000 (5, 6000, 48000) {
+	                                      my_aacProcessor (theState, drm) {
 	
 	this	-> theState		= theState;
 	this	-> drmMaster		= drm;
@@ -90,10 +88,10 @@ uint32_t y;
 	my_fecHandler			= new fecHandler (my_packetAssembler);
 	connect (this, SIGNAL (show_audioMode (QString)),
 	         drmMaster, SLOT (show_audioMode (QString)));
-	connect (this, SIGNAL (putSample (float, float)),
-	         drmMaster, SLOT (sampleOut (float, float)));
-	connect (this, SIGNAL (faadSuccess (bool)),
-	         drmMaster, SLOT (faadSuccess (bool)));
+//	connect (this, SIGNAL (putSample (float, float)),
+//	         drmMaster, SLOT (sampleOut (float, float)));
+//	connect (this, SIGNAL (faadSuccess (bool)),
+//	         drmMaster, SLOT (faadSuccess (bool)));
 	connect (this, SIGNAL (show_datacoding (QString)),
 	         drmMaster, SLOT (show_datacoding (QString)));
 	show_audioMode (" ");
@@ -149,9 +147,8 @@ int16_t	new_dataChannel	= drmMaster	-> getDataChannel ();
 	   if ((theState -> streams [i]. soort ==
 	                           stateDescriptor::AUDIO_STREAM) &&
 	                               (audioChannel == i)) {
-	      process_audio (v, i,
-	                     startPosA, lengthA,
-	                     startPosB, lengthB);
+	      process_audio (v, i, startPosA, lengthA,
+	                           startPosB, lengthB);
 	      my_messageProcessor.  processMessage (v,
 	                                       8 * (startPosB + lengthB - 4));
 	   }
@@ -190,9 +187,9 @@ uint8_t	audioCoding		= theState -> streams [mscIndex]. audioCoding;
 	switch (audioCoding) {
 	   case 0:		// AAC
 	      show_audioMode (QString ("AAC"));
-	      this -> process_aac (v, mscIndex,
-	                           startHigh, lengthHigh,
-	                           startLow,  lengthLow);
+	      my_aacProcessor. process_aac (v, mscIndex,
+	                                    startHigh, lengthHigh,
+	                                    startLow,  lengthLow);
 	      return;
 
 	   case 1:		// CELP
@@ -271,74 +268,6 @@ void	dataProcessor::handle_syncStream (uint8_t *dataBuffer,
 //	for (int i = 0; i < 40; i ++)
 //	   fprintf (stderr, "%x ", dataBuffer [i]);
 //	fprintf (stderr, "\n");
-}
-
-//	little confusing: start- and length specifications are
-//	in bytes, we are working internally in bits
-void	dataProcessor::process_aac (uint8_t *v, int16_t mscIndex,
-	                            int16_t startHigh, int16_t lengthHigh,
-	                            int16_t startLow,  int16_t lengthLow) {
-	if (lengthHigh != 0) 
-	   handle_uep_audio (v, mscIndex, startHigh, lengthHigh,
-	                            startLow, lengthLow - 4);
-	else 
-	   handle_eep_audio (v, mscIndex,  startLow, lengthLow - 4);
-}
-
-static
-int16_t outBuffer [8 * 960];
-static
-audioFrame f [20];
-void	dataProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
-	                                 int16_t startHigh, int16_t lengthHigh,
-	                                 int16_t startLow, int16_t lengthLow) {
-int16_t	headerLength, i, j;
-int16_t	usedLength	= 0;
-int16_t	crcLength	= 1;
-int16_t	payloadLength;
-
-//	first the globals
-	numFrames = theState -> streams [mscIndex]. audioSamplingRate == 1 ? 5 : 10;
-	headerLength = numFrames == 10 ? (9 * 12 + 4) / 8 : (4 * 12) / 8;
-	payloadLength = lengthLow + lengthHigh - headerLength - crcLength;
-	
-//	Then, read the numFrames - 1 "length"s from the header:
-	for (i = 0; i < numFrames - 1; i ++) {
-	   f [i]. length = get_MSCBits (v, startHigh * 8 + 12 * i, 12);
-	   if (f [i]. length < 0)
-	      return;
-	   usedLength += f [i]. length;
-	}
-//	the length of the last segment is to be computed
-	f [numFrames - 1]. length = payloadLength - usedLength;
-
-//	OK, now it is getting complicated, we first load the part(s) from the
-//	HP part. Length for all parts is equal, i.e. LengthHigh / numFrames
-//	the audiopart is one byte shorter, due to the crc
-	int16_t segmentinHP	= (lengthHigh - headerLength) / numFrames;
-	int16_t audioinHP	= segmentinHP - 1;
-	int16_t	entryinHP	= startHigh + headerLength;
-
-	for (i = 0; i < numFrames; i ++) {
-	   for (j = 0; j < audioinHP; j ++)
-	      f [i]. audio [j] = get_MSCBits (v,
-	                        (entryinHP ++) * 8, 8);
-	   f [i]. aac_crc = get_MSCBits (v, 
-	                        (entryinHP ++) * 8, 8);
-	}
-
-//	Now what is left is the part of the frame in the LP part
-
-	int16_t entryinLP	= startLow;
-	for (i = 0; i < numFrames; i ++) {
-	   for (j = 0;
-	        j < f [i]. length - audioinHP;
-	        j ++)
-	      if (entryinLP < startLow + lengthLow)
-	         f [i]. audio [audioinHP + j] =
-	                    get_MSCBits (v, (entryinLP++) * 8, 8);
-	}
-	playOut (mscIndex);
 }
 
 void	dataProcessor::handle_uep_packets (uint8_t *v, int16_t mscIndex,
@@ -435,182 +364,7 @@ int16_t	i;
 	                                   packetLength, mscIndex);
 	}
 }
-//static
-//int16_t outBuffer [8 * 960];
-//static
-//audioFrame f [20];
-//void	dataProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
-//	                           int16_t startHigh, int16_t lengthHigh,
-//	                           int16_t startLow, int16_t lengthLow) {
-//int16_t	headerLength, i, j;
-//int16_t	usedLength	= 0;
-//int16_t	crcLength	= 1;
-//int16_t	payloadLength;
-//
-////	first the globals
-//	numFrames = msc -> streams [mscIndex]. audioSamplingRate == 1 ? 5 : 10;
-//	headerLength = numFrames == 10 ? (9 * 12 + 4) / 8 : (4 * 12) / 8;
-//	payloadLength = lengthLow + lengthHigh - headerLength - crcLength;
-//	
-////	Then, read the numFrames - 1 "length"s from the header:
-//	for (i = 0; i < numFrames - 1; i ++) {
-//	   f [i]. length = get_MSCBits (v, startHigh * 8 + 12 * i, 12);
-//	   if (f [i]. length < 0)
-//	      return;
-//	   usedLength += f [i]. length;
-//	}
-////	the length of the last segment is to be computed
-//	f [numFrames - 1]. length = payloadLength - usedLength;
-//
-////	OK, now it is getting complicated, we first load the part(s) from the
-////	HP part. Length for all parts is equal, i.e. LengthHigh / numFrames
-////	the audiopart is one byte shorter, due to the crc
-//	int16_t segmentinHP	= (lengthHigh - headerLength) / numFrames;
-//	int16_t audioinHP	= segmentinHP - 1;
-//	int16_t	entryinHP	= startHigh + headerLength;
-//
-//	for (i = 0; i < numFrames; i ++) {
-//	   for (j = 0; j < audioinHP; j ++)
-//	      f [i]. audio [j] = get_MSCBits (v,
-//	                        (entryinHP ++) * 8, 8);
-//	   f [i]. aac_crc = get_MSCBits (v, 
-//	                        (entryinHP ++) * 8, 8);
-//	}
-//
-////	Now what is left is the part of the frame in the LP part
-//
-//	int16_t entryinLP	= startLow;
-//	for (i = 0; i < numFrames; i ++) {
-//	   for (j = 0;
-//	        j < f [i]. length - audioinHP;
-//	        j ++)
-//	      if (entryinLP < startLow + lengthLow)
-//	         f [i]. audio [audioinHP + j] =
-//	                    get_MSCBits (v, (entryinLP++) * 8, 8);
-//	}
-//	playOut (mscIndex);
-//}
-//
-//	Processing audio, in an EEP segment, proceeds as follows
-//	first, the number of segments is determined by looking at
-//	the audioRate. A rate of 12000 gives 5 frames, 24000 gives
-//	10 frames.
-//	second, the header is determined from which the startPositions
-//	of the subsequent aac segments can be determined. The header
-//	consists of (numFrames - 1) 12 bits words. For a 10 frame
-//	header, we add 4 bits such that the end is a byte multiple (112)
-//	Then the crc's are read in, these are 8 bit values, one for 
-//	each frame.
-//	Finally, the aac encodings of the frames themselves is readin
-//	Note that positions where the segments are to be found
-//	can be deduced from the start positions: just add the size
-//	of the header and the size of the crc block to the start position.
-void	dataProcessor::handle_eep_audio (uint8_t *v,
-	                                 int16_t mscIndex,
-	                                 int16_t startLow,
-	                                 int16_t lengthLow) {
-int16_t		i, j;
-int16_t		headerLength;
-int16_t		crc_start;
-int16_t		payLoad_start;
-int16_t		payLoad_length = 0;
 
-	numFrames = theState -> streams [mscIndex]. audioSamplingRate == 1 ? 5 : 10;
-	headerLength = numFrames == 10 ? (9 * 12 + 4) / 8 : (4 * 12) / 8;
-
-//	startLow in bytes!!
-	f [0]. startPos = 0;
-	for (i = 1; i < numFrames; i ++) {
-	   f [i]. startPos = get_MSCBits (v,
-	                                  startLow * 8 + 12 * (i - 1), 12);
-	}
-	for (i = 1; i < numFrames; i ++) {
-	   f [i - 1]. length = f [i]. startPos - f [i - 1]. startPos;
-	   if (f [i - 1]. length < 0 ||
-	       f [i - 1]. length >= lengthLow) {
-	      faadSuccess (false);
-	      return;
-	   }
-	   payLoad_length += f [i - 1]. length;
-	}
-
-	f [numFrames - 1]. length = lengthLow - 
-	                            (headerLength + numFrames) -
-	                            payLoad_length;
-	if (f [numFrames - 1]. length < 0) {
-	   faadSuccess (false);
-	   return;
-	}
-//
-//	crc_start in bytes
-	crc_start	= startLow + headerLength;
-	for (i = 0; i < numFrames; i ++)
-	   f [i]. aac_crc = get_MSCBits (v, (crc_start + i) * 8, 8);
-
-//	The actual audiobits (bytes) starts at crc_start + numFrames
-	payLoad_start	= crc_start + numFrames; // the crc's
-
-	for (i = 0; i < numFrames; i ++) {
-	   for (j = 0; j < f [i]. length; j ++) {
-	      int16_t in2 = (payLoad_start + f [i]. startPos + j);
-	      f [i]. audio [j] = get_MSCBits (v, in2 * 8, 8);
-	   }
-	}
-	playOut (mscIndex);
-}
-
-
-void	dataProcessor::playOut (int16_t	mscIndex) {
-int16_t	i;
-uint8_t	audioSamplingRate	= theState -> streams [mscIndex].
-	                                                   audioSamplingRate;
-uint8_t	SBR_flag		= theState -> streams [mscIndex].
-	                                                   SBR_flag;
-uint8_t	audioMode		= theState -> streams [mscIndex].
-	                                                   audioMode;
-
-std::vector<uint8_t>audioDescriptor;
-
-uint8_t	xxx			= 0;
-
-	xxx	= theState -> streams [mscIndex]. audioCoding << 6;
-	xxx	|= theState -> streams [mscIndex]. SBR_flag << 5;
-	xxx	|= theState -> streams [mscIndex]. audioMode << 3;
-	xxx	|= theState -> streams [mscIndex]. audioSamplingRate;
-	audioDescriptor. push_back (xxx);
-
-	xxx	= theState -> streams [mscIndex]. textFlag << 7;
-	xxx	|= theState -> streams [mscIndex]. enhancementFlag << 6;
-	xxx	|= theState -> streams [mscIndex]. coderField << 1;
-	audioDescriptor. push_back (xxx);
-	
-	if (!my_aacDecoder.  checkfor (audioSamplingRate,
-	                                        SBR_flag, 
-	                                        audioMode)) {
-	   faadSuccess (false);
-	   return;
-	}
-
-	for (i = 0; i < numFrames; i ++) {
-	   int16_t	index = i;
-	   bool		convOK;
-	   int16_t	cnt;
-	   int32_t	rate;
-	   my_aacDecoder.  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
-	                                 f [index]. length + 1,
-	                                 &convOK,
-	                                 outBuffer,
-	                                 &cnt, &rate);
-	   if (convOK) {
-	      faadSuccess (true);
-	      writeOut (outBuffer, cnt, rate);
-	   }
-	   else
-	      faadSuccess (false);
-	}
-}
-//
-//
 void	dataProcessor::process_celp (uint8_t *v, int16_t mscIndex,
 	                            int16_t startHigh, int16_t lengthHigh,
 	                            int16_t startLow,  int16_t lengthLow) {
@@ -653,65 +407,4 @@ uint8_t	audioCoding	= theState -> streams [mscIndex]. audioCoding;
 	   fprintf (stderr, "HVXC_rate = %d, HVXC_CRC = %d\n",
 	                    (audioCoding & 02) >> 1, audioCoding & 01);
 }
-
-void	dataProcessor::toOutput (float *b, int16_t cnt) {
-int16_t	i;
-	if (cnt == 0)
-	   return;
-
-	for (i = 0; i < cnt / 2; i ++)
-	   putSample (b [2 * i], b [2 * i + 1]);
-}
-
-void	dataProcessor::writeOut (int16_t *buffer, int16_t cnt,
-	                         int32_t pcmRate) {
-int16_t	i;
-	if (pcmRate == 48000) {
-	   float lbuffer [cnt];
-	   for (i = 0; i < cnt / 2; i ++) {
-	      lbuffer [2 * i]     = float (buffer [2 * i] / 32767.0);
-	      lbuffer [2 * i + 1] = float (buffer [2 * i + 1] / 32767.0);
-	   }
-	   toOutput (lbuffer, cnt);
-	   return;
-	}
-
-	if (pcmRate == 12000) {
-	   float lbuffer [4 * cnt];
-	   for (i = 0; i < cnt / 2; i ++) {
-	      DSPCOMPLEX help =
-	           upFilter_12000. Pass (DSPCOMPLEX (buffer [2 * i] / 32767.0,
-	                                           buffer [2 * i + 1] / 32767.0));
-	      lbuffer [8 * i + 0] = real (help);
-	      lbuffer [8 * i + 1] = imag (help);
-	      help = upFilter_12000. Pass (DSPCOMPLEX (0, 0));
-	      lbuffer [8 * i + 2] = real (help);
-	      lbuffer [8 * i + 3] = imag (help);
-	      help = upFilter_12000. Pass (DSPCOMPLEX (0, 0));
-	      lbuffer [8 * i + 4] = real (help);
-	      lbuffer [8 * i + 5] = imag (help);
-	      help = upFilter_12000. Pass (DSPCOMPLEX (0, 0));
-	      lbuffer [8 * i + 6] = real (help);
-	      lbuffer [8 * i + 7] = imag (help);
-	   }
-	   toOutput (lbuffer, 4 * cnt);
-	   return;
-	}
-	if (pcmRate == 24000) {
-	   float lbuffer [2 * cnt];
-	   for (i = 0; i < cnt / 2; i ++) {
-	      DSPCOMPLEX help =
-	           upFilter_24000. Pass (DSPCOMPLEX (buffer [2 * i] / 32767.0,
-	                                           buffer [2 * i + 1] / 32767.0));
-	      lbuffer [4 * i + 0] = real (help);
-	      lbuffer [4 * i + 1] = imag (help);
-	      help = upFilter_24000. Pass (DSPCOMPLEX (0, 0));
-	      lbuffer [4 * i + 2] = real (help);
-	      lbuffer [4 * i + 3] = imag (help);
-	   }
-	   toOutput (lbuffer, 2 * cnt);
-	   return;
-	}
-}
-
 

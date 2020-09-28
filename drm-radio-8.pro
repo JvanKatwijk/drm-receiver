@@ -166,7 +166,7 @@ LIBS    += -lusb-1.0
 LIBS    += -lsndfile
 LIBS    += -lsamplerate
 LIBS    += -lole32
-LIBS	+= -lfaad_drm
+#LIBS	+= -lfaad_drm
 LIBS    += -lwinmm
 }
 
@@ -348,7 +348,9 @@ drm-decoder {
 	DEFINES		+= HAVE_DRM_DECODER
 	DEFINES		+= ESTIMATOR_2
 #	LIBS		+= -lfaad_drm
-	LIBS		+= -lfaad_drm -larmadillo
+#	LIBS		+= -lfaad_drm -larmadillo
+	LIBS		+= -lfdk-aac -larmadillo
+	INCLUDEPATH	+= /usr/local/include/fdk-aac
 	DEPENDPATH	+= ./decoders/drm-decoder/ \
 	                   ./decoders/drm-decoder/ofdm \
 	                   ./decoders/drm-decoder/signal-handling \
@@ -409,6 +411,9 @@ drm-decoder {
 	                   ./decoders/drm-decoder/msc/msc-streamer.h \
 	                   ./decoders/drm-decoder/msc/msc-handler.h \
 	                   ./decoders/drm-decoder/data/data-processor.h \
+#	                   ./decoders/drm-decoder/data/aac-processor-faad.h \
+	                   ./decoders/drm-decoder/data/aac-processor-fdk.h \
+#	                   ./decoders/drm-decoder/data/drm-aacdecoder.h \
 	                   ./decoders/drm-decoder/data/fec-handler.h \
 	                   ./decoders/drm-decoder/data/galois.h \
 	                   ./decoders/drm-decoder/data/reed-solomon.h \
@@ -416,7 +421,6 @@ drm-decoder {
 	                   ./decoders/drm-decoder/data/packet-assembler.h \
 	                   ./decoders/drm-decoder/data/virtual-datahandler.h \
 	                   ./decoders/drm-decoder/data/mot-data.h \
-	                   ./decoders/drm-decoder/data/drm-aacdecoder.h \
 	                   ./decoders/drm-decoder/data/neaacdec_dll.h 
 
 	SOURCES		+= ./decoders/drm-decoder/drm-decoder.cpp  \
@@ -457,14 +461,16 @@ drm-decoder {
 	                   ./decoders/drm-decoder/msc/msc-streamer.cpp \
 	                   ./decoders/drm-decoder/msc/msc-handler.cpp \
 	                   ./decoders/drm-decoder/data/data-processor.cpp \
+#	                   ./decoders/drm-decoder/data/aac-processor-faad.cpp \
+	                   ./decoders/drm-decoder/data/aac-processor-fdk.cpp \
+#	                   ./decoders/drm-decoder/data/drm-aacdecoder.cpp \
 	                   ./decoders/drm-decoder/data/fec-handler.cpp \
 	                   ./decoders/drm-decoder/data/galois.cpp \
 	                   ./decoders/drm-decoder/data/reed-solomon.cpp \
 	                   ./decoders/drm-decoder/data/message-processor.cpp \
 	                   ./decoders/drm-decoder/data/packet-assembler.cpp \
 	                   ./decoders/drm-decoder/data/virtual-datahandler.cpp \
-	                   ./decoders/drm-decoder/data/mot-data.cpp \
-	                   ./decoders/drm-decoder/data/drm-aacdecoder.cpp 
+	                   ./decoders/drm-decoder/data/mot-data.cpp 
 }
 drm-decoder-old {
 	DEFINES		+= HAVE_DRM_DECODER
