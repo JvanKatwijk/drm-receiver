@@ -31,6 +31,7 @@
 #include	"fir-filters.h"
 //#include	"aac-processor-faad.h"
 #include	"aac-processor-fdk.h"
+#include	"xheaac-processor.h"
 #include	"message-processor.h"
 
 class	drmDecoder;
@@ -51,6 +52,7 @@ private:
 	drmDecoder	*drmMaster;
 	messageProcessor my_messageProcessor;
 	aacProcessor_fdk	my_aacProcessor;
+	xheaacProcessor		my_xheaacProcessor;
 //	aacProcessor	my_aacProcessor;
 	int16_t		numFrames;
 	int16_t		selectedDataService;

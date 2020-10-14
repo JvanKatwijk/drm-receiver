@@ -551,9 +551,9 @@ DSPCOMPLEX buffer [rate / 10];
         while (audioData -> GetRingBufferReadAvailable () >
                                                  (uint32_t)rate / 10) {
            audioData -> getDataFromBuffer (buffer, rate / 10);
-	   if (rate != 48000)
-	      theUpConverter    -> handle (buffer, rate / 10);
-	   else
+//	   if (rate != 48000)
+//	      theUpConverter    -> handle (buffer, rate / 10);
+//	   else
 	      audioHandler      -> putSamples (buffer, rate / 10);
         }
 }

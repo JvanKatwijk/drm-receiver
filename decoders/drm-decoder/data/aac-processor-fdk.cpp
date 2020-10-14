@@ -42,8 +42,8 @@ uint16_t	res	= 0;
 //
 	aacProcessor_fdk::aacProcessor_fdk (stateDescriptor *theState,
 	                                    drmDecoder *drm):
-	                                    upFilter_24000 (5, 12000, 48000),
-	                                    upFilter_12000 (5, 6000, 48000) {
+	                                    upFilter_24000 (11, 12000, 48000),
+	                                    upFilter_12000 (11, 6000, 48000) {
 
 	this	-> theState	= theState;
 	this	-> drmMaster	= drm;
@@ -374,8 +374,10 @@ uint32_t	bytesValid	= 0;
 	else
 	if (fdk_info -> numChannels == 2) {
 	   for (int i = 0; i < fdk_info -> frameSize; i ++) {
-	      buffer [2 * i] 	= localBuffer [2 * i];
+	      buffer [2 * i]	= localBuffer [2 * i];
 	      buffer [2 * i + 1] = localBuffer [2 * i + i];
+	      buffer [2 * i] 	= localBuffer [2 * i + 1];
+	      buffer [2 * i + 1] = localBuffer [2 * i];
 	   }
 	}
 #if 0

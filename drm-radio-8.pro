@@ -413,6 +413,7 @@ drm-decoder {
 	                   ./decoders/drm-decoder/data/data-processor.h \
 #	                   ./decoders/drm-decoder/data/aac-processor-faad.h \
 	                   ./decoders/drm-decoder/data/aac-processor-fdk.h \
+	                   ./decoders/drm-decoder/data/xheaac-processor.h \
 #	                   ./decoders/drm-decoder/data/drm-aacdecoder.h \
 	                   ./decoders/drm-decoder/data/fec-handler.h \
 	                   ./decoders/drm-decoder/data/galois.h \
@@ -463,6 +464,7 @@ drm-decoder {
 	                   ./decoders/drm-decoder/data/data-processor.cpp \
 #	                   ./decoders/drm-decoder/data/aac-processor-faad.cpp \
 	                   ./decoders/drm-decoder/data/aac-processor-fdk.cpp \
+	                   ./decoders/drm-decoder/data/xheaac-processor.cpp \
 #	                   ./decoders/drm-decoder/data/drm-aacdecoder.cpp \
 	                   ./decoders/drm-decoder/data/fec-handler.cpp \
 	                   ./decoders/drm-decoder/data/galois.cpp \

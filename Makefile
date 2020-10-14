@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"c91c162\" -DHAVE_SDRPLAY -DHAVE_DRM_DECODER -DESTIMATOR_2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+DEFINES       = -DGITHASH=\"e935f64\" -DHAVE_SDRPLAY -DHAVE_DRM_DECODER -DESTIMATOR_2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -isystem /usr/include/qt5/qwt -Idevices/sdrplay-handler -isystem /usr/local/include/fdk-aac -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtXml -isystem /usr/include/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib64/qt5/mkspecs/linux-g++
@@ -121,6 +121,7 @@ SOURCES       = main.cpp \
 		decoders/drm-decoder/msc/msc-handler.cpp \
 		decoders/drm-decoder/data/data-processor.cpp \
 		decoders/drm-decoder/data/aac-processor-fdk.cpp \
+		decoders/drm-decoder/data/xheaac-processor.cpp \
 		decoders/drm-decoder/data/fec-handler.cpp \
 		decoders/drm-decoder/data/galois.cpp \
 		decoders/drm-decoder/data/reed-solomon.cpp \
@@ -153,6 +154,7 @@ SOURCES       = main.cpp \
 		moc_backend-controller.cpp \
 		moc_data-processor.cpp \
 		moc_aac-processor-fdk.cpp \
+		moc_xheaac-processor.cpp \
 		moc_message-processor.cpp \
 		moc_mot-data.cpp
 OBJECTS       = main.o \
@@ -224,6 +226,7 @@ OBJECTS       = main.o \
 		msc-handler.o \
 		data-processor.o \
 		aac-processor-fdk.o \
+		xheaac-processor.o \
 		fec-handler.o \
 		galois.o \
 		reed-solomon.o \
@@ -257,6 +260,7 @@ OBJECTS       = main.o \
 		moc_backend-controller.o \
 		moc_data-processor.o \
 		moc_aac-processor-fdk.o \
+		moc_xheaac-processor.o \
 		moc_message-processor.o \
 		moc_mot-data.o
 DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
@@ -434,6 +438,7 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		decoders/drm-decoder/msc/msc-handler.h \
 		decoders/drm-decoder/data/data-processor.h \
 		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
 		decoders/drm-decoder/data/fec-handler.h \
 		decoders/drm-decoder/data/galois.h \
 		decoders/drm-decoder/data/reed-solomon.h \
@@ -510,6 +515,7 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		decoders/drm-decoder/msc/msc-handler.cpp \
 		decoders/drm-decoder/data/data-processor.cpp \
 		decoders/drm-decoder/data/aac-processor-fdk.cpp \
+		decoders/drm-decoder/data/xheaac-processor.cpp \
 		decoders/drm-decoder/data/fec-handler.cpp \
 		decoders/drm-decoder/data/galois.cpp \
 		decoders/drm-decoder/data/reed-solomon.cpp \
@@ -754,8 +760,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents radio-constants.h radio.h bandplan.h output/upconverter.h output/audiosink.h various/agchandler.h various/ringbuffer.h various/fft.h various/shifter.h various/utilities.h various/slidingfft.h various/program-list.h various/popup-keypad.h various/s-meter.h various/downconverter.h decimators/newconverter.h decimators/decimator.h filters/fft-filters.h filters/fir-filters.h filters/iir-filters.h filters/decimating_filter.h scopes-qwt6/virtual-scope.h scopes-qwt6/spectrogramdata.h scopes-qwt6/waterfall-scope.h scopes-qwt6/spectrum-scope.h scopes-qwt6/scope.h scopes-qwt6/fft-scope.h devices/device-handler.h devices/filereader/filereader.h devices/filereader/filehulp.h decoders/virtual-decoder.h devices/sdrplay-handler/sdrplay-handler.h devices/sdrplay-handler/sdrplayselect.h decoders/drm-decoder/drm-decoder.h decoders/drm-decoder/iqdisplay.h decoders/drm-decoder/eqdisplay.h decoders/drm-decoder/basics.h decoders/drm-decoder/frame-processor.h decoders/drm-decoder/ofdm/reader.h decoders/drm-decoder/ofdm/correlator.h decoders/drm-decoder/ofdm/timesync.h decoders/drm-decoder/ofdm/freqsyncer.h decoders/drm-decoder/ofdm/word-collector.h decoders/drm-decoder/signal-handling/referenceframe.h decoders/drm-decoder/signal-handling/equalizer-base.h decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h decoders/drm-decoder/signal-handling/eq-1/estimator-base.h decoders/drm-decoder/signal-handling/eq-1/estimator-2.h decoders/drm-decoder/support/my-array.h decoders/drm-decoder/support/viterbi-drm.h decoders/drm-decoder/support/mapper.h decoders/drm-decoder/support/prbs.h decoders/drm-decoder/support/checkcrc.h decoders/drm-decoder/support/qam64-metrics.h decoders/drm-decoder/support/qam16-metrics.h decoders/drm-decoder/support/qam4-metrics.h decoders/drm-decoder/support/deinterleaver.h decoders/drm-decoder/support/matrix2.h decoders/drm-decoder/support/protlevels.h decoders/drm-decoder/parameters/state-descriptor.h decoders/drm-decoder/parameters/puncture-tables.h decoders/drm-decoder/fac/fac-tables.h decoders/drm-decoder/fac/fac-processor.h decoders/drm-decoder/sdc/sdc-streamer.h decoders/drm-decoder/sdc/sdc-processor.h decoders/drm-decoder/msc/backend-controller.h decoders/drm-decoder/msc/msc-processor.h decoders/drm-decoder/msc/msc-handler-qam16.h decoders/drm-decoder/msc/msc-handler-qam64.h decoders/drm-decoder/msc/msc-streamer.h decoders/drm-decoder/msc/msc-handler.h decoders/drm-decoder/data/data-processor.h decoders/drm-decoder/data/aac-processor-fdk.h decoders/drm-decoder/data/fec-handler.h decoders/drm-decoder/data/galois.h decoders/drm-decoder/data/reed-solomon.h decoders/drm-decoder/data/message-processor.h decoders/drm-decoder/data/packet-assembler.h decoders/drm-decoder/data/virtual-datahandler.h decoders/drm-decoder/data/mot-data.h decoders/drm-decoder/data/neaacdec_dll.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp radio.cpp bandplan.cpp output/upconverter.cpp output/audiosink.cpp various/agchandler.cpp various/fft.cpp various/popup-keypad.cpp various/s-meter.cpp various/shifter.cpp various/utilities.cpp various/slidingfft.cpp various/program-list.cpp various/downconverter.cpp filters/fft-filters.cpp filters/fir-filters.cpp filters/iir-filters.cpp filters/decimating_filter.cpp scopes-qwt6/virtual-scope.cpp scopes-qwt6/waterfall-scope.cpp scopes-qwt6/spectrum-scope.cpp scopes-qwt6/scope.cpp scopes-qwt6/fft-scope.cpp decimators/decimator.cpp devices/device-handler.cpp devices/filereader/filereader.cpp devices/filereader/filehulp.cpp decoders/virtual-decoder.cpp devices/sdrplay-handler/sdrplay-handler.cpp devices/sdrplay-handler/sdrplayselect.cpp decoders/drm-decoder/drm-decoder.cpp decoders/drm-decoder/eqdisplay.cpp decoders/drm-decoder/iqdisplay.cpp decoders/drm-decoder/basics.cpp decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/correlator.cpp decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-decoder/signal-handling/referenceframe.cpp decoders/drm-decoder/signal-handling/equalizer-base.cpp decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-base.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-2.cpp decoders/drm-decoder/support/viterbi-drm.cpp decoders/drm-decoder/support/mapper.cpp decoders/drm-decoder/support/prbs.cpp decoders/drm-decoder/support/checkcrc.cpp decoders/drm-decoder/support/qam64-metrics.cpp decoders/drm-decoder/support/qam16-metrics.cpp decoders/drm-decoder/support/qam4-metrics.cpp decoders/drm-decoder/support/deinterleaver.cpp decoders/drm-decoder/support/matrix2.cpp decoders/drm-decoder/support/protlevels.cpp decoders/drm-decoder/parameters/state-descriptor.cpp decoders/drm-decoder/parameters/puncture-tables.cpp decoders/drm-decoder/fac/fac-tables.cpp decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder/sdc/sdc-streamer.cpp decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder/msc/backend-controller.cpp decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/aac-processor-fdk.cpp decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/galois.cpp decoders/drm-decoder/data/reed-solomon.cpp decoders/drm-decoder/data/message-processor.cpp decoders/drm-decoder/data/packet-assembler.cpp decoders/drm-decoder/data/virtual-datahandler.cpp decoders/drm-decoder/data/mot-data.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents radio-constants.h radio.h bandplan.h output/upconverter.h output/audiosink.h various/agchandler.h various/ringbuffer.h various/fft.h various/shifter.h various/utilities.h various/slidingfft.h various/program-list.h various/popup-keypad.h various/s-meter.h various/downconverter.h decimators/newconverter.h decimators/decimator.h filters/fft-filters.h filters/fir-filters.h filters/iir-filters.h filters/decimating_filter.h scopes-qwt6/virtual-scope.h scopes-qwt6/spectrogramdata.h scopes-qwt6/waterfall-scope.h scopes-qwt6/spectrum-scope.h scopes-qwt6/scope.h scopes-qwt6/fft-scope.h devices/device-handler.h devices/filereader/filereader.h devices/filereader/filehulp.h decoders/virtual-decoder.h devices/sdrplay-handler/sdrplay-handler.h devices/sdrplay-handler/sdrplayselect.h decoders/drm-decoder/drm-decoder.h decoders/drm-decoder/iqdisplay.h decoders/drm-decoder/eqdisplay.h decoders/drm-decoder/basics.h decoders/drm-decoder/frame-processor.h decoders/drm-decoder/ofdm/reader.h decoders/drm-decoder/ofdm/correlator.h decoders/drm-decoder/ofdm/timesync.h decoders/drm-decoder/ofdm/freqsyncer.h decoders/drm-decoder/ofdm/word-collector.h decoders/drm-decoder/signal-handling/referenceframe.h decoders/drm-decoder/signal-handling/equalizer-base.h decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h decoders/drm-decoder/signal-handling/eq-1/estimator-base.h decoders/drm-decoder/signal-handling/eq-1/estimator-2.h decoders/drm-decoder/support/my-array.h decoders/drm-decoder/support/viterbi-drm.h decoders/drm-decoder/support/mapper.h decoders/drm-decoder/support/prbs.h decoders/drm-decoder/support/checkcrc.h decoders/drm-decoder/support/qam64-metrics.h decoders/drm-decoder/support/qam16-metrics.h decoders/drm-decoder/support/qam4-metrics.h decoders/drm-decoder/support/deinterleaver.h decoders/drm-decoder/support/matrix2.h decoders/drm-decoder/support/protlevels.h decoders/drm-decoder/parameters/state-descriptor.h decoders/drm-decoder/parameters/puncture-tables.h decoders/drm-decoder/fac/fac-tables.h decoders/drm-decoder/fac/fac-processor.h decoders/drm-decoder/sdc/sdc-streamer.h decoders/drm-decoder/sdc/sdc-processor.h decoders/drm-decoder/msc/backend-controller.h decoders/drm-decoder/msc/msc-processor.h decoders/drm-decoder/msc/msc-handler-qam16.h decoders/drm-decoder/msc/msc-handler-qam64.h decoders/drm-decoder/msc/msc-streamer.h decoders/drm-decoder/msc/msc-handler.h decoders/drm-decoder/data/data-processor.h decoders/drm-decoder/data/aac-processor-fdk.h decoders/drm-decoder/data/xheaac-processor.h decoders/drm-decoder/data/fec-handler.h decoders/drm-decoder/data/galois.h decoders/drm-decoder/data/reed-solomon.h decoders/drm-decoder/data/message-processor.h decoders/drm-decoder/data/packet-assembler.h decoders/drm-decoder/data/virtual-datahandler.h decoders/drm-decoder/data/mot-data.h decoders/drm-decoder/data/neaacdec_dll.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp radio.cpp bandplan.cpp output/upconverter.cpp output/audiosink.cpp various/agchandler.cpp various/fft.cpp various/popup-keypad.cpp various/s-meter.cpp various/shifter.cpp various/utilities.cpp various/slidingfft.cpp various/program-list.cpp various/downconverter.cpp filters/fft-filters.cpp filters/fir-filters.cpp filters/iir-filters.cpp filters/decimating_filter.cpp scopes-qwt6/virtual-scope.cpp scopes-qwt6/waterfall-scope.cpp scopes-qwt6/spectrum-scope.cpp scopes-qwt6/scope.cpp scopes-qwt6/fft-scope.cpp decimators/decimator.cpp devices/device-handler.cpp devices/filereader/filereader.cpp devices/filereader/filehulp.cpp decoders/virtual-decoder.cpp devices/sdrplay-handler/sdrplay-handler.cpp devices/sdrplay-handler/sdrplayselect.cpp decoders/drm-decoder/drm-decoder.cpp decoders/drm-decoder/eqdisplay.cpp decoders/drm-decoder/iqdisplay.cpp decoders/drm-decoder/basics.cpp decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/correlator.cpp decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-decoder/signal-handling/referenceframe.cpp decoders/drm-decoder/signal-handling/equalizer-base.cpp decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-base.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-2.cpp decoders/drm-decoder/support/viterbi-drm.cpp decoders/drm-decoder/support/mapper.cpp decoders/drm-decoder/support/prbs.cpp decoders/drm-decoder/support/checkcrc.cpp decoders/drm-decoder/support/qam64-metrics.cpp decoders/drm-decoder/support/qam16-metrics.cpp decoders/drm-decoder/support/qam4-metrics.cpp decoders/drm-decoder/support/deinterleaver.cpp decoders/drm-decoder/support/matrix2.cpp decoders/drm-decoder/support/protlevels.cpp decoders/drm-decoder/parameters/state-descriptor.cpp decoders/drm-decoder/parameters/puncture-tables.cpp decoders/drm-decoder/fac/fac-tables.cpp decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder/sdc/sdc-streamer.cpp decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder/msc/backend-controller.cpp decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/aac-processor-fdk.cpp decoders/drm-decoder/data/xheaac-processor.cpp decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/galois.cpp decoders/drm-decoder/data/reed-solomon.cpp decoders/drm-decoder/data/message-processor.cpp decoders/drm-decoder/data/packet-assembler.cpp decoders/drm-decoder/data/virtual-datahandler.cpp decoders/drm-decoder/data/mot-data.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents newradio.ui devices/filereader/filereader-widget.ui devices/sdrplay-handler/sdrplay-widget.ui decoders/drm-decoder/drmdecoder.ui $(DISTDIR)/
 
 
@@ -795,9 +801,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib64/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -O2 -Wall -W -dM -E -o moc_predefs.h /usr/lib64/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_aac-processor-fdk.cpp moc_message-processor.cpp moc_mot-data.cpp
+compiler_moc_header_make_all: moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_aac-processor-fdk.cpp moc_xheaac-processor.cpp moc_message-processor.cpp moc_mot-data.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_aac-processor-fdk.cpp moc_message-processor.cpp moc_mot-data.cpp
+	-$(DEL_FILE) moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_aac-processor-fdk.cpp moc_xheaac-processor.cpp moc_message-processor.cpp moc_mot-data.cpp
 moc_radio.cpp: radio.h \
 		ui_newradio.h \
 		radio-constants.h \
@@ -1000,6 +1006,9 @@ moc_data-processor.cpp: decoders/drm-decoder/data/data-processor.h \
 		decoders/drm-decoder/data/galois.h \
 		filters/fir-filters.h \
 		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/basics.h \
+		decoders/drm-decoder/support/checkcrc.h \
 		decoders/drm-decoder/data/message-processor.h \
 		moc_predefs.h \
 		/usr/lib64/qt5/bin/moc
@@ -1011,6 +1020,15 @@ moc_aac-processor-fdk.cpp: decoders/drm-decoder/data/aac-processor-fdk.h \
 		moc_predefs.h \
 		/usr/lib64/qt5/bin/moc
 	/usr/lib64/qt5/bin/moc $(DEFINES) --include /home/jan/drm-receiver/moc_predefs.h -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/jan/drm-receiver -I/home/jan/drm-receiver -I/home/jan/drm-receiver/decimators -I/home/jan/drm-receiver/filters -I/home/jan/drm-receiver/various -I/home/jan/drm-receiver/output -I/home/jan/drm-receiver/scopes-qwt6 -I/home/jan/drm-receiver/devices -I/home/jan/drm-receiver/devices/filereader -I/home/jan/drm-receiver/decoders -I/usr/include/qt5/qwt -I/home/jan/drm-receiver/devices/sdrplay-handler -I/usr/local/include/fdk-aac -I/home/jan/drm-receiver/decoders/drm-decoder -I/home/jan/drm-receiver/decoders/drm-decoder/ofdm -I/home/jan/drm-receiver/decoders/drm-decoder/signal-handling -I/home/jan/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/home/jan/drm-receiver/decoders/drm-decoder/support -I/home/jan/drm-receiver/decoders/drm-decoder/parameters -I/home/jan/drm-receiver/decoders/drm-decoder/msc -I/home/jan/drm-receiver/decoders/drm-decoder/sdc -I/home/jan/drm-receiver/decoders/drm-decoder/fac -I/home/jan/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/9 -I/usr/include/c++/9/x86_64-redhat-linux -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-redhat-linux/9/include -I/usr/local/include -I/usr/include decoders/drm-decoder/data/aac-processor-fdk.h -o moc_aac-processor-fdk.cpp
+
+moc_xheaac-processor.cpp: decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/basics.h \
+		radio-constants.h \
+		decoders/drm-decoder/support/checkcrc.h \
+		decoders/drm-decoder/data/message-processor.h \
+		moc_predefs.h \
+		/usr/lib64/qt5/bin/moc
+	/usr/lib64/qt5/bin/moc $(DEFINES) --include /home/jan/drm-receiver/moc_predefs.h -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/jan/drm-receiver -I/home/jan/drm-receiver -I/home/jan/drm-receiver/decimators -I/home/jan/drm-receiver/filters -I/home/jan/drm-receiver/various -I/home/jan/drm-receiver/output -I/home/jan/drm-receiver/scopes-qwt6 -I/home/jan/drm-receiver/devices -I/home/jan/drm-receiver/devices/filereader -I/home/jan/drm-receiver/decoders -I/usr/include/qt5/qwt -I/home/jan/drm-receiver/devices/sdrplay-handler -I/usr/local/include/fdk-aac -I/home/jan/drm-receiver/decoders/drm-decoder -I/home/jan/drm-receiver/decoders/drm-decoder/ofdm -I/home/jan/drm-receiver/decoders/drm-decoder/signal-handling -I/home/jan/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/home/jan/drm-receiver/decoders/drm-decoder/support -I/home/jan/drm-receiver/decoders/drm-decoder/parameters -I/home/jan/drm-receiver/decoders/drm-decoder/msc -I/home/jan/drm-receiver/decoders/drm-decoder/sdc -I/home/jan/drm-receiver/decoders/drm-decoder/fac -I/home/jan/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/9 -I/usr/include/c++/9/x86_64-redhat-linux -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-redhat-linux/9/include -I/usr/local/include -I/usr/include decoders/drm-decoder/data/xheaac-processor.h -o moc_xheaac-processor.cpp
 
 moc_message-processor.cpp: decoders/drm-decoder/data/message-processor.h \
 		radio-constants.h \
@@ -1595,6 +1613,8 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/data/reed-solomon.h \
 		decoders/drm-decoder/data/galois.h \
 		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/support/checkcrc.h \
 		decoders/drm-decoder/data/message-processor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-processor.o decoders/drm-decoder/msc/msc-processor.cpp
 
@@ -1647,13 +1667,15 @@ data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-deco
 		decoders/drm-decoder/data/galois.h \
 		filters/fir-filters.h \
 		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/basics.h \
+		decoders/drm-decoder/support/checkcrc.h \
 		decoders/drm-decoder/data/message-processor.h \
 		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
 		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
-		decoders/drm-decoder/data/packet-assembler.h \
-		decoders/drm-decoder/basics.h
+		decoders/drm-decoder/data/packet-assembler.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data-processor.o decoders/drm-decoder/data/data-processor.cpp
 
 aac-processor-fdk.o: decoders/drm-decoder/data/aac-processor-fdk.cpp decoders/drm-decoder/basics.h \
@@ -1665,6 +1687,17 @@ aac-processor-fdk.o: decoders/drm-decoder/data/aac-processor-fdk.cpp decoders/dr
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		decoders/drm-decoder/data/aac-processor-fdk.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aac-processor-fdk.o decoders/drm-decoder/data/aac-processor-fdk.cpp
+
+xheaac-processor.o: decoders/drm-decoder/data/xheaac-processor.cpp decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/basics.h \
+		radio-constants.h \
+		decoders/drm-decoder/support/checkcrc.h \
+		decoders/drm-decoder/data/message-processor.h \
+		decoders/drm-decoder/drm-decoder.h \
+		filters/fir-filters.h \
+		ui_drmdecoder.h \
+		various/ringbuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xheaac-processor.o decoders/drm-decoder/data/xheaac-processor.cpp
 
 fec-handler.o: decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/fec-handler.h \
 		decoders/drm-decoder/data/reed-solomon.h \
@@ -1785,6 +1818,9 @@ moc_data-processor.o: moc_data-processor.cpp
 
 moc_aac-processor-fdk.o: moc_aac-processor-fdk.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_aac-processor-fdk.o moc_aac-processor-fdk.cpp
+
+moc_xheaac-processor.o: moc_xheaac-processor.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_xheaac-processor.o moc_xheaac-processor.cpp
 
 moc_message-processor.o: moc_message-processor.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_message-processor.o moc_message-processor.cpp
