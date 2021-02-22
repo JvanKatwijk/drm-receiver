@@ -24,7 +24,7 @@
 #include        <float.h>
 #include        <math.h>
 #include        "basics.h"
-#include	<aacdecoder_lib.h>
+#include	<fdk-aac/aacdecoder_lib.h>
 #include        "drm-decoder.h"
 #include        "state-descriptor.h"
 #include	"aac-processor-fdk.h"

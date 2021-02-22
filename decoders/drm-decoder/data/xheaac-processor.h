@@ -25,7 +25,7 @@
 #define	__XHEAAC_PROCESSOR__
 
 #include        <QObject>
-#include	<aacdecoder_lib.h>
+#include	<fdk-aac/aacdecoder_lib.h>
 #include	<stdint.h>
 #include        <cstring>
 #include	<vector>

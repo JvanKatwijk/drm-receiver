@@ -21,8 +21,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__AAC_PROCESSOR_FAAD__
-#define	__AAC_PROCESSOR_FAAD__
+#ifndef	__AAC_PROCESSOR_FAAD_H
+#define	__AAC_PROCESSOR_FAAD_H
 
 #include	<QObject>
 #include	"radio-constants.h"
@@ -34,17 +34,11 @@
 class	drmDecoder;
 class	stateDescriptor;
 
-typedef	struct frame {
-	int16_t length, startPos;
-	uint8_t	aac_crc;
-	uint8_t audio [512];
-} audioFrame; 
-	
-class	aacProcessor: public QObject {
+class	aacProcessor_faad: public QObject {
 Q_OBJECT
 public:
-		aacProcessor	(stateDescriptor *, drmDecoder *);
-		~aacProcessor	(void);
+		aacProcessor_faad	(stateDescriptor *, drmDecoder *);
+		~aacProcessor_faad	(void);
 	void	process_aac	(uint8_t *, int16_t,
 	                         int16_t, int16_t, int16_t, int16_t);
 private:

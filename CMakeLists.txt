@@ -28,14 +28,6 @@ else ()
 endif()
 
 	add_definitions (-DHAVE_SDRPLAY)
-	add_definitions (-DHAVE_AM_DECODER)
-	add_definitions (-DHAVE_SSB_DECODER)
-	add_definitions (-DHAVE_CW_DECODER)
-	add_definitions (-DHAVE_AMTOR_DECODER)
-	add_definitions (-DHAVE_PSK_DECODER)
-	add_definitions (-DHAVE_FAX_DECODER)
-	add_definitions (-DHAVE_RTTY_DECODER)
-	add_definitions (-DHAVE_MFSK_DECODER)
 	add_definitions (-DHAVE_DRM_DECODER)
 	add_definitions (-DESTIMATOR_1)
 	
@@ -136,116 +128,92 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	           devices 
 	           devices/filereader 
 	           devices/sdrplay-handler
-	           devices/hackrf-handler
-	           devices/rtlsdr-handler
 	           decoders 
-	           decoders/am-decoder 
-	           decoders/ssb-decoder 
-	           decoders/psk-decoder 
-	           decoders/cw-decoder 
-	           decoders/rtty-decoder 
-	           decoders/amtor-decoder 
-	           decoders/fax-decoder 
-	           decoders/mfsk-decoder
-	         ./decoders/drm-decoder 
-	         ./decoders/drm-decoder/ 
-	         ./decoders/drm-decoder/signal-handling 
-	         ./decoders/drm-decoder/signal-handling/eq-1 
-	         ./decoders/drm-decoder/utilities 
-	         ./decoders/drm-decoder/parameters 
-	         ./decoders/drm-decoder/msc 
-	         ./decoders/drm-decoder/sdc 
-	         ./decoders/drm-decoder/fac 
-	         ./decoders/drm-decoder/data 
-	         ./decoders/drm-decoder/input
+	           ./decoders/drm-decoder/ 
+                   ./decoders/drm-decoder/ofdm 
+                   ./decoders/drm-decoder/signal-handling 
+                   ./decoders/drm-decoder/signal-handling/eq-1 
+                   ./decoders/drm-decoder/support 
+                   ./decoders/drm-decoder/parameters 
+                   ./decoders/drm-decoder/msc 
+                   ./decoders/drm-decoder/sdc 
+                   ./decoders/drm-decoder/fac 
+                   ./decoders/drm-decoder/data
+
 	)
 
 	set (${objectName}_HDRS
 	   ./radio-constants.h 
 	   ./radio.h 
-	   ./bandplan.h
-	   ./output/upconverter.h 
+	   ./bandplan.h 
+           ./output/upconverter.h 
 	   ./output/audiosink.h 
-	   ./various/agchandler.h 
-	   ./various/ringbuffer.h 
-	   ./various/fft.h 
+           ./various/agchandler.h 
+           ./various/ringbuffer.h 
+           ./various/fft.h 
 	   ./various/shifter.h 
 	   ./various/utilities.h 
+	   ./various/slidingfft.h 
 	   ./various/program-list.h 
 	   ./various/popup-keypad.h 
 	   ./various/s-meter.h 
 	   ./various/downconverter.h 
 	   ./decimators/newconverter.h 
 	   ./decimators/decimator.h 
-	   ./filters/fft-filters.h 
-	   ./filters/fir-filters.h 
-	   ./filters/iir-filters.h 
+           ./filters/fft-filters.h 
+           ./filters/fir-filters.h 
+           ./filters/iir-filters.h 
+	   ./filters/decimating_filter.h 
 	   ./scopes-qwt6/virtual-scope.h 
 	   ./scopes-qwt6/spectrogramdata.h 
 	   ./scopes-qwt6/waterfall-scope.h 
 	   ./scopes-qwt6/spectrum-scope.h 
-	   ./scopes-qwt6/audio-scope.h
-	   ./scopes-qwt6/fft-scope.h
-           ./devices/device-handler.h
-           ./devices/filereader/filereader.h
-           ./devices/filereader/filehulp.h
-           ./devices/sdrplay-handler/sdrplay-handler.h
-           ./devices/sdrplay-handler/sdrplayselect.h
-	   ./devices/rtlsdr-handler/rtlsdr-handler.h
-	   ./devices/rtlsdr-handler/dongleselect.h
-	   ./devices/hackrf-handler/hackrf-handler.h
-	   ./decoders/virtual-decoder.h 
-	   ./decoders/am-decoder/am-decoder.h
-	   ./decoders/ssb-decoder/ssb-decoder.h
-	   ./decoders/cw-decoder/cw-decoder.h
-	   ./decoders/amtor-decoder/amtor-decoder.h
-	   ./decoders/psk-decoder/psk-decoder.h 
-	   ./decoders/psk-decoder/viterbi.h
-	   ./decoders/rtty-decoder/rtty-decoder.h
-	   ./decoders/fax-decoder/fax-decoder.h 
-	   ./decoders/fax-decoder/fax-demodulator.h 
-	   ./decoders/fax-decoder/fax-image.h 
-	   ./decoders/fax-decoder/fax-scroller.h 
-	   ./decoders/fax-decoder/fax-filenames.h
-	   ./decoders/mfsk-decoder/mfsk-decoder.h 
-	   ./decoders/mfsk-decoder/goertzel-filter.h 
-	   ./decoders/mfsk-decoder/slidingfft.h 
-	   ./decoders/mfsk-decoder/interleave.h
+           ./scopes-qwt6/scope.h 
+           ./scopes-qwt6/fft-scope.h 
+	   ./devices/device-handler.h 
+           ./devices/filereader/filereader.h 
+           ./devices/filereader/filehulp.h 
+           ./decoders/virtual-decoder.h 
 	   ./decoders/drm-decoder/drm-decoder.h  
-	   ./decoders/drm-decoder/iqdisplay.h
-	   ./decoders/drm-decoder/eqdisplay.h
+	   ./decoders/drm-decoder/iqdisplay.h 
+	   ./decoders/drm-decoder/eqdisplay.h 
 	   ./decoders/drm-decoder/basics.h 
-	   ./decoders/drm-decoder/input/reader.h 
-	   ./decoders/drm-decoder/timesync.h 
-	   ./decoders/drm-decoder/freqsyncer.h 
-	   ./decoders/drm-decoder/word-collector.h 
 	   ./decoders/drm-decoder/frame-processor.h 
+	   ./decoders/drm-decoder/ofdm/correlator.h 
+	   ./decoders/drm-decoder/ofdm/timesync.h 
+	   ./decoders/drm-decoder/ofdm/freqsyncer.h 
+	   ./decoders/drm-decoder/ofdm/word-collector.h 
 	   ./decoders/drm-decoder/signal-handling/referenceframe.h 
 	   ./decoders/drm-decoder/signal-handling/equalizer-base.h 
-	   ./decoders/drm-decoder/signal-handling/matrix2.h 
 	   ./decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h 
 	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-base.h 
-	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-1.h 
-	   ./decoders/drm-decoder/utilities/viterbi-drm.h 
-	   ./decoders/drm-decoder/utilities/mapper.h 
-	   ./decoders/drm-decoder/utilities/prbs.h 
-	   ./decoders/drm-decoder/utilities/checkcrc.h 
-	   ./decoders/drm-decoder/utilities/qam64-metrics.h 
-	   ./decoders/drm-decoder/utilities/qam16-metrics.h 
-	   ./decoders/drm-decoder/utilities/qam4-metrics.h 
-	   ./decoders/drm-decoder/utilities/deinterleaver.h 
-	   ./decoders/drm-decoder/parameters/state-descriptor.h
+	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-2.h 
+	   ./decoders/drm-decoder/support/my-array.h 
+	   ./decoders/drm-decoder/support/viterbi-drm.h 
+	   ./decoders/drm-decoder/support/mapper.h 
+	   ./decoders/drm-decoder/support/prbs.h 
+	   ./decoders/drm-decoder/support/checkcrc.h 
+	   ./decoders/drm-decoder/support/qam64-metrics.h 
+	   ./decoders/drm-decoder/support/qam16-metrics.h 
+	   ./decoders/drm-decoder/support/qam4-metrics.h 
+	   ./decoders/drm-decoder/support/deinterleaver.h 
+	   ./decoders/drm-decoder/support/matrix2.h 
+	   ./decoders/drm-decoder/support/protlevels.h 
+	   ./decoders/drm-decoder/parameters/state-descriptor.h 
 	   ./decoders/drm-decoder/parameters/puncture-tables.h 
+	   ./decoders/drm-decoder/fac/fac-tables.h 
 	   ./decoders/drm-decoder/fac/fac-processor.h 
 	   ./decoders/drm-decoder/sdc/sdc-streamer.h 
 	   ./decoders/drm-decoder/sdc/sdc-processor.h 
-	   ./decoders/drm-decoder/msc/backend-controller.h
+	   ./decoders/drm-decoder/msc/backend-controller.h 
 	   ./decoders/drm-decoder/msc/msc-processor.h 
 	   ./decoders/drm-decoder/msc/msc-handler-qam16.h 
 	   ./decoders/drm-decoder/msc/msc-handler-qam64.h 
 	   ./decoders/drm-decoder/msc/msc-streamer.h 
 	   ./decoders/drm-decoder/msc/msc-handler.h 
 	   ./decoders/drm-decoder/data/data-processor.h 
+	   ./decoders/drm-decoder/data/drm-aacdecoder.h 
+	   ./decoders/drm-decoder/data/aac-processor-faad.h
 	   ./decoders/drm-decoder/data/fec-handler.h 
 	   ./decoders/drm-decoder/data/galois.h 
 	   ./decoders/drm-decoder/data/reed-solomon.h 
@@ -253,94 +221,84 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ./decoders/drm-decoder/data/packet-assembler.h 
 	   ./decoders/drm-decoder/data/virtual-datahandler.h 
 	   ./decoders/drm-decoder/data/mot-data.h 
-	   ./decoders/drm-decoder/data/drm-aacdecoder.h 
-	   ./decoders/drm-decoder/data/neaacdec_dll.h
 	)
 
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	   ./main.cpp 
 	   ./radio.cpp 
-	   ./bandplan.cpp
+	   ./bandplan.cpp 
 	   ./output/upconverter.cpp 
-	   ./output/audiosink.cpp 
-	   ./various/agchandler.cpp 
-	   ./various/fft.cpp 
+           ./output/audiosink.cpp 
+           ./various/agchandler.cpp 
+           ./various/fft.cpp 
 	   ./various/popup-keypad.cpp 
 	   ./various/s-meter.cpp 
-	   ./various/shifter.cpp 
+           ./various/shifter.cpp 
 	   ./various/utilities.cpp 
+	   ./various/slidingfft.cpp 
 	   ./various/program-list.cpp 
 	   ./various/downconverter.cpp 
-	   ./filters/fft-filters.cpp 
-	   ./filters/fir-filters.cpp 
-	   ./filters/iir-filters.cpp 
+           ./filters/fft-filters.cpp 
+           ./filters/fir-filters.cpp 
+           ./filters/iir-filters.cpp 
+	   ./filters/decimating_filter.cpp 
 	   ./scopes-qwt6/virtual-scope.cpp 
 	   ./scopes-qwt6/waterfall-scope.cpp 
 	   ./scopes-qwt6/spectrum-scope.cpp 
-	   ./scopes-qwt6/audio-scope.cpp
-	   ./scopes-qwt6/fft-scope.cpp 
+           ./scopes-qwt6/scope.cpp 
+           ./scopes-qwt6/fft-scope.cpp 
+	   ./devices/device-handler.cpp
+           ./devices/filereader/filereader.cpp
+           ./devices/filereader/filehulp.cpp
+           ./devices/sdrplay-handler/sdrplay-handler.cpp
+           ./devices/sdrplay-handler/sdrplayselect.cpp
+           ./decoders/virtual-decoder.h
 	   ./decimators/decimator.cpp 
 	   ./devices/device-handler.cpp 
-	   ./devices/filereader/filereader.cpp 
-	   ./devices/filereader/filehulp.cpp 
-	   ./devices/sdrplay-handler/sdrplay-handler.cpp 
-	   ./devices/sdrplay-handler/sdrplayselect.cpp 
-	   ./devices/rtlsdr-handler/rtlsdr-handler.cpp
-	   ./devices/rtlsdr-handler/dongleselect.cpp
-	   ./devices/hackrf-handler/hackrf-handler.cpp
-	   ./decoders/virtual-decoder.cpp
-	   ./decoders/am-decoder/am-decoder.cpp 
-	   ./decoders/ssb-decoder/ssb-decoder.cpp 
-	   ./decoders/cw-decoder/cw-decoder.cpp 
-	   ./decoders/amtor-decoder/amtor-decoder.cpp 
-	   ./decoders/psk-decoder/psk-decoder.cpp 
-	   ./decoders/psk-decoder/viterbi.cpp 
-	   ./decoders/rtty-decoder/rtty-decoder.cpp 
-	   ./decoders/fax-decoder/fax-decoder.cpp 
-	   ./decoders/fax-decoder/fax-demodulator.cpp 
-	   ./decoders/fax-decoder/fax-image.cpp 
-	   ./decoders/fax-decoder/fax-scroller.cpp 
-	   ./decoders/fax-decoder/fax-filenames.cpp
-	   ./decoders/mfsk-decoder/mfsk-decoder.cpp 
-	   ./decoders/mfsk-decoder/goertzel-filter.cpp 
-	   ./decoders/mfsk-decoder/slidingfft.cpp 
-	   ./decoders/mfsk-decoder/interleave.cpp
+           ./devices/filereader/filereader.cpp 
+           ./devices/filereader/filehulp.cpp 
+           ./decoders/virtual-decoder.cpp  
 	   ./decoders/drm-decoder/drm-decoder.cpp  
-	   ./decoders/drm-decoder/iqdisplay.cpp
-	   ./decoders/drm-decoder/eqdisplay.cpp
+	   ./decoders/drm-decoder/eqdisplay.cpp 
+	   ./decoders/drm-decoder/iqdisplay.cpp 
 	   ./decoders/drm-decoder/basics.cpp 
-	   ./decoders/drm-decoder/input/reader.cpp 
-	   ./decoders/drm-decoder/timesync.cpp 
-	   ./decoders/drm-decoder/word-collector.cpp 
-	   ./decoders/drm-decoder/freqsyncer.cpp 
 	   ./decoders/drm-decoder/frame-processor.cpp 
+	   ./decoders/drm-decoder/ofdm/reader.cpp 
+	   ./decoders/drm-decoder/ofdm/correlator.cpp 
+	   ./decoders/drm-decoder/ofdm/timesync.cpp 
+	   ./decoders/drm-decoder/ofdm/freqsyncer.cpp 
+	   ./decoders/drm-decoder/ofdm/word-collector.cpp 
 	   ./decoders/drm-decoder/signal-handling/referenceframe.cpp 
 	   ./decoders/drm-decoder/signal-handling/equalizer-base.cpp 
-	   ./decoders/drm-decoder/signal-handling/matrix2.cpp 
 	   ./decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp 
 	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-base.cpp 
 	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-1.cpp 
-	   ./decoders/drm-decoder/utilities/viterbi-drm.cpp 
-	   ./decoders/drm-decoder/utilities/mapper.cpp 
-	   ./decoders/drm-decoder/utilities/prbs.cpp 
-	   ./decoders/drm-decoder/utilities/checkcrc.cpp 
-	   ./decoders/drm-decoder/utilities/qam64-metrics.cpp 
-	   ./decoders/drm-decoder/utilities/qam16-metrics.cpp 
-	   ./decoders/drm-decoder/utilities/qam4-metrics.cpp 
-	   ./decoders/drm-decoder/utilities/deinterleaver.cpp 
-	   ./decoders/drm-decoder/parameters/state-descriptor.cpp
+	   ./decoders/drm-decoder/support/viterbi-drm.cpp 
+	   ./decoders/drm-decoder/support/mapper.cpp 
+	   ./decoders/drm-decoder/support/prbs.cpp 
+	   ./decoders/drm-decoder/support/checkcrc.cpp 
+	   ./decoders/drm-decoder/support/qam64-metrics.cpp 
+	   ./decoders/drm-decoder/support/qam16-metrics.cpp 
+	   ./decoders/drm-decoder/support/qam4-metrics.cpp 
+ 	   ./decoders/drm-decoder/support/deinterleaver.cpp 
+	   ./decoders/drm-decoder/support/matrix2.cpp 
+	   ./decoders/drm-decoder/support/protlevels.cpp 
+	   ./decoders/drm-decoder/parameters/state-descriptor.cpp 
 	   ./decoders/drm-decoder/parameters/puncture-tables.cpp 
+	   ./decoders/drm-decoder/fac/fac-tables.cpp 
 	   ./decoders/drm-decoder/fac/fac-processor.cpp 
 	   ./decoders/drm-decoder/sdc/sdc-streamer.cpp 
 	   ./decoders/drm-decoder/sdc/sdc-processor.cpp 
-	   ./decoders/drm-decoder/msc/backend-controller.cpp
+	   ./decoders/drm-decoder/msc/backend-controller.cpp 
 	   ./decoders/drm-decoder/msc/msc-processor.cpp 
 	   ./decoders/drm-decoder/msc/msc-handler-qam16.cpp 
 	   ./decoders/drm-decoder/msc/msc-handler-qam64.cpp 
 	   ./decoders/drm-decoder/msc/msc-streamer.cpp 
 	   ./decoders/drm-decoder/msc/msc-handler.cpp 
 	   ./decoders/drm-decoder/data/data-processor.cpp 
+	   ./decoders/drm-decoder/data/drm-aacdecoder.cpp 
+	   ./decoders/drm-decoder/data/aac-processor-faad.cpp 
 	   ./decoders/drm-decoder/data/fec-handler.cpp 
 	   ./decoders/drm-decoder/data/galois.cpp 
 	   ./decoders/drm-decoder/data/reed-solomon.cpp 
@@ -348,7 +306,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ./decoders/drm-decoder/data/packet-assembler.cpp 
 	   ./decoders/drm-decoder/data/virtual-datahandler.cpp 
 	   ./decoders/drm-decoder/data/mot-data.cpp 
-	   ./decoders/drm-decoder/data/drm-aacdecoder.cpp
 	)
 
 	set (${objectName}_MOCS
@@ -360,36 +317,21 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
            ./scopes-qwt6/spectrogramdata.h 
            ./scopes-qwt6/waterfall-scope.h 
            ./scopes-qwt6/spectrum-scope.h 
-	   ./scopes-qwt6/audio-scope.h
+	   ./scopes-qwt6/scope.h
            ./scopes-qwt6/fft-scope.h 
 	   ./devices/device-handler.h
 	   ./devices/filereader/filereader.h 
 	   ./devices/filereader/filehulp.h
 	   ./devices/sdrplay-handler/sdrplay-handler.h 
 	   ./devices/sdrplay-handler/sdrplayselect.h 
-	   ./devices/rtlsdr-handler/rtlsdr-handler.h
-	   ./devices/rtlsdr-handler/dongleselect.h
-	   ./devices/hackrf-handler/hackrf-handler.h
            ./decoders/virtual-decoder.h 
-	   ./decoders/am-decoder/am-decoder.h 
-	   ./decoders/ssb-decoder/ssb-decoder.h 
-	   ./decoders/cw-decoder/cw-decoder.h 
-	   ./decoders/amtor-decoder/amtor-decoder.h 
-	   ./decoders/psk-decoder/psk-decoder.h 
-	   ./decoders/rtty-decoder/rtty-decoder.h 
-	   ./decoders/fax-decoder/fax-decoder.h 
-	   ./decoders/fax-decoder/fax-demodulator.h 
-	   ./decoders/fax-decoder/fax-image.h 
-	   ./decoders/fax-decoder/fax-scroller.h 
-	   ./decoders/fax-decoder/fax-filenames.h 
-	   ./decoders/mfsk-decoder/mfsk-decoder.h 
 	   ./decoders/drm-decoder/drm-decoder.h  
 	   ./decoders/drm-decoder/iqdisplay.h 
 	   ./decoders/drm-decoder/eqdisplay.h 
-	   ./decoders/drm-decoder/input/reader.h 
 	   ./decoders/drm-decoder/frame-processor.h 
-	   ./decoders/drm-decoder/freqsyncer.h
-	   ./decoders/drm-decoder/word-collector.h
+	   ./decoders/drm-decoder/ofdm/freqsyncer.h
+	   ./decoders/drm-decoder/ofdm/word-collector.h
+	   ./decoders/drm-decoder/fac/fac-processor.h
 	   ./decoders/drm-decoder/signal-handling/equalizer-base.h
 	   ./decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h
 	   ./decoders/drm-decoder/signal-handling/eq-1/estimator-base.h
@@ -399,6 +341,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ./decoders/drm-decoder/data/mot-data.h
 	   ./decoders/drm-decoder/data/drm-aacdecoder.h 
 	   ./decoders/drm-decoder/data/data-processor.h
+	   ./decoders/drm-decoder/data/aac-processor-faad.h
 	   ./decoders/drm-decoder/data/message-processor.h
 	)
 
@@ -407,16 +350,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ./newradio.ui 
 	   ./devices/filereader/filereader-widget.ui
 	   ./devices/sdrplay-handler/sdrplay-widget.ui
-	   ./devices/rtlsdr-handler/rtlsdr-widget.ui
-           ./devices/hackrf-handler/hackrf-widget.ui
-	   ./decoders/am-decoder/am-decoder.ui
-	   ./decoders/ssb-decoder/ssb-decoder.ui
-	   ./decoders/cw-decoder/cw-decoder.ui
-	   ./decoders/amtor-decoder/amtor-widget.ui
-	   ./decoders/psk-decoder/psk-decoder.ui
-	   ./decoders/rtty-decoder/rtty-decoder.ui
-	   ./decoders/fax-decoder/fax-decoder.ui
-	   ./decoders/mfsk-decoder/mfsk-decoder.ui
 	   ./decoders/drm-decoder/drmdecoder.ui
 	)
 
