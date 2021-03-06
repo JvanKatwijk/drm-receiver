@@ -104,7 +104,7 @@ QString	FrequencytoString (quint64 freq) {
 //
 //	out goes:
 	audioRate		= 48000;
-        audioData       = new RingBuffer<std::complex<float>> (audioRate);
+        audioData		= new RingBuffer<std::complex<float>> (audioRate);
 
 	agc. setMode (agcHandler::AGC_OFF);
 //	and the decoders

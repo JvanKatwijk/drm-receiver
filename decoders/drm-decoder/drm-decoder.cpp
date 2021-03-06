@@ -63,13 +63,11 @@ int16_t	symbs;
 	sdcSyncLabel	-> setStyleSheet ("QLabel {background-color:red}");
 	faadSyncLabel	-> setStyleSheet ("QLabel {background-color:red}");
 
-	
-
-	localOscillator. resize (12000);
-	for (int i = 0; i < 12000; i ++)
+	localOscillator. resize (inRate);
+	for (int i = 0; i < inRate; i ++)
 	   localOscillator [i] =
-	         std::complex<float> (cos ((float)i * 2 * M_PI / 12000),
-	                              sin ((float)i * 2 * M_PI / 12000));
+	         std::complex<float> (cos ((float)i * 2 * M_PI / inRate),
+	                              sin ((float)i * 2 * M_PI / inRate));
 
 	channel_1	-> hide ();
 	channel_2	-> hide ();
@@ -94,7 +92,7 @@ int16_t	symbs;
 	                                              &buffer,
 	                                              &iqBuffer,
 	                                              &eqBuffer,
-	                                              12000,
+	                                              inRate,
 	                                              symbs,
 	                                              windowDepth,
 	                                              qam64Roulette);
