@@ -4,7 +4,8 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
+ *    This file is part of the drm decoder
+ *
  *    SDR-J is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -28,19 +29,19 @@
 
 #include	"radio-constants.h"
 #include	"basics.h"
+#include	"data-processor.h"
 
 class	drmDecoder;
 class	stateDescriptor;
 class	deInterleaver;
 class	mscHandler;
-class	dataProcessor;
 
 class	mscProcessor {
 public:
 		mscProcessor		(stateDescriptor *,
 	                                 drmDecoder *,
 	                                 int8_t);
-		~mscProcessor		(void);
+		~mscProcessor		();
 	void	addtoMux		(int16_t, int32_t, theSignal);
 	void	newFrame		(stateDescriptor *);
 	void	endofFrame		(void);
@@ -48,6 +49,7 @@ private:
 	drmDecoder	*drmMaster;
 	stateDescriptor	*theState;
 	int8_t		qam64Roulette;
+	dataProcessor	my_dataProcessor;
 	uint8_t		protLevelA;
 	uint8_t		protLevelB;
 	int16_t		numofStreams;
@@ -59,7 +61,6 @@ private:
 	int16_t		bufferP;
 	deInterleaver	*my_deInterleaver;
 	mscHandler	*my_mscHandler;
-	dataProcessor	*my_dataProcessor;
 	int16_t		muxNo;
 	int16_t		dataLength;
 };

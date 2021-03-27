@@ -1,32 +1,33 @@
 #
 /*
- *    Copyright (C) 2015
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
+ *    This file is part of the drm receiver
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
 //
+#include	<cmath>
+#include	<stdio.h>
+#include	<vector>
 #include	"msc-handler-qam64.h"
 #include	"msc-streamer.h"
 #include	"state-descriptor.h"
-#include	<cmath>
-#include	<stdio.h>
 #include	"mapper.h"
 #include	"basics.h"
 #include	"prbs.h"
@@ -126,36 +127,49 @@ int16_t	highProtectedbits	= stream_0 -> highBits () +
 int16_t	lowProtectedbits	= stream_0 -> lowBits () +
 	                          stream_1 -> lowBits () +
 	                          stream_2 -> lowBits ();
-uint8_t	bitsOut [highProtectedbits + lowProtectedbits];
-uint8_t	bits_0  [stream_0 -> highBits () + stream_0 -> lowBits ()];
-//uint8_t	bits_0a  [stream_0 -> highBits () + stream_0 -> lowBits ()];
-uint8_t	bits_1  [stream_1 -> highBits () + stream_1 -> lowBits ()];
-uint8_t	bits_2  [stream_2 -> highBits () + stream_2 -> lowBits ()];
-metrics Y0 [2 * theState -> muxSize];
-metrics Y1 [2 * theState -> muxSize];
-metrics Y2 [2 * theState -> muxSize];
-int32_t	i;
-//
-uint8_t	level_0 [2 * theState -> muxSize];
-uint8_t	level_1 [2 * theState -> muxSize];
-uint8_t	level_2 [2 * theState -> muxSize];
+std::vector<uint8_t>	bitsOut;
+	bitsOut. resize (highProtectedbits + lowProtectedbits);
+std::vector<uint8_t>	bits_0;
+	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
+std::vector<uint8_t>	bits_1;
+	bits_1. resize  (stream_1 -> highBits () + stream_1 -> lowBits ());
+std::vector<uint8_t>	bits_2;
+	bits_2. resize  (stream_2 -> highBits () + stream_2 -> lowBits ());
+std::vector<metrics>	Y0;
+	Y0. resize (2 * theState -> muxSize);
+std::vector<metrics>	Y1;
+	Y1. resize (2 * theState -> muxSize);
+std::vector<metrics>	Y2;
+	Y2. resize (2 * theState -> muxSize);
+std::vector<uint8_t>	level_0;
+	level_0. resize (2 * theState -> muxSize);
+std::vector<uint8_t>	level_1;
+	level_1. resize (2 * theState -> muxSize);
+std::vector<uint8_t>	level_2;
+	level_2. resize (2 * theState -> muxSize);
 
-	for (i = 0; i < qam64Roulette; i ++) {
+	for (int i = 0; i < qam64Roulette; i ++) {
 	   myDecoder. computemetrics (v, theState -> muxSize,
-	                                   0, Y0,
+	                                   0, Y0. data (),
 	                                   i > 0,
-	                                   level_0, level_1, level_2);
-	   stream_0	-> process (Y0, bits_0, level_0);
+	                                   level_0. data (),
+	                                   level_1. data (), level_2. data ());
+	   stream_0	-> process (Y0. data (),
+	                            bits_0. data (), level_0. data ());
 	   myDecoder. computemetrics (v, theState -> muxSize,
-	                                   1, Y1, 
+	                                   1, Y1. data (), 
 	                                   i > 0,
-	                                   level_0, level_1, level_2);
-	   stream_1	-> process (Y1, bits_1, level_1);
+	                                   level_0. data (),
+	                                   level_1. data (), level_2. data ());
+	   stream_1	-> process (Y1. data (),
+	                            bits_1. data (), level_1. data ());
 	   myDecoder. computemetrics (v, theState -> muxSize,
-	                                   2, Y2,
+	                                   2, Y2. data (),
 	                                   true,
-	                                   level_0, level_1, level_2);	
-	   stream_2	-> process (Y2, bits_2, level_2);
+	                                   level_0. data (),
+	                                   level_1. data (), level_2. data ());	
+	   stream_2	-> process (Y2. data (),
+	                            bits_2. data (), level_2. data ());
 	}
 //	now the big move
 	memcpy (&bitsOut [0],
@@ -187,6 +201,6 @@ uint8_t	level_2 [2 * theState -> muxSize];
 //
 //	still one bit per uint
 	thePRBS	-> doPRBS (&bitsOut [0]);
-	memcpy (o, bitsOut, (lengthA + lengthB) * BITSPERBYTE);
+	memcpy (o, bitsOut. data (), (lengthA + lengthB) * BITSPERBYTE);
 }
 //

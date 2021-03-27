@@ -47,13 +47,13 @@ Q_OBJECT
 public:
 		sdcProcessor	(drmDecoder	*,
 	                         smodeInfo	*,
-	                         std::vector<sdcCell> *,
+	                         std::vector<sdcCell> &,
 	                         stateDescriptor	*);
 		~sdcProcessor	(void);
 	bool	processSDC	        (myArray<theSignal>  *);
 private:
-	bool	processSDC_QAM4		(theSignal *v);
-	bool	processSDC_QAM16	(theSignal *v);
+	bool	processSDC_QAM4		(std::vector<theSignal> &v);
+	bool	processSDC_QAM16	(std::vector<theSignal> &v);
 	void	interpretSDC		(uint8_t *v, int16_t size,
                                           stateDescriptor *theState);
 	void	set_SDCData		(stateDescriptor *theState,
@@ -62,7 +62,7 @@ private:
                                          uint8_t versionFlag,
                                          int8_t lengthofBody);
         std::vector<sdcCell> *sdcTable;
-	bool	sdcCorrect;
+	bool		sdcCorrect;
 	qam16_metrics	*my_qam16_metrics;
 	qam4_metrics	*my_qam4_metrics;
 	SDC_streamer	*stream_0;

@@ -71,13 +71,13 @@ int16_t	index;
 
 	sdcProcessor::sdcProcessor (drmDecoder	*master,
 	                            smodeInfo	*modeInf,
-	                            std::vector<sdcCell> * sdcTable,
+	                            std::vector<sdcCell> &sdcTable,
 	                            stateDescriptor	*theState):
 	                                  theCRC (16, crcPolynome),
-	                                  Y13Mapper (2 * sdcTable -> size (), 13),
-	                                  Y21Mapper (2 * sdcTable -> size () ,21) {
-	this	-> sdcTable	= sdcTable;
-	this	-> nrCells	= sdcTable	-> size ();
+	                                  Y13Mapper (2 * sdcTable. size (), 13),
+	                                  Y21Mapper (2 * sdcTable. size () ,21) {
+	this	-> sdcTable	= &sdcTable;
+	this	-> nrCells	= sdcTable. size ();
 	this	-> Mode		= theState	-> Mode;
 	this	-> Spectrum	= theState	-> Spectrum;
 	this	-> theState	= theState;
@@ -121,13 +121,12 @@ int16_t	index;
 
 //	actual processing of a SDC block. 
 bool	sdcProcessor::processSDC (myArray<theSignal> *outbank) {
-int16_t valueIndex      = 0;
-theSignal sdcVector [sdcTable -> size ()];
+std::vector<theSignal>  sdcVector (nrCells);
 
-        for (int i = 0; i < sdcTable -> size (); i ++) {
+        for (int i = 0; i < nrCells; i ++) {
            int symbol   = (*sdcTable) [i]. symbol;
            int carrier  = (*sdcTable) [i]. carrier;
-           sdcVector [valueIndex ++] =
+           sdcVector [i] =
                   outbank -> element (symbol)[carrier - Kmin (Mode, Spectrum)];
         }
 
@@ -137,12 +136,12 @@ theSignal sdcVector [sdcTable -> size ()];
 	   return processSDC_QAM16 (sdcVector);
 }
 
-bool	sdcProcessor::processSDC_QAM4 (theSignal *v) {
+bool	sdcProcessor::processSDC_QAM4 (std::vector<theSignal> &v) {
 uint8_t sdcBits [4 + stream_0 -> lengthOut ()];
 metrics	rawBits [2 * nrCells];
 uint8_t	reconstructed [2 * nrCells];
 
-	my_qam4_metrics -> computemetrics (v, nrCells, rawBits);
+	my_qam4_metrics -> computemetrics (v. data (), nrCells, rawBits);
 	stream_0	-> handle_stream (rawBits, reconstructed,
 	                                     &sdcBits [4], false);
 //
@@ -158,7 +157,7 @@ uint8_t	reconstructed [2 * nrCells];
 	return true;
 }
 
-bool sdcProcessor::processSDC_QAM16 (theSignal *v) {
+bool sdcProcessor::processSDC_QAM16 (std::vector<theSignal> &v) {
 uint8_t sdcBits [4 + stream_0 -> lengthOut () + stream_1 -> lengthOut ()];
 metrics Y0_stream	[2 * nrCells];
 metrics Y1_stream	[2 * nrCells];
@@ -167,7 +166,7 @@ uint8_t level_1		[2 * nrCells];
 int16_t i;
 
 	for (i = 0; i < 4; i ++) {
-	   my_qam16_metrics	-> computemetrics (v, nrCells, 0, 
+	   my_qam16_metrics	-> computemetrics (v. data (), nrCells, 0, 
 	                                           Y0_stream, 
 	                                           i != 0,
 	                                           level_0, level_1);
@@ -175,7 +174,7 @@ int16_t i;
 	                                           level_0,
 	                                           &sdcBits [4],
 	                                           true);
-	   my_qam16_metrics	-> computemetrics (v, nrCells, 1, 
+	   my_qam16_metrics	-> computemetrics (v. data (), nrCells, 1, 
 	                                           Y1_stream,
 	                                           true,
 	                                           level_0, level_1);

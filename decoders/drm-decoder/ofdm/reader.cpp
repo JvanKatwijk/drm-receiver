@@ -28,11 +28,11 @@
 //	A simple interface class to the ringBuffer
 //	The methods are called from the drmdecoder
 
-	Reader::Reader (RingBuffer<DSPCOMPLEX> *r,
+	Reader::Reader (RingBuffer<std::complex<float>> *r,
 	                int16_t s, 
 	                drmDecoder *mr) {
 	ringBuffer		= r;
-	this	-> bufSize	= 4 * 8192;
+	this	-> bufSize	= 16 * 8192;
 	data			= new std::complex<float> [this -> bufSize];
 	memset (data, 0, bufSize * sizeof (std::complex<float>));
 	master			= mr;

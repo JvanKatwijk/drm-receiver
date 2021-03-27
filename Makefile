@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"dc1a3ad\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+DEFINES       = -DGITHASH=\"c285b6e\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -I../../../include/qt5/qwt -Idevices/sdrplay-handler -I../../../include/qt5 -I../../../include/qt5/QtWidgets -I../../../include/qt5/QtGui -I../../../include/qt5/QtXml -I../../../include/qt5/QtCore -I. -I. -I/../lib64/qt5/mkspecs/linux-g++
@@ -7190,6 +7190,15 @@ frame-processor.o: decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/support/viterbi-drm.h \
 		decoders/drm-decoder/sdc/sdc-processor.h \
 		decoders/drm-decoder/msc/msc-processor.h \
+		decoders/drm-decoder/data/data-processor.h \
+		decoders/drm-decoder/data/fec-handler.h \
+		decoders/drm-decoder/data/reed-solomon.h \
+		decoders/drm-decoder/data/galois.h \
+		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/data/aac-processor-faad.h \
+		neaacdec.h \
+		decoders/drm-decoder/data/message-processor.h \
 		decoders/drm-decoder/signal-handling/referenceframe.h \
 		decoders/drm-decoder/fac/fac-tables.h \
 		decoders/drm-decoder/ofdm/correlator.h
@@ -8336,7 +8345,7 @@ sdc-processor.o: decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder
 backend-controller.o: decoders/drm-decoder/msc/backend-controller.cpp decoders/drm-decoder/msc/msc-processor.h \
 		radio-constants.h \
 		decoders/drm-decoder/basics.h \
-		decoders/drm-decoder/drm-decoder.h \
+		decoders/drm-decoder/data/data-processor.h \
 		../../../include/qt5/QtCore/QObject \
 		../../../include/qt5/QtCore/qobject.h \
 		../../../include/qt5/QtCore/qobjectdefs.h \
@@ -8391,7 +8400,17 @@ backend-controller.o: decoders/drm-decoder/msc/backend-controller.cpp decoders/d
 		../../../include/qt5/QtCore/qvarlengtharray.h \
 		../../../include/qt5/QtCore/qcontainerfwd.h \
 		../../../include/qt5/QtCore/qobject_impl.h \
+		decoders/drm-decoder/data/fec-handler.h \
+		decoders/drm-decoder/data/reed-solomon.h \
+		decoders/drm-decoder/data/galois.h \
 		filters/fir-filters.h \
+		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/support/checkcrc.h \
+		decoders/drm-decoder/data/aac-processor-faad.h \
+		neaacdec.h \
+		decoders/drm-decoder/data/message-processor.h \
+		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
 		various/ringbuffer.h \
 		../../../include/qt5/QtWidgets/QLabel \
@@ -8449,20 +8468,13 @@ backend-controller.o: decoders/drm-decoder/msc/backend-controller.cpp decoders/d
 		../../../include/qt5/QtGui/qtouchdevice.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
-		decoders/drm-decoder/support/deinterleaver.h \
-		decoders/drm-decoder/support/mapper.h \
-		decoders/drm-decoder/msc/msc-handler.h \
-		decoders/drm-decoder/msc/msc-handler-qam16.h \
-		decoders/drm-decoder/support/qam16-metrics.h \
-		decoders/drm-decoder/msc/msc-handler-qam64.h \
-		decoders/drm-decoder/support/qam64-metrics.h \
 		decoders/drm-decoder/msc/backend-controller.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o backend-controller.o decoders/drm-decoder/msc/backend-controller.cpp
 
 msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder/msc/msc-processor.h \
 		radio-constants.h \
 		decoders/drm-decoder/basics.h \
-		decoders/drm-decoder/drm-decoder.h \
+		decoders/drm-decoder/data/data-processor.h \
 		../../../include/qt5/QtCore/QObject \
 		../../../include/qt5/QtCore/qobject.h \
 		../../../include/qt5/QtCore/qobjectdefs.h \
@@ -8517,7 +8529,17 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 		../../../include/qt5/QtCore/qvarlengtharray.h \
 		../../../include/qt5/QtCore/qcontainerfwd.h \
 		../../../include/qt5/QtCore/qobject_impl.h \
+		decoders/drm-decoder/data/fec-handler.h \
+		decoders/drm-decoder/data/reed-solomon.h \
+		decoders/drm-decoder/data/galois.h \
 		filters/fir-filters.h \
+		decoders/drm-decoder/data/aac-processor-fdk.h \
+		decoders/drm-decoder/data/xheaac-processor.h \
+		decoders/drm-decoder/support/checkcrc.h \
+		decoders/drm-decoder/data/aac-processor-faad.h \
+		neaacdec.h \
+		decoders/drm-decoder/data/message-processor.h \
+		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
 		various/ringbuffer.h \
 		../../../include/qt5/QtWidgets/QLabel \
@@ -8581,17 +8603,7 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/msc/msc-handler-qam16.h \
 		decoders/drm-decoder/support/qam16-metrics.h \
 		decoders/drm-decoder/msc/msc-handler-qam64.h \
-		decoders/drm-decoder/support/qam64-metrics.h \
-		decoders/drm-decoder/data/data-processor.h \
-		decoders/drm-decoder/data/fec-handler.h \
-		decoders/drm-decoder/data/reed-solomon.h \
-		decoders/drm-decoder/data/galois.h \
-		decoders/drm-decoder/data/aac-processor-fdk.h \
-		decoders/drm-decoder/data/xheaac-processor.h \
-		decoders/drm-decoder/support/checkcrc.h \
-		decoders/drm-decoder/data/aac-processor-faad.h \
-		neaacdec.h \
-		decoders/drm-decoder/data/message-processor.h
+		decoders/drm-decoder/support/qam64-metrics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-processor.o decoders/drm-decoder/msc/msc-processor.cpp
 
 msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam16.h \

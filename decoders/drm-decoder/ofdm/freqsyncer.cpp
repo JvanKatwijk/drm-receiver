@@ -168,7 +168,6 @@ uint8_t	spectrum;
 	      m -> Spectrum = spectrum;
 	   }
 	}
-	m -> Spectrum = 3;
 	fprintf (stderr, "spectrum wordt gezet op %d\n", m -> Spectrum);
 	return true;
 }

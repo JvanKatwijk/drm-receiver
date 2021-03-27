@@ -27,10 +27,6 @@
 #include	"msc-processor.h"
 #include	"drm-decoder.h"
 #include	"state-descriptor.h"
-#include	"deinterleaver.h"
-#include	"msc-handler.h"
-#include	"msc-handler-qam16.h"
-#include	"msc-handler-qam64.h"
 #include	"backend-controller.h"
 
 	backendController::

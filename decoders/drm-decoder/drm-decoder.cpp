@@ -74,7 +74,7 @@ int16_t	symbs;
 	channel_3	-> hide ();
 	channel_4	-> hide ();
 
-	symbs			= 16;
+	symbs			= 12;
 	int8_t windowDepth 	= 2;
 	int8_t qam64Roulette 	= 6;
 	connect (channel_1, SIGNAL (clicked (void)),
@@ -117,7 +117,7 @@ void	drmDecoder::processBuffer (std::complex<float>  *dataIn, int amount) {
 
 void	drmDecoder::process (std::complex <float> v) {
 std::complex<float> x = theFilter -> Pass (v);
-	buffer. putDataIntoBuffer (&x, 1);
+	buffer. putDataIntoBuffer (&v, 1);
 }
 
 bool	drmDecoder::haltSignal		(void) {

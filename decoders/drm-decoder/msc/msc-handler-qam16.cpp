@@ -23,6 +23,7 @@
 //
 //	the real msc work is to be done by descendants of the mscHandler
 //
+#include	<vector>
 #include	"msc-handler-qam16.h"
 #include	"msc-streamer.h"
 #include	"state-descriptor.h"
@@ -111,22 +112,33 @@ int16_t	highProtectedbits	= stream_0 -> highBits () +
 	                          stream_1 -> highBits ();
 int16_t	lowProtectedbits	= stream_0 -> lowBits () +
 	                          stream_1 -> lowBits ();
-uint8_t	bitsOut [highProtectedbits + lowProtectedbits];
-uint8_t	bits_0 [stream_0 -> highBits () + stream_0 -> lowBits ()];
-uint8_t	bits_1 [stream_1 -> highBits () + stream_1 -> lowBits ()];
+std::vector<uint8_t>	bitsOut;
+std::vector<uint8_t>	bits_0;
+std::vector<uint8_t>	bits_1;
 
-metrics Y0	[2 * theState -> muxSize];
-metrics Y1	[2 * theState -> muxSize];
-uint8_t	level_0	[theState -> muxSize];
-uint8_t	level_1	[theState -> muxSize];
+std::vector<metrics> Y0;
+std::vector<metrics> Y1;
+std::vector<uint8_t> level_0;
+std::vector<uint8_t> level_1;
+	bitsOut. resize (highProtectedbits + lowProtectedbits);
+	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
+	bits_1. resize (stream_1 -> highBits () + stream_1 -> lowBits ());
+	Y0. resize (2 * theState -> muxSize);
+	Y1. resize (2 * theState -> muxSize);
+	level_0. resize (2 * theState -> muxSize);
+	level_1. resize (2 * theState -> muxSize);
 //
 //	First the "normal" decoding. leading to two bit rows
-	myDecoder. computemetrics (v, theState -> muxSize, 0, Y0,
-	                                   false, level_0, level_1);
-	stream_0	-> process	(Y0, bits_0, level_0);
-	myDecoder. computemetrics (v, theState -> muxSize, 1, Y1,
-	                                   false, level_0, level_1);
-	stream_1	-> process	(Y1, bits_1, level_1); 
+	myDecoder. computemetrics (v, theState -> muxSize, 0, Y0. data (),
+	                                   false, level_0. data (),
+	                                          level_1. data ());
+	stream_0	-> process	(Y0. data (),
+	                                 bits_0. data (), level_0. data ());
+	myDecoder. computemetrics (v, theState -> muxSize, 1, Y1. data (),
+	                                   false, level_0. data (),
+	                                          level_1. data ());
+	stream_1	-> process	(Y1. data (),
+	                                 bits_1. data (), level_1. data ()); 
 //
 	memcpy (&bitsOut [0],
 	        &bits_0 [0],
@@ -146,6 +158,6 @@ uint8_t	level_1	[theState -> muxSize];
 	          
 //	apply PRBS
 	thePRBS -> doPRBS (&bitsOut [0]);
-	memcpy (o, bitsOut, (lengthA + lengthB) * BITSPERBYTE);
+	memcpy (o, bitsOut. data (), (lengthA + lengthB) * BITSPERBYTE);
 }
 

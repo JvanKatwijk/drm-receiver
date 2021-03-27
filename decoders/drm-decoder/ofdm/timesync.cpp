@@ -63,8 +63,6 @@ float	gammaRelative;
 float	list_gammaRelative 	[]	= {0.0, 0.0, 0.0, 0.0};
 float	list_epsilon		[]	= {0.0, 0.0, 0.0, 0.0};
 int16_t	list_Offsets 		[]	= {0,   0,   0,   0};
-int16_t mode;
-int32_t i;
 int16_t b [nSymbols];
 int16_t	averageOffset	= 0;
 int16_t	theMode;
@@ -72,7 +70,7 @@ int16_t	theMode;
 	theReader -> waitfor (nSamples + 100);
 
 //	just try all modes
-	for (mode = Mode_A; mode <= Mode_D; mode++) {
+	for (int mode = Mode_A; mode <= Mode_D; mode++) {
 	   compute_gammaRelative (mode,
 	                          &list_gammaRelative	[mode - Mode_A],
 	                          &list_epsilon		[mode - Mode_A],
@@ -83,7 +81,7 @@ int16_t	theMode;
 //	now decide for the mode to be detected 
 	theMode		= Mode_B;		// default
 	gammaRelative	= -1.0E20;
-	for (i = Mode_A; i <= Mode_D; i++) {
+	for (int i = Mode_A; i <= Mode_D; i++) {
 //	   fprintf (stderr, "%f ", list_gammaRelative [i - Mode_A]);
 	   if (list_gammaRelative [i - Mode_A] > gammaRelative) {
 	      gammaRelative = list_gammaRelative [i - Mode_A];
@@ -94,12 +92,12 @@ int16_t	theMode;
 
 //	check if result is reliable 
 	bool	maxOK = true;			/* assume reliable */
-	if (gammaRelative < 0.1)
-//	if (gammaRelative < 0.3)
+//	if (gammaRelative < 0.1)
+	if (gammaRelative < 0.3)
 //	if (gammaRelative < 0.5)
 	   maxOK = false;
 	else
-	for (i = Mode_A; i <= Mode_D; i++) {
+	for (int i = Mode_A; i <= Mode_D; i++) {
 	   if ((i != theMode) && (list_gammaRelative [i - Mode_A] >
 	                           0.80 * gammaRelative))
 	      maxOK = false;
@@ -129,7 +127,7 @@ int16_t	theMode;
 	float	sumxx	= 0.0;
 	float	sumxy	= 0.0;
 
-	for (i = 0; i < nSymbols - 1; i++) {
+	for (int i = 0; i < nSymbols - 1; i++) {
 	   sumx	+= (float) i;
 	   sumy += (float) b [i];
 	   sumxx += (float) i * (float) i;

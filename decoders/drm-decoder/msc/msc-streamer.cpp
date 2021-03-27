@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -21,10 +21,11 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
+#include	<stdio.h>
+#include	<vector>
 #include	"msc-streamer.h"
 #include	"state-descriptor.h"
 #include	"viterbi-drm.h"
-#include	<stdio.h>
 #include	"puncture-tables.h"
 #include	"mapper.h"
 #include	"protlevels.h"
@@ -111,13 +112,17 @@ int32_t	MSC_streamer::lowBits (void) {
 //	  the output.
 int16_t	MSC_streamer::process (metrics *softBits,
 	                       uint8_t *out, uint8_t *better) {
-metrics	temp	[2 * (N1 + N2)];	// incoming bits
-uint8_t	xxTemp	[2 * (N1 + N2)];	// recomputed input
+int32_t	deconvolveLength = 6 * (highProtectedbits + lowProtectedbits + 6);
+std::vector<metrics>	temp;
+std::vector<uint8_t>	xxTemp;
+std::vector<metrics>	UTemp;
+std::vector<uint8_t>	hulpVec;
+	temp. resize (2 * (N1 + N2));	// incoming bits
+	xxTemp. resize (2 * (N1 + N2));	// recomputed input
+	UTemp. resize (deconvolveLength);
+	hulpVec. resize (deconvolveLength);
 metrics	*temp1;
 metrics	*temp2;
-int32_t	deconvolveLength = 6 * (highProtectedbits + lowProtectedbits + 6);
-metrics	UTemp	[deconvolveLength];
-uint8_t	hulpVec [deconvolveLength];
 int32_t	pntr	= 0;
 int32_t	next	= 0;
 int16_t	i;
@@ -127,7 +132,7 @@ int16_t	i;
 //	i.e. HP bits are mapped separately from LP bits
 //	we first map the HP part
 	if (hpMapper == NULL)	// just an eep stream or stream 0
-	   memcpy (temp, softBits, (2 * N1) * sizeof (metrics));
+	   memcpy (temp. data (), softBits, (2 * N1) * sizeof (metrics));
 	else
 	   for (i = 0; i < 2 * N1; i ++)
 	      temp [hpMapper -> mapIn (i)] = softBits [i];
@@ -187,7 +192,7 @@ int16_t	i;
 	      UTemp [pntr]. rTow1 = 0;
 	   }
 
-	deconvolver	-> deconvolve (UTemp,
+	deconvolver	-> deconvolve (UTemp. data (),
 	                               highProtectedbits + lowProtectedbits,
 	                               out);
 //
@@ -196,7 +201,7 @@ int16_t	i;
 //	the decoding process
 	deconvolver	-> convolve (out,
 	                             highProtectedbits + lowProtectedbits,
-	                             hulpVec);
+	                             hulpVec. data ());
 //
 //	Now back, 
 //	second step: get the higher protected bits
@@ -227,7 +232,7 @@ int16_t	i;
 	   for (i = 0; i < 2 * N1; i ++)
 	      better [i] = xxTemp [hpMapper -> mapIn (i)];
 	else
-	   memcpy (better, xxTemp, 2 * N1 * sizeof (uint8_t));
+	   memcpy (better, xxTemp. data (), 2 * N1 * sizeof (uint8_t));
 
 //	Next the LP bits
 	if (lpMapper != NULL)	// stream > 0 for SM 64

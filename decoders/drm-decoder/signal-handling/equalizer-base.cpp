@@ -70,10 +70,10 @@ int16_t	totalCount	= 0;
 	   for (carrier = K_min; carrier <= K_max; carrier ++) {
 	      totalCount ++;
 	      if (isPilotCell (Mode, symbol, carrier)) {
-	         gain_ref_cells_k [cellCount] = carrier + prevCarriers;
-	         gain_ref_cells_v [cellCount ++] =
-	                 getPilotValue (Mode, Spectrum, symbol, carrier);
-	
+//	         gain_ref_cells_k [cellCount] = carrier + prevCarriers;
+//	         gain_ref_cells_v [cellCount] =
+//	                 getPilotValue (Mode, Spectrum, symbol, carrier);
+	         cellCount ++;
 	         mean_energy += 
 	                 abs (getPilotValue (Mode, Spectrum, symbol, carrier)) *
 	                 abs (getPilotValue (Mode, Spectrum, symbol, carrier));
@@ -96,8 +96,8 @@ int16_t	totalCount	= 0;
 	mean_energy /= totalCount;
 	meanEnergy	= mean_energy;
 	nrCells		= totalCount;
-//	fprintf (stderr, " energy %f, cells  %d (total %d)\n",
-//	                       meanEnergy, cellCount, totalCount);
+	fprintf (stderr, " energy %f, cells  %d (total %d)\n",
+	                       meanEnergy, cellCount, totalCount);
 }
 
 int16_t	equalizer_base::actualRow (int16_t symbol, int16_t firstRow) {

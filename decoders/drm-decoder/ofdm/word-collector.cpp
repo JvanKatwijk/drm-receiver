@@ -97,6 +97,7 @@ float	timeOffsetFractional;
 //	float timedelay	= offsetFractional;
 	int d		= floor (timedelay + 0.5);
 	timeOffsetFractional	= timedelay - d;
+	timeOffsetFractional	= offsetFractional;
 
 	int f = (int)(floor (buffer -> currentIndex + d)) & bufMask;
 //	correction of the time offset by interpolation
@@ -105,8 +106,6 @@ float	timeOffsetFractional;
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
 	   temp [i] = cmul (one, 1 - timeOffsetFractional) +
 	                            cmul (two, timeOffsetFractional);
-	   temp [i] = cmul (one, 1 - offsetFractional) +
-	                            cmul (two, offsetFractional);
 	}
 
 //	And we shift the bufferpointer here
@@ -120,7 +119,7 @@ float	timeOffsetFractional;
 //
 //	offset  (and shift) in Hz / 100
 	offset		= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
-	if (offset != -offset)	// precaution to handle undefines
+//	if (offset != -offset)	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
 	                            100 * modeInf -> freqOffset_integer - offset);
 
@@ -146,9 +145,11 @@ void	wordCollector::getWord (std::complex<float>	*out,
 std::complex<float>	temp [Ts];
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	float tt		= get_timeOffset (24, 8);
+	float tt		= get_timeOffset (16, 8);
 	int timeOffsetInteger	= floor (tt + 0.5);
-	offsetFractional	= tt - timeOffsetInteger;
+//	fprintf (stderr, "offsetFractional %f, tt %f\n",
+//	                 offsetFractional, tt = timeOffsetInteger);
+//	offsetFractional	= tt - timeOffsetInteger;
 	int f	= (int)(floor (buffer -> currentIndex + 
 	                              timeOffsetInteger)) & bufMask;
 //	just linear interpolation
@@ -196,6 +197,8 @@ std::complex<float>	temp [Ts];
 void	wordCollector::fft_and_extract (std::complex<float> *in,
 	                                std::complex<float> *out) {
 //	and extract the Tu set of samples for fft processsing
+std::complex<float> temp [Tu];
+
 	memcpy (fft_vector, in, Tu * sizeof (std::complex<float>));
 
 	fftwf_execute (hetPlan);
@@ -205,7 +208,8 @@ void	wordCollector::fft_and_extract (std::complex<float> *in,
 	           &fft_vector [Tu + K_min],
 	           - K_min * sizeof (std::complex<float>));
 	   memcpy (&out [- K_min],
-	           &fft_vector [0], (K_max + 1) * sizeof (std::complex<float>));
+	           &fft_vector [0],
+	           (K_max + 1) * sizeof (std::complex<float>));
 	}
 	else
 	   memcpy (out,

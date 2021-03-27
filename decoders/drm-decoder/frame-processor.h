@@ -97,6 +97,7 @@ private:
 	stateDescriptor theState;
 	int16_t		getnrAudio	(stateDescriptor *);
 	int16_t		getnrData	(stateDescriptor *);
+	std::atomic<bool> running;
 signals:
 	void		setTimeSync	(bool);
 	void		setFACSync	(bool);
