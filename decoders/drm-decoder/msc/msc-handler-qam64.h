@@ -53,6 +53,16 @@ private:
 	Mapper		*Y13mapper_low;
 	Mapper		*Y21mapper_low;
 	metrics		makeMetrics	(uint8_t);
+	std::vector<uint8_t>	bitsOut;
+	std::vector<uint8_t>	bits_0;
+	std::vector<uint8_t>	bits_1;
+	std::vector<uint8_t>	bits_2;
+	std::vector<metrics>	Y0;
+	std::vector<metrics>	Y1;
+	std::vector<metrics>	Y2;
+	std::vector<uint8_t>	level_0;
+	std::vector<uint8_t>	level_1;
+	std::vector<uint8_t>	level_2;
 };
 
 #endif

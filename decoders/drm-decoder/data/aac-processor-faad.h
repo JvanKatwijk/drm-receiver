@@ -29,7 +29,7 @@
 #include	<cstring>
 #include	<neaacdec.h>
 #include	"fir-filters.h"
-//#include	"drm-aacdecoder.h"
+#include	"up-filter.h"
 
 class	drmDecoder;
 class	stateDescriptor;
@@ -44,20 +44,17 @@ public:
 private:
 	stateDescriptor	*theState;
 	drmDecoder	*drmMaster;
-//	DRM_aacDecoder	my_aacDecoder;
-	lowpassFIR	upFilter_24000;
-	lowpassFIR	upFilter_12000;
+//	lowpassFIR	upFilter_24000;
+//	lowpassFIR	upFilter_12000;
+	upFilter	upFilter_24000;
+	upFilter	upFilter_12000;
 	int16_t		numFrames;
 	void	handle_uep_audio	(uint8_t *, int16_t,
 	                         int16_t, int16_t, int16_t, int16_t);
 	void	handle_eep_audio	(uint8_t *, int16_t, int16_t, int16_t);
 	void    writeOut        (int16_t *, int16_t, int32_t);
-        void    toOutput        (float *, int16_t);
+        void    toOutput        (std::complex<float> *, int16_t);
         void    playOut         (int16_t);
-//	uint8_t		aac_isInit;
-//	uint8_t		prev_audioSamplingRate;
-//	uint8_t		prevSBR_flag;
-//	uint8_t		prev_audioMode;
 	bool    checkfor        (uint8_t, bool, uint8_t);
         bool    initDecoder     (int16_t, bool, uint8_t);
         void    decodeFrame     (uint8_t *,

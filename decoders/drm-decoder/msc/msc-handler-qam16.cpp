@@ -127,18 +127,24 @@ std::vector<uint8_t> level_1;
 	Y1. resize (2 * theState -> muxSize);
 	level_0. resize (2 * theState -> muxSize);
 	level_1. resize (2 * theState -> muxSize);
-//
+
+	for (int i = 0; i < 4; i ++) {
 //	First the "normal" decoding. leading to two bit rows
-	myDecoder. computemetrics (v, theState -> muxSize, 0, Y0. data (),
-	                                   false, level_0. data (),
+	   myDecoder. computemetrics (v, theState -> muxSize, 0, Y0. data (),
+//	                                   false,
+	                                   i != 0,
+	                                 level_0. data (),
 	                                          level_1. data ());
-	stream_0	-> process	(Y0. data (),
+	   stream_0	-> process	(Y0. data (),
 	                                 bits_0. data (), level_0. data ());
-	myDecoder. computemetrics (v, theState -> muxSize, 1, Y1. data (),
-	                                   false, level_0. data (),
+	   myDecoder. computemetrics (v, theState -> muxSize, 1, Y1. data (),
+//	                                   false,
+	                                   true,
+	                                 level_0. data (),
 	                                          level_1. data ());
-	stream_1	-> process	(Y1. data (),
+	   stream_1	-> process	(Y1. data (),
 	                                 bits_1. data (), level_1. data ()); 
+	}
 //
 	memcpy (&bitsOut [0],
 	        &bits_0 [0],

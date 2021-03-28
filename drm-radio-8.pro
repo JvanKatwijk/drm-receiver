@@ -127,6 +127,7 @@ HEADERS += ./radio-constants.h \
 	   ./decoders/drm-decoder/msc/msc-streamer.h \
 	   ./decoders/drm-decoder/msc/msc-handler.h \
 	   ./decoders/drm-decoder/data/data-processor.h \
+	   ./decoders/drm-decoder/data/up-filter.h \
 	   ./decoders/drm-decoder/data/fec-handler.h \
 	   ./decoders/drm-decoder/data/galois.h \
 	   ./decoders/drm-decoder/data/reed-solomon.h \
@@ -205,6 +206,7 @@ SOURCES += ./main.cpp \
 	   ./decoders/drm-decoder/msc/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc/msc-handler.cpp \
 	   ./decoders/drm-decoder/data/data-processor.cpp \
+	   ./decoders/drm-decoder/data/up-filter.cpp \
 	   ./decoders/drm-decoder/data/fec-handler.cpp \
 	   ./decoders/drm-decoder/data/galois.cpp \
 	   ./decoders/drm-decoder/data/reed-solomon.cpp \

@@ -163,8 +163,17 @@ std::complex<float>	temp [Ts];
 //	And we adjust the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & bufMask;
 
+	std::complex<float> faseError = std::complex<float> (0, 0);
+//	Now: determine the fine grain offset.	
+        for (int i = 0; i < Tg; i ++)
+           faseError += conj (temp [Tu + i]) * temp [i];
+//      simple averaging
+	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
+//	fprintf (stderr, "computer %f, got back %f\n",
+//	                   arg (faseError) / (2 * M_PI) * sampleRate / Tu,
+//	                   arg (angle) / (2 * M_PI) * sampleRate / Tu);
 //	correct the phase
-	theAngle	= theAngle - 0.1 * angle;
+//	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
 	float offset          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (offset != -offset) { // precaution to handle undefines

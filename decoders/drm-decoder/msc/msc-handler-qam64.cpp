@@ -92,6 +92,22 @@ int32_t	highProtected, lowProtected;
 	                  stream_1 -> lowBits () +
 	                  stream_2 -> lowBits ();
 	thePRBS		= new prbs (lowProtected + highProtected);
+	int16_t	highProtectedbits	= stream_0 -> highBits () +
+	                          stream_1 -> highBits () +
+	                          stream_2 -> highBits ();
+	int16_t	lowProtectedbits	= stream_0 -> lowBits () +
+	                          stream_1 -> lowBits () +
+	                          stream_2 -> lowBits ();
+	bitsOut. resize (highProtectedbits + lowProtectedbits);
+	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
+	bits_1. resize  (stream_1 -> highBits () + stream_1 -> lowBits ());
+	bits_2. resize  (stream_2 -> highBits () + stream_2 -> lowBits ());
+	Y0. resize (2 * theState -> muxSize);
+	Y1. resize (2 * theState -> muxSize);
+	Y2. resize (2 * theState -> muxSize);
+	level_0. resize (2 * theState -> muxSize);
+	level_1. resize (2 * theState -> muxSize);
+	level_2. resize (2 * theState -> muxSize);
 }
 
 	QAM64_SM_Handler::~QAM64_SM_Handler	(void) {
@@ -121,32 +137,32 @@ metrics m;
 }
 	
 void	QAM64_SM_Handler::process	(theSignal *v, uint8_t *o) {
-int16_t	highProtectedbits	= stream_0 -> highBits () +
-	                          stream_1 -> highBits () +
-	                          stream_2 -> highBits ();
-int16_t	lowProtectedbits	= stream_0 -> lowBits () +
-	                          stream_1 -> lowBits () +
-	                          stream_2 -> lowBits ();
-std::vector<uint8_t>	bitsOut;
-	bitsOut. resize (highProtectedbits + lowProtectedbits);
-std::vector<uint8_t>	bits_0;
-	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
-std::vector<uint8_t>	bits_1;
-	bits_1. resize  (stream_1 -> highBits () + stream_1 -> lowBits ());
-std::vector<uint8_t>	bits_2;
-	bits_2. resize  (stream_2 -> highBits () + stream_2 -> lowBits ());
-std::vector<metrics>	Y0;
-	Y0. resize (2 * theState -> muxSize);
-std::vector<metrics>	Y1;
-	Y1. resize (2 * theState -> muxSize);
-std::vector<metrics>	Y2;
-	Y2. resize (2 * theState -> muxSize);
-std::vector<uint8_t>	level_0;
-	level_0. resize (2 * theState -> muxSize);
-std::vector<uint8_t>	level_1;
-	level_1. resize (2 * theState -> muxSize);
-std::vector<uint8_t>	level_2;
-	level_2. resize (2 * theState -> muxSize);
+//int16_t	highProtectedbits	= stream_0 -> highBits () +
+//	                          stream_1 -> highBits () +
+//	                          stream_2 -> highBits ();
+//int16_t	lowProtectedbits	= stream_0 -> lowBits () +
+//	                          stream_1 -> lowBits () +
+//	                          stream_2 -> lowBits ();
+//std::vector<uint8_t>	bitsOut;
+//	bitsOut. resize (highProtectedbits + lowProtectedbits);
+//std::vector<uint8_t>	bits_0;
+//	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
+//std::vector<uint8_t>	bits_1;
+//	bits_1. resize  (stream_1 -> highBits () + stream_1 -> lowBits ());
+//std::vector<uint8_t>	bits_2;
+//	bits_2. resize  (stream_2 -> highBits () + stream_2 -> lowBits ());
+//std::vector<metrics>	Y0;
+//	Y0. resize (2 * theState -> muxSize);
+//std::vector<metrics>	Y1;
+//	Y1. resize (2 * theState -> muxSize);
+//std::vector<metrics>	Y2;
+//	Y2. resize (2 * theState -> muxSize);
+//std::vector<uint8_t>	level_0;
+//	level_0. resize (2 * theState -> muxSize);
+//std::vector<uint8_t>	level_1;
+//	level_1. resize (2 * theState -> muxSize);
+//std::vector<uint8_t>	level_2;
+//	level_2. resize (2 * theState -> muxSize);
 
 	for (int i = 0; i < qam64Roulette; i ++) {
 	   myDecoder. computemetrics (v, theState -> muxSize,
