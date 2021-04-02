@@ -33,7 +33,8 @@
 //	was done in the syncer) and map them onto ofdm words.
 //	
 //	The caller just calls upon "getWord" to get a new ofdm word
-//
+#define	NRSYMBOLS	12
+#define	EPSILON		1.0E-10
 //	The frequency shifter is in steps of 0.01 Hz
 	wordCollector::wordCollector (drmDecoder *mr,
 	                              Reader	*b,
@@ -89,23 +90,24 @@ void	wordCollector::getWord (std::complex<float>	*out,
 std::complex<float>	temp [Ts];
 int16_t		i;
 std::complex<float>	angle	= std::complex<float> (0, 0);
-float		offset	= 0;
-float	timeOffsetFractional;
+int	f	= buffer -> currentIndex;
+int	xx;
+float	timeOffset;
 
 	buffer		-> waitfor (Ts + Ts / 2);
-	float timedelay	= get_timeOffset (16, 6);
-//	float timedelay	= offsetFractional;
-	int d		= floor (timedelay + 0.5);
-	timeOffsetFractional	= timedelay - d;
-	timeOffsetFractional	= offsetFractional;
-
-	int f = (int)(floor (buffer -> currentIndex + d)) & bufMask;
+	timeOffset	= get_timeOffset (NRSYMBOLS, 8, &xx);
+	while (timeOffset < 0) {
+	   f --;
+	   timeOffset += 1;
+	}
+	f			+= floor (timeOffset);
+	timeOffset		-= floor (timeOffset);
+	
 //	correction of the time offset by interpolation
 	for (i = 0; i < Ts; i ++) {
-	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
-	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = cmul (one, 1 - timeOffsetFractional) +
-	                            cmul (two, timeOffsetFractional);
+	   std::complex<float> one = buffer ->  data [(f + i) & bufMask];
+	   std::complex<float> two = buffer ->  data [(f + i + 1)& bufMask];
+	   temp [i] = cmul (one, 1 - timeOffset) + cmul (two, timeOffset);
 	}
 
 //	And we shift the bufferpointer here
@@ -118,7 +120,7 @@ float	timeOffsetFractional;
 	theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
 //
 //	offset  (and shift) in Hz / 100
-	offset		= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	float offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 //	if (offset != -offset)	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
 	                            100 * modeInf -> freqOffset_integer - offset);
@@ -143,21 +145,25 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        float		angle,
 	                        float		clockOffset) {
 std::complex<float>	temp [Ts];
-	buffer		-> waitfor (Ts + Ts / 2);
+int	f		= buffer -> currentIndex;
+float	timeOffset;
+int xxx;
 
-	float tt		= get_timeOffset (16, 8);
-	int timeOffsetInteger	= floor (tt + 0.5);
-//	fprintf (stderr, "offsetFractional %f, tt %f\n",
-//	                 offsetFractional, tt = timeOffsetInteger);
-//	offsetFractional	= tt - timeOffsetInteger;
-	int f	= (int)(floor (buffer -> currentIndex + 
-	                              timeOffsetInteger)) & bufMask;
+	buffer		-> waitfor (Ts + Ts / 2);
+	timeOffset	= get_timeOffset (NRSYMBOLS, 4, &xxx);
+	if (timeOffset < 0) {
+	   f --;
+	   timeOffset += 1;
+	}
+	f	+= floor (timeOffset);
+	timeOffset	-= floor (timeOffset);
+
 //	just linear interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = cmul (one, 1 - offsetFractional) +
-	              cmul (two, offsetFractional);
+	   temp [i] = cmul (one, 1 - timeOffset) +
+	              cmul (two, timeOffset);
 	}
 
 //	And we adjust the bufferpointer here
@@ -169,9 +175,8 @@ std::complex<float>	temp [Ts];
            faseError += conj (temp [Tu + i]) * temp [i];
 //      simple averaging
 	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
-//	fprintf (stderr, "computer %f, got back %f\n",
-//	                   arg (faseError) / (2 * M_PI) * sampleRate / Tu,
-//	                   arg (angle) / (2 * M_PI) * sampleRate / Tu);
+//	alternatively, we could use the freqOffset as we got back
+//	from equalizing the previous word
 //	correct the phase
 //	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
@@ -196,7 +201,7 @@ std::complex<float>	temp [Ts];
 	   show_fineOffset	(- offset / 100);
 	   show_angle		(angle);
 	   show_timeOffset	(offsetFractional);
-	   show_timeDelay	(timeOffsetInteger);
+//	   show_timeDelay	(timeOffsetInteger);
 	   show_clockOffset	(Ts * clockOffset);
 	}
 
@@ -226,30 +231,34 @@ std::complex<float> temp [Tu];
 	           (K_max - K_min + 1) * sizeof (std::complex<float>));
 }
 
-float	wordCollector::get_timeOffset	(int nrSymbols, int range) {
-int b [nrSymbols];
+float	wordCollector::get_timeOffset	(int nrSymbols,
+	                                 int range, int *offs) {
+int16_t b [nrSymbols];
+int16_t b2 [nrSymbols];
 
 	buffer -> waitfor (2 * nrSymbols * Ts + Ts);
+	*offs	= get_intOffset (0, nrSymbols, range);
 	for (int i = 0; i < nrSymbols; i ++)
-	   b [i] = get_intOffset (i * Ts, nrSymbols, range);
+	   b [i] = get_intOffset (*offs, nrSymbols, range);
+//	   b [i] = get_intOffset (0, nrSymbols, range);
 
 	float   sumx    = 0.0;
         float   sumy    = 0.0;
         float   sumxx   = 0.0;
         float   sumxy   = 0.0;
 
-        for (int i = 0; i < nrSymbols; i++) {
+        for (int i = 0; i < nrSymbols - 1; i++) {
            sumx += (float) i;
            sumy += (float) b [i];
            sumxx += (float) i * (float) i;
            sumxy += (float) i * (float) b [i];
         }
 
-        float boffs;
-        boffs = (float) ((sumy * sumxx - sumx * sumxy) /
+        float bestOffsets;
+        bestOffsets = (float) ((sumy * sumxx - sumx * sumxy) /
                          ((nrSymbols - 1) * sumxx - sumx * sumx));
 
-	return boffs;
+	return bestOffsets;
 }
 
 int	wordCollector::get_intOffset	(int base,
@@ -257,8 +266,8 @@ int	wordCollector::get_intOffset	(int base,
 int	bestIndex = -1;
 double	min_mmse = 10E20;
 
-	for (int i = - range / 2; i < range / 2; i ++) {
-	   int index = buffer -> currentIndex + base + i;
+	for (int i = base - range / 2; i < base + range / 2; i ++) {
+	   int index = (buffer -> currentIndex + base + i) & bufMask;
 	   double mmse = compute_mmse (index, nrSymbols);
 	   if (mmse < min_mmse) {
 	      min_mmse = mmse;
@@ -275,7 +284,7 @@ double	squares = 0;
 int32_t		bufMask	= buffer -> bufSize - 1;
 
 	buffer -> waitfor (nrSymbols * Ts + Ts);
-	for (int i = 0; i < nrSymbols; i ++) {
+	for (int i = 0; i < nrSymbols - 1; i ++) {
 	   int startSample = starter + i * Ts;
 	   for (int j = 0; j < Tg; j ++) {
 	      std::complex<float> f1 =
@@ -288,3 +297,4 @@ int32_t		bufMask	= buffer -> bufSize - 1;
 	}
 	return abs (squares - 2 * abs (gamma));
 }
+

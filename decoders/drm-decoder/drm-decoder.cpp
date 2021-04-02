@@ -72,10 +72,10 @@ int16_t	symbs;
 	channel_1	-> hide ();
 	channel_2	-> hide ();
 	channel_3	-> hide ();
-	channel_4	-> hide ();
+	channel_4	-> show ();
 
 	symbs			= 12;
-	int8_t windowDepth 	= 1;
+	int8_t windowDepth 	= 2;
 	int8_t qam64Roulette 	= 4;
 	connect (channel_1, SIGNAL (clicked (void)),
 	         this, SLOT (selectChannel_1 (void)));
@@ -83,8 +83,8 @@ int16_t	symbs;
 	         this, SLOT (selectChannel_2 (void)));
 	connect (channel_3, SIGNAL (clicked (void)),
 	         this, SLOT (selectChannel_3 (void)));
-	connect (channel_4, SIGNAL (clicked (void)),
-	         this, SLOT (selectChannel_4 (void)));
+//	connect (channel_4, SIGNAL (clicked (void)),
+//	         this, SLOT (selectChannel_4 (void)));
 	theFilter	= &Filter_10;
 	running			= true;
 
@@ -195,8 +195,8 @@ void	drmDecoder::show_stationLabel (const QString &s, int stream) {
 	      channel_3	-> show ();
 	      break;
 	   case 3:
-	      channel_4	-> setText (s);
-	      channel_4	-> show ();
+//	      channel_4	-> setText (s);
+//	      channel_4	-> show ();
 	      break;
 	}
 }
@@ -227,10 +227,10 @@ void	drmDecoder::show_channels	(int audio, int data) {
 
 	if (data > 0)
 	   channel_3	-> show ();
-	if (data > 1)
-	   channel_4	-> show ();
-	else
-	   channel_4	-> hide ();
+//	if (data > 1)
+//	   channel_4	-> show ();
+//	else
+//	   channel_4	-> hide ();
 	if (data == 0)
 	   channel_3	-> hide ();
 }
@@ -304,7 +304,8 @@ void	drmDecoder::faadSuccess		(bool b) {
 	if (b)
 	   goodfaad ++;
 	if (faadCounter > 500) {
-	   fprintf (stderr, "faad ratio is %f\n", (float)goodfaad / faadCounter);
+	   float ratio = goodfaad / 500.0;
+	   channel_4 -> setText (QString::number (ratio));
 	   goodfaad	= 0;
 	   faadCounter	= 0;
 	}

@@ -75,10 +75,11 @@ private:
 	int16_t		displayCount;
 	DSPCOMPLEX	*fft_vector;
 	fftwf_plan	hetPlan;
-	float		get_timeOffset		(int, int);
+	float		get_timeOffset		(int, int, int *);
 	int		get_intOffset		(int base,
                                                  int nrSymbols, int range);
 	double		compute_mmse		(int, int);
+
 signals:
 	void		show_coarseOffset	(float);
 	void		show_fineOffset		(float);

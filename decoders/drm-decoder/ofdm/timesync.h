@@ -40,9 +40,11 @@ private:
                                                float    *Epsilon,
                                                int16_t  *Offsets);
 
-	 void		compute_b_vector        (uint8_t       mode,
-	                                         int16_t       *b,
-	                                         float         averageOffset);
+	void		compute_bestIndices	(uint8_t	mode,
+	                                         int16_t	*b,
+	                                         float averageOffset);
+	int		get_intOffset		(uint8_t, int, int, int);
+	double		compute_mmse		(uint8_t, int, int);
 
 	Reader		*theReader;
 	int32_t		sampleRate;

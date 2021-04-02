@@ -119,7 +119,7 @@ int16_t	theMode;
 
 	averageOffset = list_Offsets [theMode - 1];
 //
-        compute_b_vector (theMode, b, averageOffset);
+        compute_bestIndices (theMode, b, averageOffset);
 //
 //	Now least squares to 0...symbols_to_check and b [0] .. */
 	float	sumx	= 0.0;
@@ -144,10 +144,13 @@ int16_t	theMode;
 
 	result -> Mode		= theMode;
 	result -> sampleRate_offset = slope / ((float)Ts_of (theMode));
+	fprintf (stderr, "samplerate offset %f\n", result -> sampleRate_offset);
 	float	timeOffset	= fmodf (
 	                          (Tg_of (theMode) + Ts_of (theMode) / 2 +
 	                                      averageOffset + boffs - 1),
 	                                            (float)Ts_of (theMode));
+	timeOffset	= boffs;
+//	result	-> timeOffset_integer	= floor (timeOffset + 0.5);
 	result	-> timeOffset_integer	= floor (timeOffset + 0.5);
 	result	-> timeOffset_fractional = timeOffset -
 	                                         result -> timeOffset_integer;
@@ -200,47 +203,52 @@ int32_t i, j, k, theOffset;
 	*Offsets	= theOffset;
 }
 
-//
-void	timeSyncer::compute_b_vector (uint8_t	mode,
-	                              int16_t	*b,
-	                              float	averageOffset) {
-int16_t	Tu	= Tu_of (mode);
-int16_t	Ts	= Ts_of (mode);
-int16_t	Tg	= Tg_of	(mode);
-std::complex<float> gamma [Ts];
-float	   squareTerm [Ts];
-int32_t i, j;
-
-	int32_t	base	= theReader	-> currentIndex;
-	int32_t	mask	= theReader	-> bufSize - 1;
-	for (i = 0; i < nSamples - Tu; i ++) {
-	   summedCorrelations [i] = std::complex<float> (0, 0);
-	   summedSquares [i]	  = 0;
-	   for (j = 0; j < Tg; j ++) {
-	      std::complex<float> f1        =
-	                      theReader -> data [(base + i + j) & mask];
-              std::complex<float> f2        =
-	                      theReader -> data [(base + i + Tu + j) & mask];
-	      summedCorrelations [i] += f1 * conj (f2);
-	      summedSquares	 [i] += real (f1 * conj (f1)) +
-	                                     real (f2 * conj (f2));
-	   }
-	}
-
-//	OK, the terms are computed, now find the minimum
-	int16_t index = Tg + averageOffset + Ts / 2;
-	for (j = 0; j < (nSymbols - 2); j++) {
-	   float minValue	= 1000000.0;
-	   for (i = 0; i < Ts; i++) {
-	      gamma [i]		= summedCorrelations [(index + i)];
-              squareTerm [i]	= (float) (0.5 * (EPSILON +
-	                                 summedSquares [index + i]));
-	      float mmse = squareTerm [i] - 2 * abs (gamma [i]);
-	      if (mmse < minValue) {
-	         minValue = mmse;
-	         b [j] = i;
-	      }
-	   }
-	   index += Ts;
-	}
+void	timeSyncer::compute_bestIndices (uint8_t Mode, 
+	                                 int16_t   *b,
+                                         float     averageOffset) {
+	for (int i = 0; i < nSymbols; i ++)
+	   b [i] = get_intOffset (Mode, averageOffset, nSymbols, 8);
 }
+
+int	timeSyncer::get_intOffset	(uint8_t Mode, int base,
+	                                 int nrSymbols, int range) {
+int	bestIndex = -1;
+double	min_mmse = 10E20;
+int32_t bufMask = theReader -> bufSize - 1;
+
+	for (int i = base   - range / 2; i < base + range / 2; i ++) {
+	   int index = (theReader -> currentIndex + base + i) & bufMask;
+	   double mmse = compute_mmse (Mode, index, nrSymbols);
+	   if (mmse < min_mmse) {
+	      min_mmse = mmse;
+	      bestIndex = i;
+	   }
+	}
+	
+	return bestIndex;
+}
+
+double	timeSyncer::compute_mmse (uint8_t Mode,
+	                         int starter, int nrSymbols) {
+int	Tg	= Tg_of (Mode);
+int	Ts	= Ts_of (Mode);
+int	Tu	= Tu_of (Mode);
+std::complex<float>	gamma = std::complex<float> (0, 0);
+double	squares = 0;
+int32_t		bufMask	= theReader -> bufSize - 1;
+
+	theReader -> waitfor (nrSymbols * Ts + Ts);
+	for (int i = 0; i < nrSymbols - 1; i ++) {
+	   int startSample = starter + i * Ts;
+	   for (int j = 0; j < Tg; j ++) {
+	      std::complex<float> f1 =
+	             theReader -> data [(startSample + j) & bufMask];
+	      std::complex<float> f2 =
+	             theReader -> data [(startSample + Tu + j) & bufMask];
+	      gamma	+= f1 * conj (f2);
+	      squares	+= real (f1 * conj (f1)) + real (f2 * conj (f2));
+	   }
+	}
+	return abs (squares - 2 * abs (gamma));
+}
+

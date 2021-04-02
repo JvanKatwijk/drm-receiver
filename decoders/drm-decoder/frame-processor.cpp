@@ -214,7 +214,6 @@ restart:
 	         my_wordCollector.  getWord (inbank. element (lc),
 	                                     modeInf. freqOffset_integer,
 	                                     modeInf. timeOffset_fractional);
-	         fprintf (stderr, "equalizing element %d\n", lc);
 	         frameReady = my_Equalizer.  equalize (inbank. element (lc),
                                                        symbol_no,
                                                        &outbank);

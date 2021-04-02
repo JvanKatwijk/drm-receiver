@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"f68b2e7\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+DEFINES       = -DGITHASH=\"e66b958\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -I../../../include/qt5/qwt -Idevices/sdrplay-handler -I../../../include/qt5 -I../../../include/qt5/QtWidgets -I../../../include/qt5/QtGui -I../../../include/qt5/QtXml -I../../../include/qt5/QtCore -I. -I. -I/../lib64/qt5/mkspecs/linux-g++
