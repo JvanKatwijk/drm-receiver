@@ -74,8 +74,8 @@ int16_t	symbs;
 	channel_3	-> hide ();
 	channel_4	-> show ();
 
-	symbs			= 12;
-	int8_t windowDepth 	= 2;
+	symbs			= 40;
+	int8_t windowDepth 	= 3;
 	int8_t qam64Roulette 	= 4;
 	connect (channel_1, SIGNAL (clicked (void)),
 	         this, SLOT (selectChannel_1 (void)));

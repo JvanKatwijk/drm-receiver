@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J 
+ *    This file is part of the drm receiver
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	<stdio.h>
@@ -33,7 +33,7 @@
 //	was done in the syncer) and map them onto ofdm words.
 //	
 //	The caller just calls upon "getWord" to get a new ofdm word
-#define	NRSYMBOLS	12
+#define	NRSYMBOLS	24
 #define	EPSILON		1.0E-10
 //	The frequency shifter is in steps of 0.01 Hz
 	wordCollector::wordCollector (drmDecoder *mr,
@@ -95,19 +95,13 @@ int	xx;
 float	timeOffset;
 
 	buffer		-> waitfor (Ts + Ts / 2);
-	timeOffset	= get_timeOffset (NRSYMBOLS, 8, &xx);
-	while (timeOffset < 0) {
-	   f --;
-	   timeOffset += 1;
-	}
-	f			+= floor (timeOffset);
-	timeOffset		-= floor (timeOffset);
 	
 //	correction of the time offset by interpolation
 	for (i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer ->  data [(f + i) & bufMask];
 	   std::complex<float> two = buffer ->  data [(f + i + 1)& bufMask];
-	   temp [i] = cmul (one, 1 - timeOffset) + cmul (two, timeOffset);
+	   temp [i] = cmul (one, 1 - offsetFractional) +
+	                  cmul (two, offsetFractional);
 	}
 
 //	And we shift the bufferpointer here
@@ -146,24 +140,26 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        float		clockOffset) {
 std::complex<float>	temp [Ts];
 int	f		= buffer -> currentIndex;
-float	timeOffset;
-int xxx;
+static int timeOffset	= 0;
+int	increment	= 0;
 
 	buffer		-> waitfor (Ts + Ts / 2);
-	timeOffset	= get_timeOffset (NRSYMBOLS, 4, &xxx);
-	if (timeOffset < 0) {
-	   f --;
-	   timeOffset += 1;
-	}
-	f	+= floor (timeOffset);
-	timeOffset	-= floor (timeOffset);
 
+	if (offsetFractional < -0.5) {
+	   fprintf (stderr, "te klein");
+	   f --;
+	}
+
+	if (offsetFractional > 0.5) {
+	   fprintf (stderr, "te groot");
+	   f ++;
+	}
 //	just linear interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = cmul (one, 1 - timeOffset) +
-	              cmul (two, timeOffset);
+	   temp [i] = cmul (one, 1 - offsetFractional) +
+	              cmul (two, offsetFractional);
 	}
 
 //	And we adjust the bufferpointer here
@@ -174,11 +170,11 @@ int xxx;
         for (int i = 0; i < Tg; i ++)
            faseError += conj (temp [Tu + i]) * temp [i];
 //      simple averaging
-	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
+//	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
 //	alternatively, we could use the freqOffset as we got back
 //	from equalizing the previous word
 //	correct the phase
-//	theAngle	= theAngle - 0.1 * angle;
+	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
 	float offset          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (offset != -offset) { // precaution to handle undefines
@@ -234,13 +230,11 @@ std::complex<float> temp [Tu];
 float	wordCollector::get_timeOffset	(int nrSymbols,
 	                                 int range, int *offs) {
 int16_t b [nrSymbols];
-int16_t b2 [nrSymbols];
 
 	buffer -> waitfor (2 * nrSymbols * Ts + Ts);
 	*offs	= get_intOffset (0, nrSymbols, range);
 	for (int i = 0; i < nrSymbols; i ++)
-	   b [i] = get_intOffset (*offs, nrSymbols, range);
-//	   b [i] = get_intOffset (0, nrSymbols, range);
+	   b [i] = get_intOffset (i * Ts + *offs, nrSymbols, range);
 
 	float   sumx    = 0.0;
         float   sumy    = 0.0;
@@ -267,7 +261,7 @@ int	bestIndex = -1;
 double	min_mmse = 10E20;
 
 	for (int i = base - range / 2; i < base + range / 2; i ++) {
-	   int index = (buffer -> currentIndex + base + i) & bufMask;
+	   int index = (buffer -> currentIndex + i) & bufMask;
 	   double mmse = compute_mmse (index, nrSymbols);
 	   if (mmse < min_mmse) {
 	      min_mmse = mmse;

@@ -154,15 +154,15 @@ uint8_t	spectrum;
 	binNumber = get_zeroBin (0);
 	m -> freqOffset_integer	= binNumber * sampleRate / Tu;
 
-	fprintf (stderr, "bin 0 = %d\n", binNumber);
+//	fprintf (stderr, "bin 0 = %d\n", binNumber);
 //	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
 	for (i = 0; i <= 3; i ++) 
 	   occupancyIndicator [i] = get_spectrumOccupancy (i, binNumber);
 
 	float tmp1	= 0.0;
 	for (spectrum = 0; spectrum <= 3; spectrum ++) {	
-	   fprintf (stderr, "spectrum %d, indicator %f\n",
-	                     spectrum, occupancyIndicator [spectrum]);
+//	   fprintf (stderr, "spectrum %d, indicator %f\n",
+//	                     spectrum, occupancyIndicator [spectrum]);
 	   if (occupancyIndicator [spectrum] >= tmp1) {
 	      tmp1 = occupancyIndicator [spectrum];
 	      m -> Spectrum = spectrum;

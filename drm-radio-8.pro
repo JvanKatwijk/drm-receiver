@@ -114,6 +114,7 @@ HEADERS += ./radio-constants.h \
 	   ./decoders/drm-decoder/support/deinterleaver.h \
 	   ./decoders/drm-decoder/support/matrix2.h \
 	   ./decoders/drm-decoder/support/protlevels.h \
+	   ./decoders/drm-decoder/support/mer16-values.h \
 	   ./decoders/drm-decoder/parameters/state-descriptor.h \
 	   ./decoders/drm-decoder/parameters/puncture-tables.h \
 	   ./decoders/drm-decoder/fac/fac-tables.h \
@@ -193,6 +194,7 @@ SOURCES += ./main.cpp \
  	   ./decoders/drm-decoder/support/deinterleaver.cpp \
 	   ./decoders/drm-decoder/support/matrix2.cpp \
 	   ./decoders/drm-decoder/support/protlevels.cpp \
+	   ./decoders/drm-decoder/support/mer16-values.cpp \
 	   ./decoders/drm-decoder/parameters/state-descriptor.cpp \
 	   ./decoders/drm-decoder/parameters/puncture-tables.cpp \
 	   ./decoders/drm-decoder/fac/fac-tables.cpp \

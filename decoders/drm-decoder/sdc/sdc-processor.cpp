@@ -31,6 +31,8 @@
 #include	"qam16-metrics.h"
 #include	"qam4-metrics.h"
 #include	"viterbi-drm.h"
+
+#include	"mer16-values.h"
 //
 //	the "processor" for extracting the SDC values from the
 //	(first) frame of a superframe encoded in QAM4/QAM16
@@ -163,9 +165,11 @@ metrics Y0_stream	[2 * nrCells];
 metrics Y1_stream	[2 * nrCells];
 uint8_t level_0		[2 * nrCells];
 uint8_t level_1		[2 * nrCells];
-int16_t i;
+mer16_compute	computeMER;
 
-	for (i = 0; i < 4; i ++) {
+	fprintf (stderr, "MER %f\n",
+	               10 * log10 (computeMER. computemer (v. data (), nrCells)));
+	for (int i = 0; i < 4; i ++) {
 	   my_qam16_metrics	-> computemetrics (v. data (), nrCells, 0, 
 	                                           Y0_stream, 
 	                                           i != 0,

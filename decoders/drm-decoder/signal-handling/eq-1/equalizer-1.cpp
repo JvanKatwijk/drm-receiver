@@ -138,7 +138,7 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //	values taken from diorama
 	f_cut_t = 0.0675 / symbols_to_delay;
 	f_cut_k = 1.75 * (float) Tg / (float) Tu;
-//	f_cut_k = 1.0 * (float) Tg / (float) Tu;
+	f_cut_k = 2.0 * (float) Tg / (float) Tu;
 //	1.75 seems a little large and has as effect that in the equalizatiom
 //	a dip will appear, so we take a smaller value
 //	f_cut_k = (Mode == Mode_A ? 2.25 :

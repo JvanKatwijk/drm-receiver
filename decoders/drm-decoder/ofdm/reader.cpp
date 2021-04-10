@@ -29,7 +29,7 @@
 //	The methods are called from the drmdecoder
 
 	Reader::Reader (RingBuffer<std::complex<float>> *r,
-	                int16_t s, 
+	                int s, 
 	                drmDecoder *mr) {
 	ringBuffer		= r;
 	this	-> bufSize	= 16 * 8192;

@@ -36,7 +36,7 @@ class	drmDecoder;
 class	Reader {
 public:
 			Reader (RingBuffer<DSPCOMPLEX> *,
-	                           int16_t, drmDecoder *);
+	                           int, drmDecoder *);
 			~Reader (void);
 	void		waitfor		(int32_t);
 	void		shiftBuffer	(int16_t);
