@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
-    <height>294</height>
+    <width>624</width>
+    <height>326</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>140</y>
+     <y>170</y>
      <width>291</width>
      <height>131</height>
     </rect>
@@ -27,7 +27,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>130</y>
+     <y>160</y>
      <width>24</width>
      <height>121</height>
     </rect>
@@ -43,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>130</y>
+     <y>160</y>
      <width>191</width>
      <height>141</height>
     </rect>
@@ -171,9 +171,9 @@
   <widget class="QLCDNumber" name="snrDisplay">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>80</y>
-     <width>41</width>
+     <x>10</x>
+     <y>130</y>
+     <width>121</width>
      <height>20</height>
     </rect>
    </property>
@@ -525,6 +525,38 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="sdc_mer">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>130</y>
+     <width>141</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="segmentStyle">
+    <enum>QLCDNumber::Flat</enum>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="msc_mer">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>130</y>
+     <width>161</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="segmentStyle">
+    <enum>QLCDNumber::Flat</enum>
    </property>
   </widget>
  </widget>

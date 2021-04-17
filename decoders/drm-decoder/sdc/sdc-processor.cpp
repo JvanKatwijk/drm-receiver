@@ -32,6 +32,7 @@
 #include	"qam4-metrics.h"
 #include	"viterbi-drm.h"
 
+#include	"mer4-values.h"
 #include	"mer16-values.h"
 //
 //	the "processor" for extracting the SDC values from the
@@ -88,6 +89,8 @@ int16_t	index;
 	         master, SLOT (show_stationLabel (const QString &, int)));
 	connect (this, SIGNAL (show_timeLabel    (const QString &)),
 	         master, SLOT (show_timeLabel    (const QString &)));
+	connect (this, SIGNAL (show_mer (float)),
+	         master, SLOT (show_sdc_mer (float)));
 	rmFlag	= theState	-> RMflag;
 	SDCmode	= theState	-> sdcMode;
 	qammode	= (rmFlag == 0 && SDCmode == 0) ? QAM16 : QAM4;
@@ -142,6 +145,9 @@ bool	sdcProcessor::processSDC_QAM4 (std::vector<theSignal> &v) {
 uint8_t sdcBits [4 + stream_0 -> lengthOut ()];
 metrics	rawBits [2 * nrCells];
 uint8_t	reconstructed [2 * nrCells];
+mer4_compute   computeMER;
+float   mer     = 10 * log10 (computeMER. computemer (v. data (), nrCells));
+	show_mer (mer);
 
 	my_qam4_metrics -> computemetrics (v. data (), nrCells, rawBits);
 	stream_0	-> handle_stream (rawBits, reconstructed,
@@ -166,9 +172,8 @@ metrics Y1_stream	[2 * nrCells];
 uint8_t level_0		[2 * nrCells];
 uint8_t level_1		[2 * nrCells];
 mer16_compute	computeMER;
-
-	fprintf (stderr, "MER %f\n",
-	               10 * log10 (computeMER. computemer (v. data (), nrCells)));
+float mer = 10 * log10 (computeMER. computemer (v. data (), nrCells));
+	show_mer (mer);
 	for (int i = 0; i < 4; i ++) {
 	   my_qam16_metrics	-> computemetrics (v. data (), nrCells, 0, 
 	                                           Y0_stream, 

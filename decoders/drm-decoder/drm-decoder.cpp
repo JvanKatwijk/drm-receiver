@@ -386,3 +386,11 @@ void	drmDecoder::selectFilter	(const QString &s) {
 	   theFilter	= &Filter_20;
 }
 
+void	drmDecoder::show_sdc_mer	(float f) {
+	sdc_mer	-> display (f);
+}
+
+void	drmDecoder::show_msc_mer	(float f) {
+	msc_mer	-> display (f);
+}
+

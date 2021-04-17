@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"7640891\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+DEFINES       = -DGITHASH=\"40b28ce\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -I../../../include/qt5/qwt -Idevices/sdrplay-handler -I../../../include/qt5 -I../../../include/qt5/QtWidgets -I../../../include/qt5/QtGui -I../../../include/qt5/QtXml -I../../../include/qt5/QtCore -I. -I. -I/../lib64/qt5/mkspecs/linux-g++
@@ -105,7 +105,9 @@ SOURCES       = main.cpp \
 		decoders/drm-decoder/support/deinterleaver.cpp \
 		decoders/drm-decoder/support/matrix2.cpp \
 		decoders/drm-decoder/support/protlevels.cpp \
+		decoders/drm-decoder/support/mer4-values.cpp \
 		decoders/drm-decoder/support/mer16-values.cpp \
+		decoders/drm-decoder/support/mer64-values.cpp \
 		decoders/drm-decoder/parameters/state-descriptor.cpp \
 		decoders/drm-decoder/parameters/puncture-tables.cpp \
 		decoders/drm-decoder/fac/fac-tables.cpp \
@@ -152,6 +154,7 @@ SOURCES       = main.cpp \
 		moc_fac-processor.cpp \
 		moc_sdc-processor.cpp \
 		moc_backend-controller.cpp \
+		moc_msc-handler.cpp \
 		moc_data-processor.cpp \
 		moc_message-processor.cpp \
 		moc_mot-data.cpp \
@@ -212,7 +215,9 @@ OBJECTS       = main.o \
 		deinterleaver.o \
 		matrix2.o \
 		protlevels.o \
+		mer4-values.o \
 		mer16-values.o \
+		mer64-values.o \
 		state-descriptor.o \
 		puncture-tables.o \
 		fac-tables.o \
@@ -260,6 +265,7 @@ OBJECTS       = main.o \
 		moc_fac-processor.o \
 		moc_sdc-processor.o \
 		moc_backend-controller.o \
+		moc_msc-handler.o \
 		moc_data-processor.o \
 		moc_message-processor.o \
 		moc_mot-data.o \
@@ -403,7 +409,9 @@ DIST          = /../lib64/qt5/mkspecs/features/spec_pre.prf \
 		decoders/drm-decoder/support/deinterleaver.h \
 		decoders/drm-decoder/support/matrix2.h \
 		decoders/drm-decoder/support/protlevels.h \
+		decoders/drm-decoder/support/mer4-values.h \
 		decoders/drm-decoder/support/mer16-values.h \
+		decoders/drm-decoder/support/mer64-values.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		decoders/drm-decoder/parameters/puncture-tables.h \
 		decoders/drm-decoder/fac/fac-tables.h \
@@ -482,7 +490,9 @@ DIST          = /../lib64/qt5/mkspecs/features/spec_pre.prf \
 		decoders/drm-decoder/support/deinterleaver.cpp \
 		decoders/drm-decoder/support/matrix2.cpp \
 		decoders/drm-decoder/support/protlevels.cpp \
+		decoders/drm-decoder/support/mer4-values.cpp \
 		decoders/drm-decoder/support/mer16-values.cpp \
+		decoders/drm-decoder/support/mer64-values.cpp \
 		decoders/drm-decoder/parameters/state-descriptor.cpp \
 		decoders/drm-decoder/parameters/puncture-tables.cpp \
 		decoders/drm-decoder/fac/fac-tables.cpp \
@@ -699,8 +709,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /../lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents radio-constants.h radio.h bandplan.h output/upconverter.h output/audiosink.h various/agchandler.h various/ringbuffer.h various/fft.h various/shifter.h various/utilities.h various/slidingfft.h various/program-list.h various/popup-keypad.h various/s-meter.h various/downconverter.h decimators/newconverter.h decimators/decimator.h filters/fft-filters.h filters/fir-filters.h filters/iir-filters.h filters/decimating_filter.h scopes-qwt6/virtual-scope.h scopes-qwt6/spectrogramdata.h scopes-qwt6/waterfall-scope.h scopes-qwt6/spectrum-scope.h scopes-qwt6/scope.h scopes-qwt6/fft-scope.h devices/device-handler.h devices/filereader/filereader.h devices/filereader/filehulp.h decoders/virtual-decoder.h decoders/drm-decoder/drm-decoder.h decoders/drm-decoder/iqdisplay.h decoders/drm-decoder/eqdisplay.h decoders/drm-decoder/basics.h decoders/drm-decoder/frame-processor.h decoders/drm-decoder/ofdm/reader.h decoders/drm-decoder/ofdm/correlator.h decoders/drm-decoder/ofdm/timesync.h decoders/drm-decoder/ofdm/freqsyncer.h decoders/drm-decoder/ofdm/word-collector.h decoders/drm-decoder/signal-handling/referenceframe.h decoders/drm-decoder/signal-handling/equalizer-base.h decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h decoders/drm-decoder/signal-handling/eq-1/estimator-base.h decoders/drm-decoder/signal-handling/eq-1/estimator-2.h decoders/drm-decoder/support/my-array.h decoders/drm-decoder/support/viterbi-drm.h decoders/drm-decoder/support/mapper.h decoders/drm-decoder/support/prbs.h decoders/drm-decoder/support/checkcrc.h decoders/drm-decoder/support/qam64-metrics.h decoders/drm-decoder/support/qam16-metrics.h decoders/drm-decoder/support/qam4-metrics.h decoders/drm-decoder/support/deinterleaver.h decoders/drm-decoder/support/matrix2.h decoders/drm-decoder/support/protlevels.h decoders/drm-decoder/support/mer16-values.h decoders/drm-decoder/parameters/state-descriptor.h decoders/drm-decoder/parameters/puncture-tables.h decoders/drm-decoder/fac/fac-tables.h decoders/drm-decoder/fac/fac-processor.h decoders/drm-decoder/sdc/sdc-streamer.h decoders/drm-decoder/sdc/sdc-processor.h decoders/drm-decoder/msc/backend-controller.h decoders/drm-decoder/msc/msc-processor.h decoders/drm-decoder/msc/msc-handler-qam16.h decoders/drm-decoder/msc/msc-handler-qam64.h decoders/drm-decoder/msc/msc-streamer.h decoders/drm-decoder/msc/msc-handler.h decoders/drm-decoder/data/data-processor.h decoders/drm-decoder/data/up-filter.h decoders/drm-decoder/data/fec-handler.h decoders/drm-decoder/data/galois.h decoders/drm-decoder/data/reed-solomon.h decoders/drm-decoder/data/message-processor.h decoders/drm-decoder/data/packet-assembler.h decoders/drm-decoder/data/virtual-datahandler.h decoders/drm-decoder/data/mot-data.h devices/sdrplay-handler/sdrplay-handler.h devices/sdrplay-handler/sdrplayselect.h decoders/drm-decoder/data/aac-processor-faad.h decoders/drm-decoder/data/drm-aacdecoder.h decoders/drm-decoder/data/neaacdec_dll.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp radio.cpp bandplan.cpp output/upconverter.cpp output/audiosink.cpp various/agchandler.cpp various/fft.cpp various/popup-keypad.cpp various/s-meter.cpp various/shifter.cpp various/utilities.cpp various/slidingfft.cpp various/program-list.cpp various/downconverter.cpp filters/fft-filters.cpp filters/fir-filters.cpp filters/iir-filters.cpp filters/decimating_filter.cpp scopes-qwt6/virtual-scope.cpp scopes-qwt6/waterfall-scope.cpp scopes-qwt6/spectrum-scope.cpp scopes-qwt6/scope.cpp scopes-qwt6/fft-scope.cpp decimators/decimator.cpp devices/device-handler.cpp devices/filereader/filereader.cpp devices/filereader/filehulp.cpp decoders/virtual-decoder.cpp decoders/drm-decoder/drm-decoder.cpp decoders/drm-decoder/eqdisplay.cpp decoders/drm-decoder/iqdisplay.cpp decoders/drm-decoder/basics.cpp decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/correlator.cpp decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-decoder/signal-handling/referenceframe.cpp decoders/drm-decoder/signal-handling/equalizer-base.cpp decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-base.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-1.cpp decoders/drm-decoder/support/viterbi-drm.cpp decoders/drm-decoder/support/mapper.cpp decoders/drm-decoder/support/prbs.cpp decoders/drm-decoder/support/checkcrc.cpp decoders/drm-decoder/support/qam64-metrics.cpp decoders/drm-decoder/support/qam16-metrics.cpp decoders/drm-decoder/support/qam4-metrics.cpp decoders/drm-decoder/support/deinterleaver.cpp decoders/drm-decoder/support/matrix2.cpp decoders/drm-decoder/support/protlevels.cpp decoders/drm-decoder/support/mer16-values.cpp decoders/drm-decoder/parameters/state-descriptor.cpp decoders/drm-decoder/parameters/puncture-tables.cpp decoders/drm-decoder/fac/fac-tables.cpp decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder/sdc/sdc-streamer.cpp decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder/msc/backend-controller.cpp decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/up-filter.cpp decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/galois.cpp decoders/drm-decoder/data/reed-solomon.cpp decoders/drm-decoder/data/message-processor.cpp decoders/drm-decoder/data/packet-assembler.cpp decoders/drm-decoder/data/virtual-datahandler.cpp decoders/drm-decoder/data/mot-data.cpp devices/sdrplay-handler/sdrplay-handler.cpp devices/sdrplay-handler/sdrplayselect.cpp decoders/drm-decoder/data/aac-processor-faad.cpp decoders/drm-decoder/data/drm-aacdecoder.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents radio-constants.h radio.h bandplan.h output/upconverter.h output/audiosink.h various/agchandler.h various/ringbuffer.h various/fft.h various/shifter.h various/utilities.h various/slidingfft.h various/program-list.h various/popup-keypad.h various/s-meter.h various/downconverter.h decimators/newconverter.h decimators/decimator.h filters/fft-filters.h filters/fir-filters.h filters/iir-filters.h filters/decimating_filter.h scopes-qwt6/virtual-scope.h scopes-qwt6/spectrogramdata.h scopes-qwt6/waterfall-scope.h scopes-qwt6/spectrum-scope.h scopes-qwt6/scope.h scopes-qwt6/fft-scope.h devices/device-handler.h devices/filereader/filereader.h devices/filereader/filehulp.h decoders/virtual-decoder.h decoders/drm-decoder/drm-decoder.h decoders/drm-decoder/iqdisplay.h decoders/drm-decoder/eqdisplay.h decoders/drm-decoder/basics.h decoders/drm-decoder/frame-processor.h decoders/drm-decoder/ofdm/reader.h decoders/drm-decoder/ofdm/correlator.h decoders/drm-decoder/ofdm/timesync.h decoders/drm-decoder/ofdm/freqsyncer.h decoders/drm-decoder/ofdm/word-collector.h decoders/drm-decoder/signal-handling/referenceframe.h decoders/drm-decoder/signal-handling/equalizer-base.h decoders/drm-decoder/signal-handling/eq-1/equalizer-1.h decoders/drm-decoder/signal-handling/eq-1/estimator-base.h decoders/drm-decoder/signal-handling/eq-1/estimator-2.h decoders/drm-decoder/support/my-array.h decoders/drm-decoder/support/viterbi-drm.h decoders/drm-decoder/support/mapper.h decoders/drm-decoder/support/prbs.h decoders/drm-decoder/support/checkcrc.h decoders/drm-decoder/support/qam64-metrics.h decoders/drm-decoder/support/qam16-metrics.h decoders/drm-decoder/support/qam4-metrics.h decoders/drm-decoder/support/deinterleaver.h decoders/drm-decoder/support/matrix2.h decoders/drm-decoder/support/protlevels.h decoders/drm-decoder/support/mer4-values.h decoders/drm-decoder/support/mer16-values.h decoders/drm-decoder/support/mer64-values.h decoders/drm-decoder/parameters/state-descriptor.h decoders/drm-decoder/parameters/puncture-tables.h decoders/drm-decoder/fac/fac-tables.h decoders/drm-decoder/fac/fac-processor.h decoders/drm-decoder/sdc/sdc-streamer.h decoders/drm-decoder/sdc/sdc-processor.h decoders/drm-decoder/msc/backend-controller.h decoders/drm-decoder/msc/msc-processor.h decoders/drm-decoder/msc/msc-handler-qam16.h decoders/drm-decoder/msc/msc-handler-qam64.h decoders/drm-decoder/msc/msc-streamer.h decoders/drm-decoder/msc/msc-handler.h decoders/drm-decoder/data/data-processor.h decoders/drm-decoder/data/up-filter.h decoders/drm-decoder/data/fec-handler.h decoders/drm-decoder/data/galois.h decoders/drm-decoder/data/reed-solomon.h decoders/drm-decoder/data/message-processor.h decoders/drm-decoder/data/packet-assembler.h decoders/drm-decoder/data/virtual-datahandler.h decoders/drm-decoder/data/mot-data.h devices/sdrplay-handler/sdrplay-handler.h devices/sdrplay-handler/sdrplayselect.h decoders/drm-decoder/data/aac-processor-faad.h decoders/drm-decoder/data/drm-aacdecoder.h decoders/drm-decoder/data/neaacdec_dll.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp radio.cpp bandplan.cpp output/upconverter.cpp output/audiosink.cpp various/agchandler.cpp various/fft.cpp various/popup-keypad.cpp various/s-meter.cpp various/shifter.cpp various/utilities.cpp various/slidingfft.cpp various/program-list.cpp various/downconverter.cpp filters/fft-filters.cpp filters/fir-filters.cpp filters/iir-filters.cpp filters/decimating_filter.cpp scopes-qwt6/virtual-scope.cpp scopes-qwt6/waterfall-scope.cpp scopes-qwt6/spectrum-scope.cpp scopes-qwt6/scope.cpp scopes-qwt6/fft-scope.cpp decimators/decimator.cpp devices/device-handler.cpp devices/filereader/filereader.cpp devices/filereader/filehulp.cpp decoders/virtual-decoder.cpp decoders/drm-decoder/drm-decoder.cpp decoders/drm-decoder/eqdisplay.cpp decoders/drm-decoder/iqdisplay.cpp decoders/drm-decoder/basics.cpp decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/correlator.cpp decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-decoder/signal-handling/referenceframe.cpp decoders/drm-decoder/signal-handling/equalizer-base.cpp decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-base.cpp decoders/drm-decoder/signal-handling/eq-1/estimator-1.cpp decoders/drm-decoder/support/viterbi-drm.cpp decoders/drm-decoder/support/mapper.cpp decoders/drm-decoder/support/prbs.cpp decoders/drm-decoder/support/checkcrc.cpp decoders/drm-decoder/support/qam64-metrics.cpp decoders/drm-decoder/support/qam16-metrics.cpp decoders/drm-decoder/support/qam4-metrics.cpp decoders/drm-decoder/support/deinterleaver.cpp decoders/drm-decoder/support/matrix2.cpp decoders/drm-decoder/support/protlevels.cpp decoders/drm-decoder/support/mer4-values.cpp decoders/drm-decoder/support/mer16-values.cpp decoders/drm-decoder/support/mer64-values.cpp decoders/drm-decoder/parameters/state-descriptor.cpp decoders/drm-decoder/parameters/puncture-tables.cpp decoders/drm-decoder/fac/fac-tables.cpp decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder/sdc/sdc-streamer.cpp decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder/msc/backend-controller.cpp decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/up-filter.cpp decoders/drm-decoder/data/fec-handler.cpp decoders/drm-decoder/data/galois.cpp decoders/drm-decoder/data/reed-solomon.cpp decoders/drm-decoder/data/message-processor.cpp decoders/drm-decoder/data/packet-assembler.cpp decoders/drm-decoder/data/virtual-datahandler.cpp decoders/drm-decoder/data/mot-data.cpp devices/sdrplay-handler/sdrplay-handler.cpp devices/sdrplay-handler/sdrplayselect.cpp decoders/drm-decoder/data/aac-processor-faad.cpp decoders/drm-decoder/data/drm-aacdecoder.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents newradio.ui devices/filereader/filereader-widget.ui decoders/drm-decoder/drmdecoder.ui devices/sdrplay-handler/sdrplay-widget.ui $(DISTDIR)/
 
 
@@ -740,9 +750,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /../lib64/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -O2 -Wall -Wextra -dM -E -o moc_predefs.h /../lib64/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_message-processor.cpp moc_mot-data.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_aac-processor-faad.cpp moc_drm-aacdecoder.cpp
+compiler_moc_header_make_all: moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_msc-handler.cpp moc_data-processor.cpp moc_message-processor.cpp moc_mot-data.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_aac-processor-faad.cpp moc_drm-aacdecoder.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_data-processor.cpp moc_message-processor.cpp moc_mot-data.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_aac-processor-faad.cpp moc_drm-aacdecoder.cpp
+	-$(DEL_FILE) moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_msc-handler.cpp moc_data-processor.cpp moc_message-processor.cpp moc_mot-data.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_aac-processor-faad.cpp moc_drm-aacdecoder.cpp
 moc_radio.cpp: radio.h \
 		../../../include/qt5/QtWidgets/QMainWindow \
 		../../../include/qt5/QtWidgets/qmainwindow.h \
@@ -3132,6 +3142,67 @@ moc_backend-controller.cpp: decoders/drm-decoder/msc/backend-controller.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
 	/../lib64/qt5/bin/moc $(DEFINES) --include /usr/shared/systems/drm-receiver/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver/decimators -I/usr/shared/systems/drm-receiver/filters -I/usr/shared/systems/drm-receiver/various -I/usr/shared/systems/drm-receiver/output -I/usr/shared/systems/drm-receiver/scopes-qwt6 -I/usr/shared/systems/drm-receiver/devices -I/usr/shared/systems/drm-receiver/devices/filereader -I/usr/shared/systems/drm-receiver/decoders -I/usr/shared/systems/drm-receiver/decoders/drm-decoder -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/ofdm -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/support -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/parameters -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/msc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/sdc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/fac -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5/qwt -I/usr/shared/systems/drm-receiver/devices/sdrplay-handler -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/10 -I/usr/include/c++/10/x86_64-redhat-linux -I/usr/include/c++/10/backward -I/usr/lib/gcc/x86_64-redhat-linux/10/include -I/usr/local/include -I/usr/include decoders/drm-decoder/msc/backend-controller.h -o moc_backend-controller.cpp
+
+moc_msc-handler.cpp: decoders/drm-decoder/msc/msc-handler.h \
+		radio-constants.h \
+		../../../include/qt5/QtCore/QObject \
+		../../../include/qt5/QtCore/qobject.h \
+		../../../include/qt5/QtCore/qobjectdefs.h \
+		../../../include/qt5/QtCore/qnamespace.h \
+		../../../include/qt5/QtCore/qglobal.h \
+		../../../include/qt5/QtCore/qconfig-bootstrapped.h \
+		../../../include/qt5/QtCore/qconfig.h \
+		../../../include/qt5/QtCore/qconfig-64.h \
+		../../../include/qt5/QtCore/qtcore-config.h \
+		../../../include/qt5/QtCore/qsystemdetection.h \
+		../../../include/qt5/QtCore/qprocessordetection.h \
+		../../../include/qt5/QtCore/qcompilerdetection.h \
+		../../../include/qt5/QtCore/qtypeinfo.h \
+		../../../include/qt5/QtCore/qsysinfo.h \
+		../../../include/qt5/QtCore/qlogging.h \
+		../../../include/qt5/QtCore/qflags.h \
+		../../../include/qt5/QtCore/qatomic.h \
+		../../../include/qt5/QtCore/qbasicatomic.h \
+		../../../include/qt5/QtCore/qatomic_bootstrap.h \
+		../../../include/qt5/QtCore/qgenericatomic.h \
+		../../../include/qt5/QtCore/qatomic_cxx11.h \
+		../../../include/qt5/QtCore/qatomic_msvc.h \
+		../../../include/qt5/QtCore/qglobalstatic.h \
+		../../../include/qt5/QtCore/qmutex.h \
+		../../../include/qt5/QtCore/qnumeric.h \
+		../../../include/qt5/QtCore/qversiontagging.h \
+		../../../include/qt5/QtCore/qobjectdefs_impl.h \
+		../../../include/qt5/QtCore/qstring.h \
+		../../../include/qt5/QtCore/qchar.h \
+		../../../include/qt5/QtCore/qbytearray.h \
+		../../../include/qt5/QtCore/qrefcount.h \
+		../../../include/qt5/QtCore/qarraydata.h \
+		../../../include/qt5/QtCore/qstringliteral.h \
+		../../../include/qt5/QtCore/qstringalgorithms.h \
+		../../../include/qt5/QtCore/qstringview.h \
+		../../../include/qt5/QtCore/qstringbuilder.h \
+		../../../include/qt5/QtCore/qlist.h \
+		../../../include/qt5/QtCore/qalgorithms.h \
+		../../../include/qt5/QtCore/qiterator.h \
+		../../../include/qt5/QtCore/qhashfunctions.h \
+		../../../include/qt5/QtCore/qpair.h \
+		../../../include/qt5/QtCore/qvector.h \
+		../../../include/qt5/QtCore/qcontainertools_impl.h \
+		../../../include/qt5/QtCore/qpoint.h \
+		../../../include/qt5/QtCore/qbytearraylist.h \
+		../../../include/qt5/QtCore/qstringlist.h \
+		../../../include/qt5/QtCore/qregexp.h \
+		../../../include/qt5/QtCore/qstringmatcher.h \
+		../../../include/qt5/QtCore/qcoreevent.h \
+		../../../include/qt5/QtCore/qscopedpointer.h \
+		../../../include/qt5/QtCore/qmetatype.h \
+		../../../include/qt5/QtCore/qvarlengtharray.h \
+		../../../include/qt5/QtCore/qcontainerfwd.h \
+		../../../include/qt5/QtCore/qobject_impl.h \
+		decoders/drm-decoder/basics.h \
+		moc_predefs.h \
+		/../lib64/qt5/bin/moc
+	/../lib64/qt5/bin/moc $(DEFINES) --include /usr/shared/systems/drm-receiver/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver/decimators -I/usr/shared/systems/drm-receiver/filters -I/usr/shared/systems/drm-receiver/various -I/usr/shared/systems/drm-receiver/output -I/usr/shared/systems/drm-receiver/scopes-qwt6 -I/usr/shared/systems/drm-receiver/devices -I/usr/shared/systems/drm-receiver/devices/filereader -I/usr/shared/systems/drm-receiver/decoders -I/usr/shared/systems/drm-receiver/decoders/drm-decoder -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/ofdm -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/support -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/parameters -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/msc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/sdc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/fac -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5/qwt -I/usr/shared/systems/drm-receiver/devices/sdrplay-handler -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/10 -I/usr/include/c++/10/x86_64-redhat-linux -I/usr/include/c++/10/backward -I/usr/lib/gcc/x86_64-redhat-linux/10/include -I/usr/local/include -I/usr/include decoders/drm-decoder/msc/msc-handler.h -o moc_msc-handler.cpp
 
 moc_data-processor.cpp: decoders/drm-decoder/data/data-processor.h \
 		../../../include/qt5/QtCore/QObject \
@@ -8713,10 +8784,20 @@ matrix2.o: decoders/drm-decoder/support/matrix2.cpp decoders/drm-decoder/support
 protlevels.o: decoders/drm-decoder/support/protlevels.cpp decoders/drm-decoder/support/protlevels.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o protlevels.o decoders/drm-decoder/support/protlevels.cpp
 
+mer4-values.o: decoders/drm-decoder/support/mer4-values.cpp decoders/drm-decoder/support/mer4-values.h \
+		decoders/drm-decoder/basics.h \
+		radio-constants.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mer4-values.o decoders/drm-decoder/support/mer4-values.cpp
+
 mer16-values.o: decoders/drm-decoder/support/mer16-values.cpp decoders/drm-decoder/support/mer16-values.h \
 		decoders/drm-decoder/basics.h \
 		radio-constants.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mer16-values.o decoders/drm-decoder/support/mer16-values.cpp
+
+mer64-values.o: decoders/drm-decoder/support/mer64-values.cpp decoders/drm-decoder/support/mer64-values.h \
+		decoders/drm-decoder/basics.h \
+		radio-constants.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mer64-values.o decoders/drm-decoder/support/mer64-values.cpp
 
 state-descriptor.o: decoders/drm-decoder/parameters/state-descriptor.cpp decoders/drm-decoder/parameters/state-descriptor.h \
 		radio-constants.h \
@@ -9087,6 +9168,7 @@ sdc-processor.o: decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/support/viterbi-drm.h \
 		decoders/drm-decoder/support/qam16-metrics.h \
 		decoders/drm-decoder/support/qam4-metrics.h \
+		decoders/drm-decoder/support/mer4-values.h \
 		decoders/drm-decoder/support/mer16-values.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sdc-processor.o decoders/drm-decoder/sdc/sdc-processor.cpp
 
@@ -9425,14 +9507,79 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm-decoder/msc/msc-handler-qam16.h \
 		radio-constants.h \
 		decoders/drm-decoder/msc/msc-handler.h \
+		../../../include/qt5/QtCore/QObject \
+		../../../include/qt5/QtCore/qobject.h \
+		../../../include/qt5/QtCore/qobjectdefs.h \
+		../../../include/qt5/QtCore/qnamespace.h \
+		../../../include/qt5/QtCore/qglobal.h \
+		../../../include/qt5/QtCore/qconfig-bootstrapped.h \
+		../../../include/qt5/QtCore/qconfig.h \
+		../../../include/qt5/QtCore/qconfig-64.h \
+		../../../include/qt5/QtCore/qtcore-config.h \
+		../../../include/qt5/QtCore/qsystemdetection.h \
+		../../../include/qt5/QtCore/qprocessordetection.h \
+		../../../include/qt5/QtCore/qcompilerdetection.h \
+		../../../include/qt5/QtCore/qtypeinfo.h \
+		../../../include/qt5/QtCore/qsysinfo.h \
+		../../../include/qt5/QtCore/qlogging.h \
+		../../../include/qt5/QtCore/qflags.h \
+		../../../include/qt5/QtCore/qatomic.h \
+		../../../include/qt5/QtCore/qbasicatomic.h \
+		../../../include/qt5/QtCore/qatomic_bootstrap.h \
+		../../../include/qt5/QtCore/qgenericatomic.h \
+		../../../include/qt5/QtCore/qatomic_cxx11.h \
+		../../../include/qt5/QtCore/qatomic_msvc.h \
+		../../../include/qt5/QtCore/qglobalstatic.h \
+		../../../include/qt5/QtCore/qmutex.h \
+		../../../include/qt5/QtCore/qnumeric.h \
+		../../../include/qt5/QtCore/qversiontagging.h \
+		../../../include/qt5/QtCore/qobjectdefs_impl.h \
+		../../../include/qt5/QtCore/qstring.h \
+		../../../include/qt5/QtCore/qchar.h \
+		../../../include/qt5/QtCore/qbytearray.h \
+		../../../include/qt5/QtCore/qrefcount.h \
+		../../../include/qt5/QtCore/qarraydata.h \
+		../../../include/qt5/QtCore/qstringliteral.h \
+		../../../include/qt5/QtCore/qstringalgorithms.h \
+		../../../include/qt5/QtCore/qstringview.h \
+		../../../include/qt5/QtCore/qstringbuilder.h \
+		../../../include/qt5/QtCore/qlist.h \
+		../../../include/qt5/QtCore/qalgorithms.h \
+		../../../include/qt5/QtCore/qiterator.h \
+		../../../include/qt5/QtCore/qhashfunctions.h \
+		../../../include/qt5/QtCore/qpair.h \
+		../../../include/qt5/QtCore/qvector.h \
+		../../../include/qt5/QtCore/qcontainertools_impl.h \
+		../../../include/qt5/QtCore/qpoint.h \
+		../../../include/qt5/QtCore/qbytearraylist.h \
+		../../../include/qt5/QtCore/qstringlist.h \
+		../../../include/qt5/QtCore/qregexp.h \
+		../../../include/qt5/QtCore/qstringmatcher.h \
+		../../../include/qt5/QtCore/qcoreevent.h \
+		../../../include/qt5/QtCore/qscopedpointer.h \
+		../../../include/qt5/QtCore/qmetatype.h \
+		../../../include/qt5/QtCore/qvarlengtharray.h \
+		../../../include/qt5/QtCore/qcontainerfwd.h \
+		../../../include/qt5/QtCore/qobject_impl.h \
 		decoders/drm-decoder/basics.h \
 		decoders/drm-decoder/support/qam16-metrics.h \
 		decoders/drm-decoder/msc/msc-streamer.h \
 		decoders/drm-decoder/parameters/puncture-tables.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
-		../../../include/qt5/QtCore/qstring.h \
-		../../../include/qt5/QtCore/qchar.h \
+		decoders/drm-decoder/support/mapper.h \
+		decoders/drm-decoder/support/prbs.h \
+		decoders/drm-decoder/support/protlevels.h \
+		decoders/drm-decoder/support/mer16-values.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler-qam16.o decoders/drm-decoder/msc/msc-handler-qam16.cpp
+
+msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-handler-qam64.h \
+		radio-constants.h \
+		decoders/drm-decoder/msc/msc-handler.h \
+		../../../include/qt5/QtCore/QObject \
+		../../../include/qt5/QtCore/qobject.h \
+		../../../include/qt5/QtCore/qobjectdefs.h \
+		../../../include/qt5/QtCore/qnamespace.h \
 		../../../include/qt5/QtCore/qglobal.h \
 		../../../include/qt5/QtCore/qconfig-bootstrapped.h \
 		../../../include/qt5/QtCore/qconfig.h \
@@ -9455,63 +9602,44 @@ msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm
 		../../../include/qt5/QtCore/qmutex.h \
 		../../../include/qt5/QtCore/qnumeric.h \
 		../../../include/qt5/QtCore/qversiontagging.h \
+		../../../include/qt5/QtCore/qobjectdefs_impl.h \
+		../../../include/qt5/QtCore/qstring.h \
+		../../../include/qt5/QtCore/qchar.h \
 		../../../include/qt5/QtCore/qbytearray.h \
 		../../../include/qt5/QtCore/qrefcount.h \
-		../../../include/qt5/QtCore/qnamespace.h \
 		../../../include/qt5/QtCore/qarraydata.h \
 		../../../include/qt5/QtCore/qstringliteral.h \
 		../../../include/qt5/QtCore/qstringalgorithms.h \
 		../../../include/qt5/QtCore/qstringview.h \
 		../../../include/qt5/QtCore/qstringbuilder.h \
-		decoders/drm-decoder/support/mapper.h \
-		decoders/drm-decoder/support/prbs.h \
-		decoders/drm-decoder/support/protlevels.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler-qam16.o decoders/drm-decoder/msc/msc-handler-qam16.cpp
-
-msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm-decoder/msc/msc-handler-qam64.h \
-		radio-constants.h \
-		decoders/drm-decoder/msc/msc-handler.h \
+		../../../include/qt5/QtCore/qlist.h \
+		../../../include/qt5/QtCore/qalgorithms.h \
+		../../../include/qt5/QtCore/qiterator.h \
+		../../../include/qt5/QtCore/qhashfunctions.h \
+		../../../include/qt5/QtCore/qpair.h \
+		../../../include/qt5/QtCore/qvector.h \
+		../../../include/qt5/QtCore/qcontainertools_impl.h \
+		../../../include/qt5/QtCore/qpoint.h \
+		../../../include/qt5/QtCore/qbytearraylist.h \
+		../../../include/qt5/QtCore/qstringlist.h \
+		../../../include/qt5/QtCore/qregexp.h \
+		../../../include/qt5/QtCore/qstringmatcher.h \
+		../../../include/qt5/QtCore/qcoreevent.h \
+		../../../include/qt5/QtCore/qscopedpointer.h \
+		../../../include/qt5/QtCore/qmetatype.h \
+		../../../include/qt5/QtCore/qvarlengtharray.h \
+		../../../include/qt5/QtCore/qcontainerfwd.h \
+		../../../include/qt5/QtCore/qobject_impl.h \
 		decoders/drm-decoder/basics.h \
 		decoders/drm-decoder/support/qam64-metrics.h \
 		decoders/drm-decoder/msc/msc-streamer.h \
 		decoders/drm-decoder/parameters/puncture-tables.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
-		../../../include/qt5/QtCore/qstring.h \
-		../../../include/qt5/QtCore/qchar.h \
-		../../../include/qt5/QtCore/qglobal.h \
-		../../../include/qt5/QtCore/qconfig-bootstrapped.h \
-		../../../include/qt5/QtCore/qconfig.h \
-		../../../include/qt5/QtCore/qconfig-64.h \
-		../../../include/qt5/QtCore/qtcore-config.h \
-		../../../include/qt5/QtCore/qsystemdetection.h \
-		../../../include/qt5/QtCore/qprocessordetection.h \
-		../../../include/qt5/QtCore/qcompilerdetection.h \
-		../../../include/qt5/QtCore/qtypeinfo.h \
-		../../../include/qt5/QtCore/qsysinfo.h \
-		../../../include/qt5/QtCore/qlogging.h \
-		../../../include/qt5/QtCore/qflags.h \
-		../../../include/qt5/QtCore/qatomic.h \
-		../../../include/qt5/QtCore/qbasicatomic.h \
-		../../../include/qt5/QtCore/qatomic_bootstrap.h \
-		../../../include/qt5/QtCore/qgenericatomic.h \
-		../../../include/qt5/QtCore/qatomic_cxx11.h \
-		../../../include/qt5/QtCore/qatomic_msvc.h \
-		../../../include/qt5/QtCore/qglobalstatic.h \
-		../../../include/qt5/QtCore/qmutex.h \
-		../../../include/qt5/QtCore/qnumeric.h \
-		../../../include/qt5/QtCore/qversiontagging.h \
-		../../../include/qt5/QtCore/qbytearray.h \
-		../../../include/qt5/QtCore/qrefcount.h \
-		../../../include/qt5/QtCore/qnamespace.h \
-		../../../include/qt5/QtCore/qarraydata.h \
-		../../../include/qt5/QtCore/qstringliteral.h \
-		../../../include/qt5/QtCore/qstringalgorithms.h \
-		../../../include/qt5/QtCore/qstringview.h \
-		../../../include/qt5/QtCore/qstringbuilder.h \
 		decoders/drm-decoder/support/mapper.h \
 		decoders/drm-decoder/support/prbs.h \
-		decoders/drm-decoder/support/protlevels.h
+		decoders/drm-decoder/support/protlevels.h \
+		decoders/drm-decoder/support/mer64-values.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler-qam64.o decoders/drm-decoder/msc/msc-handler-qam64.cpp
 
 msc-streamer.o: decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/msc/msc-streamer.h \
@@ -9559,11 +9687,10 @@ msc-streamer.o: decoders/drm-decoder/msc/msc-streamer.cpp decoders/drm-decoder/m
 
 msc-handler.o: decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/msc/msc-handler.h \
 		radio-constants.h \
-		decoders/drm-decoder/basics.h \
-		decoders/drm-decoder/parameters/state-descriptor.h \
-		../../../include/qt5/QtCore/QString \
-		../../../include/qt5/QtCore/qstring.h \
-		../../../include/qt5/QtCore/qchar.h \
+		../../../include/qt5/QtCore/QObject \
+		../../../include/qt5/QtCore/qobject.h \
+		../../../include/qt5/QtCore/qobjectdefs.h \
+		../../../include/qt5/QtCore/qnamespace.h \
 		../../../include/qt5/QtCore/qglobal.h \
 		../../../include/qt5/QtCore/qconfig-bootstrapped.h \
 		../../../include/qt5/QtCore/qconfig.h \
@@ -9586,14 +9713,127 @@ msc-handler.o: decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/msc
 		../../../include/qt5/QtCore/qmutex.h \
 		../../../include/qt5/QtCore/qnumeric.h \
 		../../../include/qt5/QtCore/qversiontagging.h \
+		../../../include/qt5/QtCore/qobjectdefs_impl.h \
+		../../../include/qt5/QtCore/qstring.h \
+		../../../include/qt5/QtCore/qchar.h \
 		../../../include/qt5/QtCore/qbytearray.h \
 		../../../include/qt5/QtCore/qrefcount.h \
-		../../../include/qt5/QtCore/qnamespace.h \
 		../../../include/qt5/QtCore/qarraydata.h \
 		../../../include/qt5/QtCore/qstringliteral.h \
 		../../../include/qt5/QtCore/qstringalgorithms.h \
 		../../../include/qt5/QtCore/qstringview.h \
-		../../../include/qt5/QtCore/qstringbuilder.h
+		../../../include/qt5/QtCore/qstringbuilder.h \
+		../../../include/qt5/QtCore/qlist.h \
+		../../../include/qt5/QtCore/qalgorithms.h \
+		../../../include/qt5/QtCore/qiterator.h \
+		../../../include/qt5/QtCore/qhashfunctions.h \
+		../../../include/qt5/QtCore/qpair.h \
+		../../../include/qt5/QtCore/qvector.h \
+		../../../include/qt5/QtCore/qcontainertools_impl.h \
+		../../../include/qt5/QtCore/qpoint.h \
+		../../../include/qt5/QtCore/qbytearraylist.h \
+		../../../include/qt5/QtCore/qstringlist.h \
+		../../../include/qt5/QtCore/qregexp.h \
+		../../../include/qt5/QtCore/qstringmatcher.h \
+		../../../include/qt5/QtCore/qcoreevent.h \
+		../../../include/qt5/QtCore/qscopedpointer.h \
+		../../../include/qt5/QtCore/qmetatype.h \
+		../../../include/qt5/QtCore/qvarlengtharray.h \
+		../../../include/qt5/QtCore/qcontainerfwd.h \
+		../../../include/qt5/QtCore/qobject_impl.h \
+		decoders/drm-decoder/basics.h \
+		decoders/drm-decoder/parameters/state-descriptor.h \
+		../../../include/qt5/QtCore/QString \
+		decoders/drm-decoder/drm-decoder.h \
+		filters/fir-filters.h \
+		ui_drmdecoder.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
+		../../../include/qt5/QtGui/qtguiglobal.h \
+		../../../include/qt5/QtGui/qtgui-config.h \
+		../../../include/qt5/QtWidgets/qtwidgets-config.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtGui/qwindowdefs.h \
+		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
+		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtGui/qpaintdevice.h \
+		../../../include/qt5/QtCore/qrect.h \
+		../../../include/qt5/QtGui/qpalette.h \
+		../../../include/qt5/QtGui/qcolor.h \
+		../../../include/qt5/QtGui/qrgb.h \
+		../../../include/qt5/QtGui/qrgba64.h \
+		../../../include/qt5/QtGui/qbrush.h \
+		../../../include/qt5/QtGui/qmatrix.h \
+		../../../include/qt5/QtGui/qpolygon.h \
+		../../../include/qt5/QtGui/qregion.h \
+		../../../include/qt5/QtCore/qdatastream.h \
+		../../../include/qt5/QtCore/qline.h \
+		../../../include/qt5/QtGui/qtransform.h \
+		../../../include/qt5/QtGui/qimage.h \
+		../../../include/qt5/QtGui/qpixelformat.h \
+		../../../include/qt5/QtGui/qpixmap.h \
+		../../../include/qt5/QtGui/qfont.h \
+		../../../include/qt5/QtGui/qfontmetrics.h \
+		../../../include/qt5/QtGui/qfontinfo.h \
+		../../../include/qt5/QtWidgets/qsizepolicy.h \
+		../../../include/qt5/QtGui/qkeysequence.h \
+		../../../include/qt5/QtGui/qevent.h \
+		../../../include/qt5/QtCore/qurl.h \
+		../../../include/qt5/QtCore/qurlquery.h \
+		../../../include/qt5/QtCore/qfile.h \
+		../../../include/qt5/QtCore/qfiledevice.h \
+		../../../include/qt5/QtGui/qvector2d.h \
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler.o decoders/drm-decoder/msc/msc-handler.cpp
 
 data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/data-processor.h \
@@ -10945,6 +11185,9 @@ moc_sdc-processor.o: moc_sdc-processor.cpp
 
 moc_backend-controller.o: moc_backend-controller.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_backend-controller.o moc_backend-controller.cpp
+
+moc_msc-handler.o: moc_msc-handler.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_msc-handler.o moc_msc-handler.cpp
 
 moc_data-processor.o: moc_data-processor.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_data-processor.o moc_data-processor.cpp

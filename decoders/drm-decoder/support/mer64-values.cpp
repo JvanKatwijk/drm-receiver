@@ -22,54 +22,73 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-/* Definitions ****************************************************************/
-/* Definitions for binary numbers (BI). On the left is most sigificant bit */
-#define BI_00   0 /* Two bits */
-#define BI_01   1
-#define BI_10   2
-#define BI_11   3
 
-/**********************************************************************/
-/* 16QAM **************************************************************/
-/**********************************************************************/
-/*		(i_0  i_1  q_0  q_1) = (y_0,0  y_1,0  y_0,1  y_1,1)   */
+#include	"mer64-values.h"
 
-#include	"mer16-values.h"
-
-static
-const float rTableQAM16 [4][2] = {
-    { 0.9486832980,  0.9486832980},
-    {-0.3162277660, -0.3162277660},
-    { 0.3162277660,  0.3162277660},
-    {-0.9486832980, -0.9486832980}
+const float rTableQAM64SM [8][2] = {
+    { 1.0801234497f,  1.0801234497f},
+    {-0.1543033499f, -0.1543033499f},
+    { 0.4629100498f,  0.4629100498f},
+    {-0.7715167498f, -0.7715167498f},
+    { 0.7715167498f,  0.7715167498f},
+    {-0.4629100498f, -0.4629100498f},
+    { 0.1543033499f,  0.1543033499f},
+    {-1.0801234497f, -1.0801234497f}
 };
-	mer16_compute::mer16_compute	() {
+
+	mer64_compute::mer64_compute	() {
 }
 
-	mer16_compute::~mer16_compute	() {
+	mer64_compute::~mer64_compute	() {
 }
 //
-float	mer16_compute::computemer	(theSignal	*signalVector,
+float N (float x) {
+	return sqrt (2 * x * x);
+}
+
+float	mer64_compute::computemer	(theSignal	*signalVector,
 	                                 int32_t	amount) {
 double	sumIQ	= 0;
 double	sumdIdQ	= 0;
+
+float	diff1	= (0.4629100498 * sqrt (2) -
+                                         0.1543033499 * sqrt (2)) / 2; 
+float	diff2	= (0.7715167498 * sqrt (2) -
+                                         0.4629100498 * sqrt (2)) / 2;
+float	diff3	= (1.0801234497 * sqrt (2) -
+                                         0.7715167498 * sqrt (2)) / 2;
 
 	   for (int i = 0; i < amount; i ++) {
 	      std::complex<float> val = signalVector [i]. signalValue;
 	      float	theI, theQ, thedI, thedQ;
 	      val =  std::complex<float> (fabs (real (val)), fabs (imag (val)));
-	      if (abs (val) < 0.5) {
-	         theI = rTableQAM16 [2][0];
-	         theQ = rTableQAM16 [2][0];
+	      if (abs (val) < 0.4629100498 * sqrt (2) - diff1)  {
+	         theI = 0.1543033499;
+	         theQ = 0.1543033499;;
+	         thedI = real (val) - theI;
+	         thedQ = imag (val) - theQ;
+	      }
+	      else 
+	      if (abs (val) < 0.7715167498 * sqrt (2) - diff2) {
+	         theI = 0.4629100498;
+	         theQ = 0.4629100498;
+	         thedI = real (val) - theI;
+	         thedQ = imag (val) - theQ;
+	      }
+	      else
+	      if (abs (val) < 1.0801234497 * sqrt (2) - diff3) {
+	         theI = 0.7715167498;
+	         theQ = 0.7715167498;
 	         thedI = real (val) - theI;
 	         thedQ = imag (val) - theQ;
 	      }
 	      else {
-	         theI = rTableQAM16 [0][0];
-	         theQ = rTableQAM16 [0][0];
+	         theI = 1.0801234497;
+	         theQ = 1.0801234497;
 	         thedI = real (val) - theI;
 	         thedQ = imag (val) - theQ;
 	      }
+	
 	      sumIQ	+= theI * theI + theQ * theQ;
 	      sumdIdQ	+= thedI * thedI + thedQ * thedQ;
 	}

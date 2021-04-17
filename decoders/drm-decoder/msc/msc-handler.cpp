@@ -25,10 +25,15 @@
 //
 #include	"msc-handler.h"
 #include	"state-descriptor.h"
+#include	"drm-decoder.h"
 
-	mscHandler::mscHandler	(stateDescriptor *theState) {
+	mscHandler::mscHandler	(drmDecoder *m,
+	                         stateDescriptor *theState) {
+	this	-> master	= m;
 	this	-> theState	= theState;
 	muxLength		= theState	-> mscCells / 3;
+	connect (this, SIGNAL (show_mer (float)),
+	         master, SLOT (show_msc_mer (float)));
 }
 
 	mscHandler::~mscHandler	(void) {

@@ -81,6 +81,7 @@
 	fftwf_destroy_plan (hetPlan);
 }
 
+static float theOffset= 0;
 //	when starting up, we "borrow" the precomputed frequency offset
 //	and start building up the spectrumbuffer.
 //	
@@ -88,16 +89,14 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        int32_t		initialFreq,
 	                        float		offsetFractional) {
 std::complex<float>	temp [Ts];
-int16_t		i;
 std::complex<float>	angle	= std::complex<float> (0, 0);
 int	f	= buffer -> currentIndex;
-int	xx;
-float	timeOffset;
 
+	theOffset = 0;
 	buffer		-> waitfor (Ts + Ts / 2);
 	
 //	correction of the time offset by interpolation
-	for (i = 0; i < Ts; i ++) {
+	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer ->  data [(f + i) & bufMask];
 	   std::complex<float> two = buffer ->  data [(f + i + 1)& bufMask];
 	   temp [i] = cmul (one, 1 - offsetFractional) +
@@ -108,7 +107,7 @@ float	timeOffset;
 	buffer -> currentIndex = (f + Ts) & bufMask;
 
 //	Now: determine the fine grain offset.
-	for (i = 0; i < Tg; i ++)
+	for (int i = 0; i < Tg; i ++)
 	   angle += conj (temp [Tu + i]) * temp [i];
 //	simple averaging
 	theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
@@ -139,27 +138,35 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        float		angle,
 	                        float		clockOffset) {
 std::complex<float>	temp [Ts];
+static float theOffset = 0;
 int	f		= buffer -> currentIndex;
-static int timeOffset	= 0;
-int	increment	= 0;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	if (offsetFractional < -0.5) {
-	   fprintf (stderr, "te klein");
+	int xxx	= get_intOffset (0, 15, 10);
+	theOffset += clockOffset;
+	if (theOffset <  0) {
 	   f --;
+	   theOffset += 1;
+	   fprintf (stderr, "-1 due to clock %f (intOf %d)\n",
+	                              Ts * clockOffset, xxx);
+	}
+	if (theOffset >= 1) {
+	   f ++;
+	   theOffset -= 1;
+	   fprintf (stderr, "+1 due to clock %f (intoff %d)\n",
+	                              Ts * clockOffset, xxx);
 	}
 
-	if (offsetFractional > 0.5) {
-	   fprintf (stderr, "te groot");
-	   f ++;
+	if (xxx / 3 != 0) {
+//	   fprintf (stderr, "offset %d\n", xxx);
+//	   f += xxx / 3;
 	}
-//	just linear interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = cmul (one, 1 - offsetFractional) +
-	              cmul (two, offsetFractional);
+	   temp [i] = cmul (one, 1 - theOffset) +
+	              cmul (two, theOffset);
 	}
 
 //	And we adjust the bufferpointer here
@@ -167,10 +174,11 @@ int	increment	= 0;
 
 	std::complex<float> faseError = std::complex<float> (0, 0);
 //	Now: determine the fine grain offset.	
-        for (int i = 0; i < Tg; i ++)
-           faseError += conj (temp [Tu + i]) * temp [i];
+//	for (int i = 0; i < Tg; i ++)
+//	   faseError += conj (temp [Tu + i]) * temp [i];
 //      simple averaging
 //	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
+//
 //	alternatively, we could use the freqOffset as we got back
 //	from equalizing the previous word
 //	correct the phase

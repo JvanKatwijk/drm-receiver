@@ -34,8 +34,9 @@ class	Mapper;
 
 class	QAM64_SM_Handler : public mscHandler {
 public:
-		QAM64_SM_Handler	(stateDescriptor *, int8_t);
-		~QAM64_SM_Handler	(void);
+		QAM64_SM_Handler	(drmDecoder *,
+	                                 stateDescriptor *, int8_t);
+		~QAM64_SM_Handler	();
 	void	process			(theSignal *, uint8_t *);
 private:
 

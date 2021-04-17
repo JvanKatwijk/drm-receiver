@@ -24,6 +24,7 @@
 //	the real msc work is to be done by descendants of the mscHandler
 //
 #include	<vector>
+#include	"drm-decoder.h"
 #include	"msc-handler-qam16.h"
 #include	"msc-streamer.h"
 #include	"state-descriptor.h"
@@ -31,12 +32,15 @@
 #include	"basics.h"
 #include	"prbs.h"
 #include	"protlevels.h"
+
+#include	"mer16-values.h"
 //
 //	For each of the "levels" (qam16 => 2 levels), we create a
 //	separate handler. From "samples to bitstreams" is done here
 //	as is the bit-deinterleaving
-	QAM16_SM_Handler::QAM16_SM_Handler	(stateDescriptor *theState):
-	                                             mscHandler (theState),
+	QAM16_SM_Handler::QAM16_SM_Handler	(drmDecoder *m,
+	                                         stateDescriptor *theState):
+	                                             mscHandler (m, theState),
 	                                             myDecoder () {
 int16_t	RYlcm, i;
 float	denom;
@@ -120,6 +124,11 @@ std::vector<metrics> Y0;
 std::vector<metrics> Y1;
 std::vector<uint8_t> level_0;
 std::vector<uint8_t> level_1;
+
+mer16_compute computeMER;
+float mer = 10 * log10 (computeMER. computemer (v, theState -> muxSize));
+	show_mer (mer);
+
 	bitsOut. resize (highProtectedbits + lowProtectedbits);
 	bits_0. resize (stream_0 -> highBits () + stream_0 -> lowBits ());
 	bits_1. resize (stream_1 -> highBits () + stream_1 -> lowBits ());
@@ -131,8 +140,8 @@ std::vector<uint8_t> level_1;
 	for (int i = 0; i < 6; i ++) {
 //	First the "normal" decoding. leading to two bit rows
 	   myDecoder. computemetrics (v, theState -> muxSize, 0, Y0. data (),
-	                                   i != 0,
-	                                 level_0. data (),
+	                              i != 0,
+	                              level_0. data (),
 	                                          level_1. data ());
 	   stream_0	-> process	(Y0. data (),
 	                                 bits_0. data (), level_0. data ());

@@ -121,6 +121,8 @@ private slots:
 
 	void		set_phaseOffset		(int);
 
+	void		show_sdc_mer		(float);
+	void		show_msc_mer		(float);
 signals:
 	void		audioAvailable		(int, int);
 	void		setDetectorMarker	(int);
