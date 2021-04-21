@@ -101,7 +101,7 @@ int16_t	theMode;
 	else
 	for (i = Mode_A; i <= Mode_D; i++) {
 	   if ((i != theMode) && (list_gammaRelative [i - Mode_A] >
-	                           0.80 * gammaRelative))
+	                           0.50 * gammaRelative))
 	      maxOK = false;
 	}
 	
@@ -237,7 +237,7 @@ int32_t i, j;
 	      gamma [i]		= summedCorrelations [(index + i)];
               squareTerm [i]	= (float) (0.5 * (EPSILON +
 	                                 summedSquares [index + i]));
-	      float mmse = squareTerm [i] - 2 * abs (gamma [i]);
+	      float mmse = abs (squareTerm [i] - 2 * abs (gamma [i]));
 	      if (mmse < minValue) {
 	         minValue = mmse;
 	         b [j] = i;

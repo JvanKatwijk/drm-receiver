@@ -143,25 +143,18 @@ int	f		= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	int xxx	= get_intOffset (0, 15, 10);
 	theOffset += clockOffset;
 	if (theOffset <  0) {
 	   f --;
 	   theOffset += 1;
-	   fprintf (stderr, "-1 due to clock %f (intOf %d)\n",
-	                              Ts * clockOffset, xxx);
+	   fprintf (stderr, "-1 due to clock %f \n", Ts * clockOffset);
 	}
 	if (theOffset >= 1) {
 	   f ++;
 	   theOffset -= 1;
-	   fprintf (stderr, "+1 due to clock %f (intoff %d)\n",
-	                              Ts * clockOffset, xxx);
+	   fprintf (stderr, "+1 due to clock %f\n", Ts * clockOffset);
 	}
 
-	if (xxx / 3 != 0) {
-//	   fprintf (stderr, "offset %d\n", xxx);
-//	   f += xxx / 3;
-	}
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
@@ -172,40 +165,22 @@ int	f		= buffer -> currentIndex;
 //	And we adjust the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & bufMask;
 
-	std::complex<float> faseError = std::complex<float> (0, 0);
-//	Now: determine the fine grain offset.	
-//	for (int i = 0; i < Tg; i ++)
-//	   faseError += conj (temp [Tu + i]) * temp [i];
-//      simple averaging
-//	theAngle        = 0.9 * theAngle + 0.1 * arg (faseError);
-//
-//	alternatively, we could use the freqOffset as we got back
-//	from equalizing the previous word
 //	correct the phase
 	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
-	float offset          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
-	if (offset != -offset) { // precaution to handle undefines
-	   if (offset > 200 * sampleRate / Tu) {
-	      modeInf -> freqOffset_integer +=  sampleRate / Tu;
-	      offset -= 200 * sampleRate / Tu;
-	   }
-	   if (offset < -200 * sampleRate / Tu) {
-	      modeInf -> freqOffset_integer -= sampleRate / Tu / 2;
-	      offset += 200 * sampleRate / Tu;
-	   }
-
+	float freqOff          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	if (freqOff != -freqOff) { // precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
-	                        100 * modeInf -> freqOffset_integer - offset);
+	                        100 * modeInf -> freqOffset_integer -
+	                                         freqOff);
 	}
 
 	if (++displayCount > 20) {
 	   displayCount = 0;
 	   show_coarseOffset	(initialFreq);
-	   show_fineOffset	(- offset / 100);
+	   show_fineOffset	(- freqOff / 100);
 	   show_angle		(angle);
 	   show_timeOffset	(offsetFractional);
-//	   show_timeDelay	(timeOffsetInteger);
 	   show_clockOffset	(Ts * clockOffset);
 	}
 
