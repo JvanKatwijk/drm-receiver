@@ -111,7 +111,12 @@ int16_t		threeinaRow;
 int16_t		symbol_no	= 0;
 bool		frameReady;
 int16_t		missers;
-timeSyncer  my_Syncer (&my_Reader, sampleRate,  nSymbols);
+timeSyncer  my_Syncer (&my_Reader, sampleRate,  55);
+//timeSyncer  my_Syncer (&my_Reader, sampleRate,  nSymbols);
+float	offsetFractional	= 0;	//
+int16_t	offsetInteger		= 0;
+float	deltaFreqOffset		= 0;
+float	sampleclockOffset	= 0;
 //
 	try {
 restart:
@@ -129,7 +134,7 @@ restart:
 //	First step: find mode and starting point
 	   modeInf. Mode = -1;
 	   while (modeInf. Mode == -1) {
-	      my_Reader. shiftBuffer (Ts_of (Mode_A) / 2);
+	      my_Reader. shiftBuffer (Ts_of (Mode_B) / 2);
 	      getMode (&my_Reader, &modeInf);
            }
 
@@ -207,18 +212,32 @@ restart:
 	   for (symbol_no = 0; symbol_no < nrSymbols; symbol_no ++) 
 	      (void) my_Equalizer.
 	            equalize (inbank. element ((lc + symbol_no) % nrSymbols),
-	                                               symbol_no, &outbank);
+	                      symbol_no,
+	                      &outbank,
+	                      &modeInf. timeOffset_fractional,
+	                      &deltaFreqOffset,
+	                      &sampleclockOffset);
 
 	   lc		= (lc + symbol_no) % symbol_no;
 	   symbol_no	= 0;
 	   frameReady	= false;
 	   while (!frameReady) {
-	      my_wordCollector.  getWord (inbank. element (lc),
-	                                  modeInf. freqOffset_integer,
-	                                  modeInf. timeOffset_fractional);
-	      frameReady = my_Equalizer.  equalize (inbank. element (lc),
-                                                    symbol_no,
-                                                    &outbank);
+	      my_wordCollector.
+	            getWord (inbank. element (lc),
+	                     modeInf. freqOffset_integer,
+	                     false,
+                              modeInf. timeOffset_fractional,
+                              deltaFreqOffset,         // tracking value
+                              sampleclockOffset        // tracking value
+                             );
+
+	      frameReady = my_Equalizer.
+	                         equalize (inbank. element (lc),
+                                           symbol_no,
+                                           &outbank,
+                                           &modeInf. timeOffset_fractional,
+                                           &deltaFreqOffset,
+                                           &sampleclockOffset);
 
 	      lc = (lc + 1) % nrSymbols;
 	      symbol_no = (symbol_no + 1) % nrSymbols;
@@ -234,9 +253,11 @@ restart:
 	   if (modeInf. Spectrum != getSpectrum (&theState))
 	      goto restart;
 
-	   if ((!inSync) && (++errors > 5))
+//	   if ((!inSync) && (++errors > 5))
+	   if (!inSync)
 	      goto restart;
-
+	   errors = 0;
+	fprintf (stderr, "fac ok\n");
 //
 //	prepare for sdc processing
 //	Since computing the position of the sdc Cells depends (a.o)
@@ -247,10 +268,6 @@ restart:
 	                                 sdcTable, &theState);
 
 	   bool	firstTime	= true;
-	   float	offsetFractional	= 0;	//
-	   int16_t	offsetInteger		= 0;
-	   float	deltaFreqOffset		= 0;
-	   float	sampleclockOffset	= 0;
 	   while (true) {
 	      setFACSync (true);
 //	when we are here, we can start thinking about  SDC's and superframes

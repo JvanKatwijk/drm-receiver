@@ -127,7 +127,6 @@ int16_t	i;
 }
 
 bool freqSyncer::frequencySync (smodeInfo *m) {
-int16_t	i;
 int32_t	localIndex	= 0;
 float	occupancyIndicator [6];
 uint8_t	spectrum;
@@ -138,7 +137,7 @@ uint8_t	spectrum;
 //	into the (circular) buffer "symbolBuffer",
 //	However: do not move the "currentIndex" in the Reader,
 //	i.e. do not consume the words from the input
-	for (i = 0; i < N_symbols; i ++) {
+	for (int i = 0; i < N_symbols; i ++) {
 	 int16_t  time_offset_integer =
 	          getWord (buffer -> data,
 	                   buffer -> bufSize,
@@ -156,7 +155,7 @@ uint8_t	spectrum;
 
 //	fprintf (stderr, "bin 0 = %d\n", binNumber);
 //	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
-	for (i = 0; i <= 3; i ++) 
+	for (int i = 0; i <= 3; i ++) 
 	   occupancyIndicator [i] = get_spectrumOccupancy (i, binNumber);
 
 	float tmp1	= 0.0;
@@ -178,10 +177,15 @@ uint8_t	spectrum;
 //	in the rows the computed spectra of the last N_symbols ofdm words,
 //	starting at start (i.e. circular)
 
+float	square (std::complex<float> v) {
+	return real (v * conj (v));
+}
+
 int32_t	freqSyncer::get_zeroBin (int16_t start) {
 int16_t i, j;
 std::complex<float> correlationSum [Tu];
 float	abs_sum [Tu];
+float	squares [Tu];
 //
 //
 //	assuming we do not have freq sync pilots, it is possible to
@@ -193,6 +197,7 @@ float	abs_sum [Tu];
 //
 	memset (correlationSum, 0, Tu * sizeof (std::complex<float>));
 	memset (abs_sum, 0, Tu * sizeof (float));
+	memset (squares, 0, Tu * sizeof (float));
 
 //	accumulate phase diffs of all carriers in subsequent symbols
 	for (j = start + 1; j < start + N_symbols; j++) {
@@ -202,23 +207,25 @@ float	abs_sum [Tu];
 	      std::complex<float> tmp1 = symbolBuffer [jmin1][i] *
 	                                        conj (symbolBuffer [jj][i]);
 	      correlationSum [i] += tmp1;
+	      squares [i] += square (symbolBuffer [jmin1][i]) +
+	                                    square (symbolBuffer [jj][i]);
 	   }
 	}
 //
 	for (i = 0; i < Tu; i++) 
-	   abs_sum [i] = abs (correlationSum [i]);
+	   abs_sum [i] = abs (squares [i] - 2 * abs (correlationSum [i]));
 
-	float	highest		= -1.0E20;
+	float	lowest		= 1.0E10;
 	int	dcOffset	= 0;
 //
 //	recall that the pilots are relative to -Tu / 2
-	for (i = - Tu / 10; i < Tu / 10; i ++) {
+	for (i = - Tu / 20; i < Tu / 20; i ++) {
 	   float sum = abs_sum [k_pilot1 + i] +
 	               abs_sum [k_pilot2 + i] +
 	               abs_sum [k_pilot3 + i];
-	   if (sum > highest) {
-	      dcOffset	= i;
-	      highest	= sum;
+	   if (sum < lowest) {
+	      dcOffset = i;
+	      lowest = sum;
 	   }
 	}
 

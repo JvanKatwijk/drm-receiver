@@ -92,15 +92,16 @@ std::complex<float>	temp [Ts];
 std::complex<float>	angle	= std::complex<float> (0, 0);
 int	f	= buffer -> currentIndex;
 
-	theOffset = 0;
 	buffer		-> waitfor (Ts + Ts / 2);
-	
+	theOffset = 0;
+
 //	correction of the time offset by interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one = buffer ->  data [(f + i) & bufMask];
 	   std::complex<float> two = buffer ->  data [(f + i + 1)& bufMask];
-	   temp [i] = cmul (one, 1 - offsetFractional) +
-	                  cmul (two, offsetFractional);
+	   temp [i] = one;
+//	   temp [i] = cmul (one, 1 - offsetFractional) +
+//	                  cmul (two, offsetFractional);
 	}
 
 //	And we shift the bufferpointer here
@@ -110,13 +111,13 @@ int	f	= buffer -> currentIndex;
 	for (int i = 0; i < Tg; i ++)
 	   angle += conj (temp [Tu + i]) * temp [i];
 //	simple averaging
-	theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
+	theAngle	= 0.6 * theAngle + 0.4 * arg (angle);
 //
 //	offset  (and shift) in Hz / 100
 	float offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
-//	if (offset != -offset)	// precaution to handle undefines
+	if (!isnan (offset))	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
-	                            100 * modeInf -> freqOffset_integer - offset);
+	                            100 * initialFreq - offset);
 
 	if (++displayCount > 20) {
 	   displayCount = 0;
@@ -138,7 +139,6 @@ void	wordCollector::getWord (std::complex<float>	*out,
 	                        float		angle,
 	                        float		clockOffset) {
 std::complex<float>	temp [Ts];
-static float theOffset = 0;
 int	f		= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
@@ -169,11 +169,13 @@ int	f		= buffer -> currentIndex;
 	theAngle	= theAngle - 0.1 * angle;
 //	offset in 0.01 * Hz
 	float freqOff          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
-	if (freqOff != -freqOff) { // precaution to handle undefines
+	if (!isnan (freqOff)) { // precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
-	                        100 * modeInf -> freqOffset_integer -
+	                         100 * modeInf -> freqOffset_integer -
 	                                         freqOff);
 	}
+	else
+	   theAngle = 0;
 
 	if (++displayCount > 20) {
 	   displayCount = 0;
@@ -210,33 +212,92 @@ std::complex<float> temp [Tu];
 	           (K_max - K_min + 1) * sizeof (std::complex<float>));
 }
 
-float	wordCollector::get_timeOffset	(int nrSymbols,
-	                                 int range, int *offs) {
-int16_t b [nrSymbols];
+float wordCollector::get_timeOffset	(int nrSymbols, int range, int *o) {
+int	b [nrSymbols];
+std::complex<float> summedCorrelations [nrSymbols * Ts - Tu_of (Mode_D)];
+float summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
 
 	buffer -> waitfor (2 * nrSymbols * Ts + Ts);
-	*offs	= get_intOffset (0, nrSymbols, range);
-	for (int i = 0; i < nrSymbols; i ++)
-	   b [i] = get_intOffset (i * Ts + *offs, nrSymbols, range);
+	float avgOff	= get_intOffset (0, nrSymbols, range);
 
-	float   sumx    = 0.0;
-        float   sumy    = 0.0;
-        float   sumxx   = 0.0;
-        float   sumxy   = 0.0;
-
-        for (int i = 0; i < nrSymbols - 1; i++) {
-           sumx += (float) i;
-           sumy += (float) b [i];
-           sumxx += (float) i * (float) i;
-           sumxy += (float) i * (float) b [i];
+	for (int i = 0; i < nrSymbols * Ts - Tu; i ++) {
+	   summedCorrelations [i] = std::complex<float> (0, 0);
+	   summedSquares [i]	= 0;
+	   for (int j; j < Tg; j ++) {
+	      std::complex<float> f1        =
+                           buffer -> data [(buffer -> currentIndex + i + j) & bufMask];
+              std::complex<float> f2        =
+                           buffer -> data [(buffer -> currentIndex + i + Tu + j) & bufMask];
+              summedCorrelations [i] += f1 * conj (f2);
+              summedSquares      [i] += real (f1 * conj (f1)) +
+                                             real (f2 * conj (f2));
+           }
         }
 
-        float bestOffsets;
-        bestOffsets = (float) ((sumy * sumxx - sumx * sumxy) /
-                         ((nrSymbols - 1) * sumxx - sumx * sumx));
+	int16_t index = Tg + avgOff + Ts / 2;
+	float	mmse = 0;
+        for (int j = 0; j < (nrSymbols - 2); j++) {
+           float minValue       = 1000000.0;
+           for (int i = 0; i < Ts; i++) {
+              std::complex<float> gamma  = summedCorrelations [(index + i)];
+              float squareTerm    = (float) (0.5 * (EPSILON +
+                                         summedSquares [index + i]));
+              float mmse = squareTerm - 2 * abs (gamma);
+              if (mmse < minValue) {
+                 minValue = mmse;
+                 b [j] = i;
+              }
+           }
+           index += Ts;
+        }
 
-	return bestOffsets;
+	float   sumx    = 0.0;
+	float   sumy    = 0.0;
+	float   sumxx   = 0.0;
+	float   sumxy   = 0.0;
+
+	for (int i = 0; i < nrSymbols - 1; i++) {
+	   sumx += (float) i;
+	   sumy += (float) b [i];
+	   sumxx += (float) i * (float) i;
+	   sumxy += (float) i * (float) b [i];
+	}
+
+	float boffs;
+	boffs = (float) ((sumy * sumxx - sumx * sumxy) /
+	                    ((nrSymbols - 1) * sumxx - sumx * sumx));
+	float timeOffset	= fmodf ((Tg + Ts) / 2 + avgOff - boffs - 1,
+	                                               Ts);
+	return timeOffset;
 }
+ 
+//float	wordCollector::get_timeOffset	(int nrSymbols,
+//	                                 int range, int *offs) {
+//int16_t b [nrSymbols];
+//
+//	buffer -> waitfor (2 * nrSymbols * Ts + Ts);
+//	*offs	= get_intOffset (0, nrSymbols, range);
+//	for (int i = 0; i < nrSymbols; i ++)
+//	   b [i] = get_intOffset (i * Ts + *offs, nrSymbols, range);
+//
+//	float   sumx    = 0.0;
+//        float   sumy    = 0.0;
+//        float   sumxx   = 0.0;
+//        float   sumxy   = 0.0;
+//
+//        for (int i = 0; i < nrSymbols - 1; i++) {
+//           sumx += (float) i;
+//           sumy += (float) b [i];
+//           sumxx += (float) i * (float) i;
+//           sumxy += (float) i * (float) b [i];
+//        }
+//
+//        float bestOffsets;
+//        bestOffsets = (float) ((sumy * sumxx - sumx * sumxy) /
+//                         ((nrSymbols - 1) * sumxx - sumx * sumx));
+//
+//	return bestOffsets;
+//}
 
 int	wordCollector::get_intOffset	(int base,
 	                                 int nrSymbols, int range) {

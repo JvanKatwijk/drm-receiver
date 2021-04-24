@@ -373,7 +373,7 @@ int16_t	i;
 //	the SCO is then
 //	arg (offsa) / symbolsinFrame / (2 * M_PI * Ts / Tu * offsb)) * Ts;
 //	The measured offset is in radials
-	*sampleclockOffset = offsa / (2 * M_PI * (float (Ts) / Tu) * offsb);
+	*sampleclockOffset = arg (offsa) / (2 * M_PI * (float (Ts) / Tu) * offsb);
 
 //	still wondering about the scale
 	*offset_fractional	= arg (offs2) / (2 * M_PI * periodforPilots);
