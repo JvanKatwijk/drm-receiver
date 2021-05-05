@@ -28,6 +28,7 @@
 #include	"drm-decoder.h"
 #include	"basics.h"
 
+#include	"fft-complex.h"
 //	The wordCollector will handle segments of a given size,
 //	do all kinds of frequency correction (timecorrection
 //	was done in the syncer) and map them onto ofdm words.
@@ -55,13 +56,13 @@
 	this	-> K_min	= Kmin	(Mode, Spectrum);
 	this	-> K_max	= Kmax	(Mode, Spectrum);
 	this	-> displayCount	= 0;
-	fft_vector		= (std::complex<float> *)
-	                               fftwf_malloc (Tu *
-	                                            sizeof (fftwf_complex));
-	hetPlan			= fftwf_plan_dft_1d (Tu,
-	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-	                    FFTW_FORWARD, FFTW_ESTIMATE);
+//	fft_vector		= (std::complex<float> *)
+//	                               fftwf_malloc (Tu *
+//	                                            sizeof (fftwf_complex));
+//	hetPlan			= fftwf_plan_dft_1d (Tu,
+//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+//	                    FFTW_FORWARD, FFTW_ESTIMATE);
 	connect (this, SIGNAL (show_fineOffset (float)),
 	         mr, SLOT (show_fineOffset (float)));
 	connect (this, SIGNAL (show_coarseOffset (float)),
@@ -77,8 +78,8 @@
 }
 
 		wordCollector::~wordCollector (void) {
-	fftwf_free (fft_vector);
-	fftwf_destroy_plan (hetPlan);
+//	fftwf_free (fft_vector);
+//	fftwf_destroy_plan (hetPlan);
 }
 
 static float theOffset= 0;
@@ -192,23 +193,23 @@ int	f		= buffer -> currentIndex;
 void	wordCollector::fft_and_extract (std::complex<float> *in,
 	                                std::complex<float> *out) {
 //	and extract the Tu set of samples for fft processsing
-std::complex<float> temp [Tu];
+//std::complex<float> temp [Tu];
 
-	memcpy (fft_vector, in, Tu * sizeof (std::complex<float>));
-
-	fftwf_execute (hetPlan);
+//	memcpy (fft_vector, in, Tu * sizeof (std::complex<float>));
+	Fft_transform (in, Tu, false);
+//	fftwf_execute (hetPlan);
 //	extract the "useful" data
 	if (K_min < 0) {
 	   memcpy (out,
-	           &fft_vector [Tu + K_min],
+	           &in [Tu + K_min],
 	           - K_min * sizeof (std::complex<float>));
 	   memcpy (&out [- K_min],
-	           &fft_vector [0],
+	           &in [0],
 	           (K_max + 1) * sizeof (std::complex<float>));
 	}
 	else
 	   memcpy (out,
-	           &fft_vector [K_min],
+	           &in [K_min],
 	           (K_max - K_min + 1) * sizeof (std::complex<float>));
 }
 

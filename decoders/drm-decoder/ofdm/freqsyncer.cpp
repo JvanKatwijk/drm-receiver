@@ -29,6 +29,7 @@
 #include	"basics.h"
 #include	"referenceframe.h"
 
+#include	"fft-complex.h"
 //
 struct testCells {
 	int	index;
@@ -96,13 +97,13 @@ int16_t	i;
 	this	-> symbolBuffer	= new std::complex<float> *[N_symbols];
 	for (i = 0; i < N_symbols; i ++)
 	   symbolBuffer [i] = new std::complex<float> [Tu_of (Mode)];
-	fft_vector		= (std::complex<float> *)
-	                               fftwf_malloc (Tu_of (Mode) *
-	                                            sizeof (fftwf_complex));
-	hetPlan			= fftwf_plan_dft_1d (Tu_of (Mode),
-	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-	                    FFTW_FORWARD, FFTW_ESTIMATE);
+//	fft_vector		= (std::complex<float> *)
+//	                               fftwf_malloc (Tu_of (Mode) *
+//	                                            sizeof (fftwf_complex));
+//	hetPlan			= fftwf_plan_dft_1d (Tu_of (Mode),
+//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+//	                    FFTW_FORWARD, FFTW_ESTIMATE);
 	connect (this, SIGNAL (show_fineOffset (float)),
 	         mr, SLOT (show_fineOffset (float)));
 	connect (this, SIGNAL (show_coarseOffset (float)),
@@ -119,8 +120,8 @@ int16_t	i;
 
 		freqSyncer::~freqSyncer (void) {
 int16_t	i;
-	fftwf_free (fft_vector);
-	fftwf_destroy_plan (hetPlan);
+//	fftwf_free (fft_vector);
+//	fftwf_destroy_plan (hetPlan);
 	for (i = 0; i < N_symbols; i ++)
 	   delete[]  symbolBuffer [i];
 	delete[] symbolBuffer;
@@ -349,13 +350,13 @@ std:;complex<float> angle	= std::complex<float> (0, 0);
 	   theShifter. do_shift (temp, Ts, -offset);
 
 //	and extract the Tu set of samples for fft processsing
-	memcpy (fft_vector, &temp [Tg], Tu * sizeof (std::complex<float>));
-
-	fftwf_execute (hetPlan);
+//	memcpy (fft_vector, &temp [Tg], Tu * sizeof (std::complex<float>));
+	Fft_transform (&temp [Tg], Tu, false);
+//	fftwf_execute (hetPlan);
 	memcpy (symbolBuffer [wordNumber],
-	        &fft_vector [Tu / 2], Tu / 2 * sizeof (std::complex<float>));
+	        &temp [Tg + Tu / 2], Tu / 2 * sizeof (std::complex<float>));
 	memcpy (&symbolBuffer [wordNumber] [Tu / 2],
-	        fft_vector , Tu / 2 * sizeof (std::complex<float>));
+	        &temp [Tg] , Tu / 2 * sizeof (std::complex<float>));
 	return 0;
 }
 

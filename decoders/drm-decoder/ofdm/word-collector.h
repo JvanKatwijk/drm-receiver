@@ -30,7 +30,7 @@
 #include	<stdlib.h>
 #include	<cstring>
 #include	<math.h>
-#include	<fftw3.h>
+//#include	<fftw3.h>
 #include	"shifter.h"
 
 class	Reader;
@@ -73,8 +73,8 @@ private:
 	int16_t		K_min;
 	int16_t		K_max;
 	int16_t		displayCount;
-	DSPCOMPLEX	*fft_vector;
-	fftwf_plan	hetPlan;
+//	DSPCOMPLEX	*fft_vector;
+//	fftwf_plan	hetPlan;
 	float		get_timeOffset		(int, int, int *);
 	int		get_intOffset		(int base,
                                                  int nrSymbols, int range);

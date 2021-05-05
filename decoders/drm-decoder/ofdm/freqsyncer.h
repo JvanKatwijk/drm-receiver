@@ -30,7 +30,7 @@
 #include	<stdlib.h>
 #include	<cstring>
 #include	<math.h>
-#include	<fftw3.h>
+//#include	<fftw3.h>
 #include	"shifter.h"
 
 class	Reader;
@@ -69,8 +69,8 @@ private:
 	int16_t		N_symbols;
 	int16_t		bufferIndex;
 	DSPCOMPLEX	**symbolBuffer;
-	DSPCOMPLEX	*fft_vector;
-	fftwf_plan	hetPlan;
+//	DSPCOMPLEX	*fft_vector;
+//	fftwf_plan	hetPlan;
 	shifter		theShifter;
 //
 signals:
