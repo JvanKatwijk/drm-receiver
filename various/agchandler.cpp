@@ -48,14 +48,13 @@
 	attackAverage		= 1;
 	decayAverage		= 1;
 	bufferSize		= sampleRate / 50;	// 20 msec buffer
-	buffer			= new float [bufferSize];
+	buffer. resize (bufferSize);
 	bufferP			= 0;
 	ThresholdValue		= -get_db (0) + 30;	// default
 	fprintf (stderr, "Threshold = %f\n", ThresholdValue);
 }
 
 	agcHandler::~agcHandler	(void) {
-	delete	buffer;
 }
 
 void	agcHandler::set_bitDepth (int bitDepth) {

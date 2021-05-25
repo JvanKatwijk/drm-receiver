@@ -37,7 +37,7 @@
 #include	"mer16-values.h"
 
 static
-const float rTableQAM16 [4][2] = {
+const JAN rTableQAM16 [4][2] = {
     { 0.9486832980,  0.9486832980},
     {-0.3162277660, -0.3162277660},
     { 0.3162277660,  0.3162277660},
@@ -49,15 +49,15 @@ const float rTableQAM16 [4][2] = {
 	mer16_compute::~mer16_compute	() {
 }
 //
-float	mer16_compute::computemer	(theSignal	*signalVector,
+JAN	mer16_compute::computemer	(theSignal	*signalVector,
 	                                 int32_t	amount) {
 double	sumIQ	= 0;
 double	sumdIdQ	= 0;
 
 	   for (int i = 0; i < amount; i ++) {
-	      std::complex<float> val = signalVector [i]. signalValue;
-	      float	theI, theQ, thedI, thedQ;
-	      val =  std::complex<float> (fabs (real (val)), fabs (imag (val)));
+	      std::complex<JAN> val = signalVector [i]. signalValue;
+	      JAN	theI, theQ, thedI, thedQ;
+	      val =  std::complex<JAN> (fabs (real (val)), fabs (imag (val)));
 	      if (abs (val) < 0.5) {
 	         theI = rTableQAM16 [2][0];
 	         theQ = rTableQAM16 [2][0];

@@ -42,20 +42,20 @@ public:
 	                                 uint8_t	Mode,
 	                                 uint8_t	Spectrum,
 	                                 int8_t		strength,
-	                                 RingBuffer<std::complex<float>> *);
+	                                 RingBuffer<std::complex<JAN>> *);
 			~equalizer_1 	(void);
-	bool		equalize	(std::complex<float> *,
+	bool		equalize	(std::complex<JAN> *,
 	                                 int16_t,
 	                                 myArray<theSignal>*,
-	                                 float *,
-	                                 float *,
-	                                 float *);
-	bool		equalize	(std::complex<float> *,
+	                                 JAN *,
+	                                 JAN *,
+	                                 JAN *);
+	bool		equalize	(std::complex<JAN> *,
 	                                 int16_t,
 	                                 myArray<theSignal>*);
 private:
 	drmDecoder	*parent;
-	RingBuffer<std::complex<float>>	*eqBuffer;
+	RingBuffer<std::complex<JAN>>	*eqBuffer;
 	void		getRelAddress	(int16_t, int16_t *, int16_t *);
 	int16_t		buildTrainers	(int16_t);
 	int16_t		rndcnt;
@@ -63,11 +63,12 @@ private:
 	int16_t		windowsinFrame;
 	int16_t		periodforPilots;
 	int16_t		periodforSymbols;
-	double		**W_symbol_blk [10];
-	float		f_cut_t;
-	float		f_cut_k;
+//	double		**W_symbol_blk [20];
+	std::vector<std::vector<double>> W_symbol_blk [20];
+	JAN		f_cut_t;
+	JAN		f_cut_k;
 	std::vector<std::vector<trainer>> theTrainers;
-	std::vector<std::vector<std::complex<float>>> pilotEstimates;
+	std::vector<std::vector<std::complex<JAN>>> pilotEstimates;
 	int16_t		trainers_per_window [10];
 	int16_t		symbols_to_delay;
 	int16_t		symbols_per_window;

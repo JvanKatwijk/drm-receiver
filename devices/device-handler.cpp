@@ -30,10 +30,10 @@
 	lastFrequency	= Mhz (100);
 }
 
-	deviceHandler::~deviceHandler	(void) {
+	deviceHandler::~deviceHandler	() {
 }
 
-int32_t	deviceHandler::getRate		(void) {
+int32_t	deviceHandler::getRate		() {
 	return 192000;
 }
 

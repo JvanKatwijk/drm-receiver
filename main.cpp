@@ -59,7 +59,6 @@ int32_t		opt;
 /*
  *	The default values
  */
-QSettings	*ISettings;		/* .ini file	*/
 RadioInterface	*MyRadioInterface;
 QString iniFile		= QDir::homePath ();
 QString stationList     = QDir::homePath ();
@@ -102,14 +101,13 @@ QString	bandplanFile	= QDir::homePath ();
 #endif
 	QApplication a (argc, argv);
 
-	ISettings	= new QSettings (iniFile, QSettings::IniFormat);
+	QSettings ISettings (iniFile, QSettings::IniFormat);
 /*
  *	Before we connect control to the gui, we have to
  *	instantiate
  */
-//	int rate	= ISettings -> value ("workingRate", 96000). toInt ();
 	bandPlan my_bandPlan (bandplanFile);
-        MyRadioInterface = new RadioInterface (ISettings,
+        MyRadioInterface = new RadioInterface (&ISettings,
 	                                       stationList,
 	                                       &my_bandPlan,
 	                                       2 * 96000, 1 * 12000);
@@ -121,8 +119,7 @@ QString	bandplanFile	= QDir::homePath ();
 	fflush (stdout);
 	fflush (stderr);
 	qDebug ("It is done\n");
-	ISettings	-> sync ();
+	ISettings. sync ();
 	fprintf (stderr, "we gaan deleten\n");
 	delete MyRadioInterface;
-//	ISettings	-> ~QSettings ();
 }

@@ -20,15 +20,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include	"basics.h"
 
 #define   TINY 1.0e-20
 
-void	inverse	(float**,int);
-void	ludcmp	(float**, int, int*, float*);
-void	lubksb	(float**, int, int*, float*);
-float **matrix	(int,int,int,int);
-float *vector	(int,int);
-void	free_matrix(float**,int,int,int,int);
-void	free_vector(float*,int,int);
+void	inverse	(JAN**,int);
+void	ludcmp	(JAN**, int, int*, JAN*);
+void	lubksb	(JAN**, int, int*, JAN*);
+JAN **matrix	(int,int,int,int);
+JAN *vector	(int,int);
+void	free_matrix(JAN**,int,int,int,int);
+void	free_vector(JAN*,int,int);
 #endif
 

@@ -18,23 +18,23 @@
 #include	"matrix2.h"
 #define   TINY 1.0e-20
 
-void	inverse		(float**, int);
-void	ludcmp		(float**, int, int*, float*);
-void	lubksb		(float**, int, int*, float*);
-float	**matrix	(int, int, int, int);
-float	*vector		(int, int);
-void	free_matrix	(float**, int, int, int, int);
-void	free_vector	(float*, int, int);
+void	inverse		(JAN**, int);
+void	ludcmp		(JAN**, int, int*, JAN*);
+void	lubksb		(JAN**, int, int*, JAN*);
+JAN	**matrix	(int, int, int, int);
+JAN	*vector		(int, int);
+void	free_matrix	(JAN**, int, int, int, int);
+void	free_vector	(JAN*, int, int);
 
-void inverse (float **mat, int dim) {
+void inverse (JAN **mat, int dim) {
 int i, j, *indx;
-float **y, d, *col;
+JAN **y, d, *col;
 
-	y = new float *[dim];
+	y = new JAN *[dim];
 	for (i = 0; i < dim; i ++)
-	   y [i] = new float [dim];
+	   y [i] = new JAN [dim];
 	indx = new int [dim];
-	col = new float [dim];
+	col = new JAN [dim];
 	ludcmp (mat, dim, indx, &d);
 	for (j = 0; j < dim; j++) {
 	   for (i = 0; i < dim; i++)
@@ -55,12 +55,12 @@ float **y, d, *col;
 	delete [] y;
 }
 
-void	ludcmp (float **a, int n, int *indx, float *d) {
+void	ludcmp (JAN **a, int n, int *indx, JAN *d) {
 int i, imax = 0, j, k;
-float   big,dum,sum,temp;
-float   *vv;
+JAN   big,dum,sum,temp;
+JAN   *vv;
 
-	vv = new float [n];
+	vv = new JAN [n];
 	*d = 1.0;
 	for (i = 0; i < n; i++) {
 	   big = 0.0;
@@ -120,9 +120,9 @@ float   *vv;
 	delete[] vv;
 }
 
-void lubksb (float **a, int n, int *indx, float *b) {
+void lubksb (JAN **a, int n, int *indx, JAN *b) {
 int i,ip,j,ii=-1;
-float   sum;
+JAN   sum;
 
 	for (i = 0; i < n; i++) {
 	   ip = indx [i];

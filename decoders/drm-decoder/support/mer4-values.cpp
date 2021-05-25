@@ -27,7 +27,7 @@
 #include	"mer4-values.h"
 
 static
-const double rTableQAM4[2][2] = {
+const JAN rTableQAM4[2][2] = {
     { 0.7071067811f,  0.7071067811f},
     {-0.7071067811f, -0.7071067811f}
 };
@@ -38,15 +38,15 @@ const double rTableQAM4[2][2] = {
 	mer4_compute::~mer4_compute	() {
 }
 //
-float	mer4_compute::computemer	(theSignal	*signalVector,
+JAN	mer4_compute::computemer	(theSignal	*signalVector,
 	                                 int32_t	amount) {
-double	sumIQ	= 0;
-double	sumdIdQ	= 0;
+JAN	sumIQ	= 0;
+JAN	sumdIdQ	= 0;
 
 	   for (int i = 0; i < amount; i ++) {
-	      std::complex<float> val = signalVector [i]. signalValue;
-	      float	theI, theQ, thedI, thedQ;
-	      val =  std::complex<float> (fabs (real (val)), fabs (imag (val)));
+	      std::complex<JAN> val = signalVector [i]. signalValue;
+	      JAN	theI, theQ, thedI, thedQ;
+	      val =  std::complex<JAN> (fabs (real (val)), fabs (imag (val)));
 	      theI = rTableQAM4 [0][0];
 	      theQ = rTableQAM4 [0][0];
 	      thedI = real (val) - theI;

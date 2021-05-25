@@ -1,4 +1,5 @@
-# /*
+#
+/*
  *    Copyright (C) 2014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
@@ -25,6 +26,7 @@
 #include	<QObject>
 #include	<QFrame>
 #include	<QSettings>
+#include	<vector>
 #include	<atomic>
 #include	"radio-constants.h"
 #include	"ringbuffer.h"
@@ -96,7 +98,7 @@ Q_OBJECT
 public:
 		sdrplayHandler		(RadioInterface *,
 	                                 int32_t	outputRate,
-	                                 RingBuffer<DSPCOMPLEX> *,
+	                                 RingBuffer<std::complex<float>> *,
 	                                 QSettings	*);
 		~sdrplayHandler		(void);
 	int32_t	getRate			(void);
@@ -110,7 +112,7 @@ public:
 //
 //	This buffer is used in the callback, it therefore
 //	should be visible
-	RingBuffer<DSPCOMPLEX>	*_I_Buffer;
+	RingBuffer<std::complex<float>>	*_I_Buffer;
 	int32_t		sampleCnt;
 	uint32_t	inputRate;
 	int32_t		outputRate;
@@ -118,9 +120,10 @@ public:
 	decimatingFIR	*filter;
 	int32_t		localShift;
 	int32_t		oscillatorPhase;
-	std::complex<float> *oscillatorTable;
+	std::vector<std::complex<float>> oscillatorTable;
 	int		denominator;
 private:
+	QFrame		myFrame;
 	pfn_mir_sdr_StreamInit	my_mir_sdr_StreamInit;
 	pfn_mir_sdr_Reinit	my_mir_sdr_Reinit;
 	pfn_mir_sdr_StreamUninit	my_mir_sdr_StreamUninit;
@@ -157,7 +160,6 @@ private:
 	uint32_t	numofDevs;
 	uint16_t	deviceIndex;
 	bool		loadFunctions	(void);
-	QFrame		*myFrame;
 	int		nrBits;
 
 	bool		libraryLoaded;

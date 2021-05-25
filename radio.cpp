@@ -106,6 +106,7 @@ QString	FrequencytoString (quint64 freq) {
 	audioRate		= 48000;
         audioData		= new RingBuffer<std::complex<float>> (audioRate);
 
+	theDecoder		= nullptr;
 	agc. setMode (agcHandler::AGC_OFF);
 //	and the decoders
 	displaySize		= 1024;
@@ -257,10 +258,6 @@ QString	FrequencytoString (quint64 freq) {
 
 //      The end of all
         RadioInterface::~RadioInterface () {
-	secondsTimer. stop ();
-        delete  mykeyPad;
-        delete  myList;
-	delete	theUpConverter;
 }
 //
 //	If the user quits before selecting a device ....
@@ -274,7 +271,18 @@ void	RadioInterface::handle_quitButton	(void) {
 	sleep (1);
 	myList          -> saveTable ();
 	myList		-> hide ();
-	delete	theDecoder;
+
+	fprintf (stderr, "we kappen ermee\n");
+	delete theDecoder;
+	secondsTimer. stop ();
+        delete  mykeyPad;
+        delete  myList;
+	delete	theUpConverter;
+	delete []	outTable;
+	delete	audioData;
+        delete	inputData;
+	delete	hfScope;
+	delete	lfScope;
 }
 
 deviceHandler	*RadioInterface::setDevice (RingBuffer<std::complex<float>> *hfBuffer) {

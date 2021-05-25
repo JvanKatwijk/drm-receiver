@@ -44,6 +44,7 @@ float	tmp  [bufferSize * (outRate / inRate)];
 float	f	= (float)(inRate / 2) / outRate;
 float	sum	= 0;
 
+	fprintf (stderr, "upFilter %d %d %d\n", bufferSize, inRate, outRate);
 	this	-> multiplier	= outRate / inRate;
 	this	-> order	= bufferSize * multiplier;
 	this	-> ip		= 0;

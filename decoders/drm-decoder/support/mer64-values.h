@@ -32,7 +32,7 @@ class	mer64_compute {
 public:
 	mer64_compute	();
 	~mer64_compute	();
-float	computemer	(theSignal	*signalVector,
+JAN	computemer	(theSignal	*signalVector,
 	                                 int32_t	amount);
 };
 #endif

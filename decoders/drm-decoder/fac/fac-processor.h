@@ -42,8 +42,8 @@ Q_OBJECT
 public:
 	                facProcessor	(drmDecoder *, smodeInfo *);
 			~facProcessor	(void);
-	bool		processFAC	(float        meanEnergy,
-                                         std::complex<float> **H,
+	bool		processFAC	(JAN        meanEnergy,
+                                         std::complex<JAN> **H,
                                          myArray<theSignal> *outbank,
                                          stateDescriptor *theState);
 

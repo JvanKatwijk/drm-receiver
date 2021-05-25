@@ -25,7 +25,7 @@
 
 #include	"mer64-values.h"
 
-const float rTableQAM64SM [8][2] = {
+const JAN rTableQAM64SM [8][2] = {
     { 1.0801234497f,  1.0801234497f},
     {-0.1543033499f, -0.1543033499f},
     { 0.4629100498f,  0.4629100498f},
@@ -42,26 +42,26 @@ const float rTableQAM64SM [8][2] = {
 	mer64_compute::~mer64_compute	() {
 }
 //
-float N (float x) {
+JAN N (JAN x) {
 	return sqrt (2 * x * x);
 }
 
-float	mer64_compute::computemer	(theSignal	*signalVector,
+JAN	mer64_compute::computemer	(theSignal	*signalVector,
 	                                 int32_t	amount) {
 double	sumIQ	= 0;
 double	sumdIdQ	= 0;
 
-float	diff1	= (0.4629100498 * sqrt (2) -
+JAN	diff1	= (0.4629100498 * sqrt (2) -
                                          0.1543033499 * sqrt (2)) / 2; 
-float	diff2	= (0.7715167498 * sqrt (2) -
+JAN	diff2	= (0.7715167498 * sqrt (2) -
                                          0.4629100498 * sqrt (2)) / 2;
-float	diff3	= (1.0801234497 * sqrt (2) -
+JAN	diff3	= (1.0801234497 * sqrt (2) -
                                          0.7715167498 * sqrt (2)) / 2;
 
 	   for (int i = 0; i < amount; i ++) {
-	      std::complex<float> val = signalVector [i]. signalValue;
-	      float	theI, theQ, thedI, thedQ;
-	      val =  std::complex<float> (fabs (real (val)), fabs (imag (val)));
+	      std::complex<JAN> val = signalVector [i]. signalValue;
+	      JAN	theI, theQ, thedI, thedQ;
+	      val =  std::complex<JAN> (fabs (real (val)), fabs (imag (val)));
 	      if (abs (val) < 0.4629100498 * sqrt (2) - diff1)  {
 	         theI = 0.1543033499;
 	         theQ = 0.1543033499;;

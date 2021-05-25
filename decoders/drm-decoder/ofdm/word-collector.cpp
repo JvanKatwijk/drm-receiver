@@ -50,19 +50,13 @@
 	this	-> Mode		= modeInf -> Mode;
 	this	-> Spectrum	= modeInf -> Spectrum;
 	this	-> theAngle	= 0;
+	this	-> theAngle_2	= 0;
 	this	-> Tu		= Tu_of (Mode);
 	this	-> Ts		= Ts_of (Mode);
 	this	-> Tg		= Tg_of (Mode);
 	this	-> K_min	= Kmin	(Mode, Spectrum);
 	this	-> K_max	= Kmax	(Mode, Spectrum);
 	this	-> displayCount	= 0;
-//	fft_vector		= (std::complex<float> *)
-//	                               fftwf_malloc (Tu *
-//	                                            sizeof (fftwf_complex));
-//	hetPlan			= fftwf_plan_dft_1d (Tu,
-//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-//	                    FFTW_FORWARD, FFTW_ESTIMATE);
 	connect (this, SIGNAL (show_fineOffset (float)),
 	         mr, SLOT (show_fineOffset (float)));
 	connect (this, SIGNAL (show_coarseOffset (float)),
@@ -78,19 +72,17 @@
 }
 
 		wordCollector::~wordCollector (void) {
-//	fftwf_free (fft_vector);
-//	fftwf_destroy_plan (hetPlan);
 }
 
-static float theOffset= 0;
+static JAN theOffset= 0;
 //	when starting up, we "borrow" the precomputed frequency offset
 //	and start building up the spectrumbuffer.
 //	
-void	wordCollector::getWord (std::complex<float>	*out,
+void	wordCollector::getWord (std::complex<JAN>	*out,
 	                        int32_t		initialFreq,
-	                        float		offsetFractional) {
-std::complex<float>	temp [Ts];
-std::complex<float>	angle	= std::complex<float> (0, 0);
+	                        JAN		offsetFractional) {
+std::complex<JAN>	temp [Ts + 100];
+std::complex<JAN>	angle	= std::complex<JAN> (0, 0);
 int	f	= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
@@ -98,27 +90,29 @@ int	f	= buffer -> currentIndex;
 
 //	correction of the time offset by interpolation
 	for (int i = 0; i < Ts; i ++) {
-	   std::complex<float> one = buffer ->  data [(f + i) & bufMask];
-	   std::complex<float> two = buffer ->  data [(f + i + 1)& bufMask];
-	   temp [i] = one;
-//	   temp [i] = cmul (one, 1 - offsetFractional) +
-//	                  cmul (two, offsetFractional);
+	   std::complex<JAN> one = buffer ->  data [(f + i) & bufMask];
+	   std::complex<JAN> two = buffer ->  data [(f + i + 1)& bufMask];
+//	   temp [i] = one;
+	   temp [i] = cmul (one, 1 - offsetFractional) +
+	                  cmul (two, offsetFractional);
 	}
 
 //	And we shift the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & bufMask;
 
+//	theShifter. do_shift (temp, Ts, 100 * initialFreq);
 //	Now: determine the fine grain offset.
 	for (int i = 0; i < Tg; i ++)
 	   angle += conj (temp [Tu + i]) * temp [i];
 //	simple averaging
 	theAngle	= 0.6 * theAngle + 0.4 * arg (angle);
+	theAngle_2	= theAngle;
 //
 //	offset  (and shift) in Hz / 100
-	float offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	JAN offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (!isnan (offset))	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
-	                            100 * initialFreq - offset);
+	                     100 * initialFreq - offset);
 
 	if (++displayCount > 20) {
 	   displayCount = 0;
@@ -133,43 +127,57 @@ int	f	= buffer -> currentIndex;
 //
 //	The getWord as below is used in the main loop, to obtain
 //	a next ofdm word
-void	wordCollector::getWord (std::complex<float>	*out,
+void	wordCollector::getWord (std::complex<JAN>	*out,
 	                        int32_t		initialFreq,
 	                        bool		firstTime,
-	                        float		offsetFractional,
-	                        float		angle,
-	                        float		clockOffset) {
-std::complex<float>	temp [Ts];
+	                        JAN		offsetFractional,
+	                        JAN		angle,
+	                        JAN		clockOffset) {
+std::complex<JAN>	temp [Ts + 100];
 int	f		= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	theOffset += clockOffset;
-	if (theOffset <  0) {
-	   f --;
-	   theOffset += 1;
-	   fprintf (stderr, "-1 due to clock %f \n", Ts * clockOffset);
-	}
-	if (theOffset >= 1) {
-	   f ++;
-	   theOffset -= 1;
-	   fprintf (stderr, "+1 due to clock %f\n", Ts * clockOffset);
-	}
+	theOffset	= offsetFractional + clockOffset;
+//	if  (theOffset < -0.5) {
+//	   theOffset += 1;
+//	   fprintf (stderr, "-1 due to fractionalOffset %f\n", offsetFractional);
+//	   buffer -> currentIndex --;
+//	}
+//	else
+//	if (theOffset >= 0.5 ) {
+//	   theOffset -= 1;
+//	   fprintf (stderr, "+1 due to fractionalOffset %f\n", offsetFractional);
+//	   buffer -> currentIndex ++;
+//	}
+//
+//	if (theOffset < 0) {
+//	   f --;
+//	   theOffset += 1;
+//	}
 
 	for (int i = 0; i < Ts; i ++) {
-	   std::complex<float> one = buffer -> data [(f + i) & bufMask];
-	   std::complex<float> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = cmul (one, 1 - theOffset) +
-	              cmul (two, theOffset);
+	   std::complex<JAN> one = buffer -> data [(f + i) & bufMask];
+	   std::complex<JAN> two = buffer -> data [(f + i + 1) & bufMask];
+	   temp [i] = 
+	             cmul (one, 1 - theOffset) + cmul (two, theOffset);
 	}
 
 //	And we adjust the bufferpointer here
-	buffer -> currentIndex = (f + Ts) & bufMask;
+	buffer -> currentIndex = (buffer -> currentIndex + Ts) & bufMask;
+
+	std::complex<float> phaseError = std::complex<float> (0, 0);
+//	Now: determine the fine grain offset.
+//	for (int i = 1; i < Tg - 1; i ++)
+//	   phaseError += conj (temp [Tu + i]) * temp [i];
+//	simple averaging
+//	theAngle_2	= 0.9 * theAngle + 0.1 * arg (phaseError);
 
 //	correct the phase
 	theAngle	= theAngle - 0.1 * angle;
+
 //	offset in 0.01 * Hz
-	float freqOff          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	JAN freqOff          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (!isnan (freqOff)) { // precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
 	                         100 * modeInf -> freqOffset_integer -
@@ -183,51 +191,51 @@ int	f		= buffer -> currentIndex;
 	   show_coarseOffset	(initialFreq);
 	   show_fineOffset	(- freqOff / 100);
 	   show_angle		(angle);
-	   show_timeOffset	(offsetFractional);
+	   show_timeOffset	(theOffset);
 	   show_clockOffset	(Ts * clockOffset);
 	}
 
 	fft_and_extract (&temp [Tg], out);
 }
 
-void	wordCollector::fft_and_extract (std::complex<float> *in,
-	                                std::complex<float> *out) {
+void	wordCollector::fft_and_extract (std::complex<JAN> *in,
+	                                std::complex<JAN> *out) {
 //	and extract the Tu set of samples for fft processsing
-//std::complex<float> temp [Tu];
+//std::complex<JAN> temp [Tu];
 
-//	memcpy (fft_vector, in, Tu * sizeof (std::complex<float>));
+//	memcpy (fft_vector, in, Tu * sizeof (std::complex<JAN>));
 	Fft_transform (in, Tu, false);
 //	fftwf_execute (hetPlan);
 //	extract the "useful" data
 	if (K_min < 0) {
 	   memcpy (out,
 	           &in [Tu + K_min],
-	           - K_min * sizeof (std::complex<float>));
+	           - K_min * sizeof (std::complex<JAN>));
 	   memcpy (&out [- K_min],
 	           &in [0],
-	           (K_max + 1) * sizeof (std::complex<float>));
+	           (K_max + 1) * sizeof (std::complex<JAN>));
 	}
 	else
 	   memcpy (out,
 	           &in [K_min],
-	           (K_max - K_min + 1) * sizeof (std::complex<float>));
+	           (K_max - K_min + 1) * sizeof (std::complex<JAN>));
 }
 
-float wordCollector::get_timeOffset	(int nrSymbols, int range, int *o) {
+JAN wordCollector::get_timeOffset	(int nrSymbols, int range, int *o) {
 int	b [nrSymbols];
-std::complex<float> summedCorrelations [nrSymbols * Ts - Tu_of (Mode_D)];
-float summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
+std::complex<JAN> summedCorrelations [nrSymbols * Ts - Tu_of (Mode_D)];
+JAN summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
 
 	buffer -> waitfor (2 * nrSymbols * Ts + Ts);
-	float avgOff	= get_intOffset (0, nrSymbols, range);
+	JAN avgOff	= get_intOffset (0, nrSymbols, range);
 
 	for (int i = 0; i < nrSymbols * Ts - Tu; i ++) {
-	   summedCorrelations [i] = std::complex<float> (0, 0);
+	   summedCorrelations [i] = std::complex<JAN> (0, 0);
 	   summedSquares [i]	= 0;
 	   for (int j; j < Tg; j ++) {
-	      std::complex<float> f1        =
+	      std::complex<JAN> f1        =
                            buffer -> data [(buffer -> currentIndex + i + j) & bufMask];
-              std::complex<float> f2        =
+              std::complex<JAN> f2        =
                            buffer -> data [(buffer -> currentIndex + i + Tu + j) & bufMask];
               summedCorrelations [i] += f1 * conj (f2);
               summedSquares      [i] += real (f1 * conj (f1)) +
@@ -236,14 +244,14 @@ float summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
         }
 
 	int16_t index = Tg + avgOff + Ts / 2;
-	float	mmse = 0;
+	JAN	mmse = 0;
         for (int j = 0; j < (nrSymbols - 2); j++) {
-           float minValue       = 1000000.0;
+           JAN minValue       = 1000000.0;
            for (int i = 0; i < Ts; i++) {
-              std::complex<float> gamma  = summedCorrelations [(index + i)];
-              float squareTerm    = (float) (0.5 * (EPSILON +
+              std::complex<JAN> gamma  = summedCorrelations [(index + i)];
+              JAN squareTerm    = (JAN) (0.5 * (EPSILON +
                                          summedSquares [index + i]));
-              float mmse = squareTerm - 2 * abs (gamma);
+              JAN mmse = squareTerm - 2 * abs (gamma);
               if (mmse < minValue) {
                  minValue = mmse;
                  b [j] = i;
@@ -252,27 +260,27 @@ float summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
            index += Ts;
         }
 
-	float   sumx    = 0.0;
-	float   sumy    = 0.0;
-	float   sumxx   = 0.0;
-	float   sumxy   = 0.0;
+	JAN   sumx    = 0.0;
+	JAN   sumy    = 0.0;
+	JAN   sumxx   = 0.0;
+	JAN   sumxy   = 0.0;
 
 	for (int i = 0; i < nrSymbols - 1; i++) {
-	   sumx += (float) i;
-	   sumy += (float) b [i];
-	   sumxx += (float) i * (float) i;
-	   sumxy += (float) i * (float) b [i];
+	   sumx += (JAN) i;
+	   sumy += (JAN) b [i];
+	   sumxx += (JAN) i * (JAN) i;
+	   sumxy += (JAN) i * (JAN) b [i];
 	}
 
-	float boffs;
-	boffs = (float) ((sumy * sumxx - sumx * sumxy) /
+	JAN boffs;
+	boffs = (JAN) ((sumy * sumxx - sumx * sumxy) /
 	                    ((nrSymbols - 1) * sumxx - sumx * sumx));
-	float timeOffset	= fmodf ((Tg + Ts) / 2 + avgOff - boffs - 1,
+	JAN timeOffset	= fmodf ((Tg + Ts) / 2 + avgOff - boffs - 1,
 	                                               Ts);
 	return timeOffset;
 }
  
-//float	wordCollector::get_timeOffset	(int nrSymbols,
+//JAN	wordCollector::get_timeOffset	(int nrSymbols,
 //	                                 int range, int *offs) {
 //int16_t b [nrSymbols];
 //
@@ -281,20 +289,20 @@ float summedSquares [nrSymbols * Ts - Tu_of (Mode_D)];
 //	for (int i = 0; i < nrSymbols; i ++)
 //	   b [i] = get_intOffset (i * Ts + *offs, nrSymbols, range);
 //
-//	float   sumx    = 0.0;
-//        float   sumy    = 0.0;
-//        float   sumxx   = 0.0;
-//        float   sumxy   = 0.0;
+//	JAN   sumx    = 0.0;
+//        JAN   sumy    = 0.0;
+//        JAN   sumxx   = 0.0;
+//        JAN   sumxy   = 0.0;
 //
 //        for (int i = 0; i < nrSymbols - 1; i++) {
-//           sumx += (float) i;
-//           sumy += (float) b [i];
-//           sumxx += (float) i * (float) i;
-//           sumxy += (float) i * (float) b [i];
+//           sumx += (JAN) i;
+//           sumy += (JAN) b [i];
+//           sumxx += (JAN) i * (JAN) i;
+//           sumxy += (JAN) i * (JAN) b [i];
 //        }
 //
-//        float bestOffsets;
-//        bestOffsets = (float) ((sumy * sumxx - sumx * sumxy) /
+//        JAN bestOffsets;
+//        bestOffsets = (JAN) ((sumy * sumxx - sumx * sumxy) /
 //                         ((nrSymbols - 1) * sumxx - sumx * sumx));
 //
 //	return bestOffsets;
@@ -318,7 +326,7 @@ double	min_mmse = 10E20;
 }
 
 double	wordCollector::compute_mmse (int starter, int nrSymbols) {
-std::complex<float>	gamma = std::complex<float> (0, 0);
+std::complex<JAN>	gamma = std::complex<JAN> (0, 0);
 double	squares = 0;
 int32_t		bufMask	= buffer -> bufSize - 1;
 
@@ -326,9 +334,9 @@ int32_t		bufMask	= buffer -> bufSize - 1;
 	for (int i = 0; i < nrSymbols - 1; i ++) {
 	   int startSample = starter + i * Ts;
 	   for (int j = 0; j < Tg; j ++) {
-	      std::complex<float> f1 =
+	      std::complex<JAN> f1 =
 	             buffer -> data [(startSample + j) & bufMask];
-	      std::complex<float> f2 =
+	      std::complex<JAN> f2 =
 	             buffer -> data [(startSample + Tu + j) & bufMask];
 	      gamma	+= f1 * conj (f2);
 	      squares	+= real (f1 * conj (f1)) + real (f2 * conj (f2));

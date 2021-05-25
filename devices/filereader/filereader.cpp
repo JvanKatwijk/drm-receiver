@@ -83,6 +83,7 @@ void	fileReader::setProgress	(int progress,
 }
 
 bool	fileReader::restartReader		(void) {
+	fprintf (stderr, "reader restart met %d\n", myReader != nullptr);
 	if (myReader != NULL)
 	   return myReader -> restartReader ();
 	else

@@ -23,7 +23,8 @@
 #ifndef	__EQDISPLAY__
 #define	__EQDISPLAY__
 
-#include	"radio-constants.h"
+#include	"basics.h"
+#include	<complex>
 #include	<vector>
 #include	<qwt.h>
 #include	<qwt_slider.h>
@@ -46,7 +47,7 @@ class EQDisplay {
 public:
 	EQDisplay		(QwtPlot *);
 	~EQDisplay		();
-void	show			(std::complex<float> *, int);
+void	show			(std::complex<JAN> *, int);
 private:
 	QwtPlot			*plotgrid;
         QwtPlotGrid		*grid;

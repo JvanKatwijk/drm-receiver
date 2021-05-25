@@ -70,7 +70,7 @@ SF_INFO	*sf_info;
 	theRate		= rate;
 	readerOK	= true;
 	resetRequest	= false;
-	
+	running. store (false);
 	currPos		= 0;
 }
 
@@ -79,14 +79,13 @@ SF_INFO	*sf_info;
 	   return;
 	stopReader ();
 	sf_close (filePointer);
-	delete _I_Buffer;
 }
 
 bool	fileHulp::restartReader	(void) {
 	if (!readerOK)
 	   return false;
-	if (running. load ())
-	   return true;
+//	if (running. load ())
+//	   return true;
 	start ();
 	return true;
 }
@@ -215,9 +214,10 @@ int64_t	nextStop;
 	         t = bufferSize;
 	      }
 	       _I_Buffer -> putDataIntoBuffer ((std::complex<float> *)bi, t / 2);
-	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
+	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10) {
+//	         fprintf (stderr, "signal sent\n");
 	         emit dataAvailable (theRate / 10);
-
+	      }
 
 	      if (nextStop - getMyTime () > 0)
 	         usleep (nextStop - getMyTime ());
@@ -291,7 +291,7 @@ int64_t	nextStop;
 	      }
 	   }
 
-	   delete	bi;
+	   delete []	bi;
 	   src_delete (converter);
 	   delete src_data;
 	}

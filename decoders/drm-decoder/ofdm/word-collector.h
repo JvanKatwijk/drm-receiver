@@ -25,13 +25,11 @@
 
 #include	<QObject>
 #include	"basics.h"
-#include	"radio-constants.h"
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<cstring>
 #include	<math.h>
-//#include	<fftw3.h>
-#include	"shifter.h"
+#include	"drm-shifter.h"
 
 class	Reader;
 class	simpleBuf;
@@ -44,38 +42,37 @@ public:
 	                                         smodeInfo *,
 	                                         int32_t);
 			~wordCollector 		(void);
-	void		getWord			(DSPCOMPLEX *,
+	void		getWord			(std::complex<JAN> *,
 	                                         int32_t,
-	                                         float);
-	void		getWord			(DSPCOMPLEX *,
+	                                         JAN);
+	void		getWord			(std::complex<JAN> *,
 	                                         int32_t,
 	                                         bool,
-	                                         float,
-	                                         float,
-	                                         float);
+	                                         JAN,
+	                                         JAN,
+	                                         JAN);
 private:
-	shifter		theShifter;
+	drmShifter	theShifter;
 
 	smodeInfo	*modeInf;
 	uint32_t	bufMask;
-	void		fft_and_extract		(std::complex<float> *,
-	                                         std::complex<float> *);
+	void		fft_and_extract		(std::complex<JAN> *,
+	                                         std::complex<JAN> *);
 	Reader		* buffer;
 	int32_t		sampleRate;
 	uint8_t		Mode;
 	uint8_t		Spectrum;
 	drmDecoder	*master;
-	float		theAngle;
-	float		sampleclockOffset;
+	JAN		theAngle;
+	JAN		theAngle_2;
+	JAN		sampleclockOffset;
 	int16_t		Tu;
 	int16_t		Ts;
 	int16_t		Tg;
 	int16_t		K_min;
 	int16_t		K_max;
 	int16_t		displayCount;
-//	DSPCOMPLEX	*fft_vector;
-//	fftwf_plan	hetPlan;
-	float		get_timeOffset		(int, int, int *);
+	JAN		get_timeOffset		(int, int, int *);
 	int		get_intOffset		(int base,
                                                  int nrSymbols, int range);
 	double		compute_mmse		(int, int);

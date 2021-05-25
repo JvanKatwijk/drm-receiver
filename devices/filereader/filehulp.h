@@ -57,7 +57,7 @@ virtual void		run		(void);
 	int32_t		sampleRate;
 	int16_t		bitsperSample;
 	int32_t		samplesinFile;
-	int32_t		totalTime;
+	float		totalTime;
 	int32_t		fileLength;
 	int32_t		currPos;
 	int16_t		numofChannels;

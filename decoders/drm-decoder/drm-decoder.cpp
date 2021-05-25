@@ -66,8 +66,8 @@ int16_t	symbs;
 	localOscillator. resize (inRate);
 	for (int i = 0; i < inRate; i ++)
 	   localOscillator [i] =
-	         std::complex<float> (cos ((float)i * 2 * M_PI / inRate),
-	                              sin ((float)i * 2 * M_PI / inRate));
+	         std::complex<JAN> (cos ((JAN)i * 2 * M_PI / inRate),
+	                              sin ((JAN)i * 2 * M_PI / inRate));
 
 	channel_1	-> hide ();
 	channel_2	-> hide ();
@@ -108,6 +108,8 @@ int16_t	symbs;
 	while (my_frameProcessor -> isRunning ())
 	   usleep (10);
 	delete	my_frameProcessor;
+	delete my_iqDisplay;
+	delete my_eqDisplay;
 }
 
 //	Basically a simple approach. The "frameProcessor" does the
@@ -116,8 +118,8 @@ void	drmDecoder::processBuffer (std::complex<float>  *dataIn, int amount) {
 }
 
 void	drmDecoder::process (std::complex <float> v) {
-std::complex<float> x = theFilter -> Pass (v);
-	buffer. putDataIntoBuffer (&v, 1);
+std::complex<JAN> vv = std::complex<float> (real (v), imag (v));
+	buffer. putDataIntoBuffer (&vv, 1);
 }
 
 bool	drmDecoder::haltSignal		(void) {
@@ -349,7 +351,7 @@ void	drmDecoder::show_time	(QString s) {
 }
 
 void    drmDecoder::showIQ  (int amount) {
-std::complex<float> Values [amount];
+std::complex<JAN> Values [amount];
 int16_t i;
 int16_t t;
 double  avg     = 0;
@@ -368,7 +370,7 @@ int     scopeWidth      = scopeSlider -> value();
 }
 
 void	drmDecoder::show_eqsymbol	(int amount) {
-std::complex<float> line [amount];
+std::complex<JAN> line [amount];
 
 	eqBuffer. getDataFromBuffer (line, amount);
 	my_eqDisplay	-> show (line, amount);

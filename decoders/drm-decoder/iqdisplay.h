@@ -23,8 +23,9 @@
 #ifndef	__IQDISPLAY__
 #define	__IQDISPLAY__
 
-#include	"radio-constants.h"
+#include	"basics.h"
 #include	<vector>
+#include	<complex>
 #include	<qwt.h>
 #include	<qwt_slider.h>
 #include	<qwt_plot.h>
@@ -50,12 +51,12 @@ Q_OBJECT
 public:
 	IQDisplay		(QwtPlot *, int16_t);
 	~IQDisplay();
-void	DisplayIQ		(std::complex<float> *, float);
+void	DisplayIQ		(std::complex<JAN> *, JAN);
 private:
 	int32_t			x_amount;
 	std::vector<double>	plotData;
 	std::vector<double>	plot2;
-	std::vector<complex<float> > Points;
+	std::vector<std::complex<JAN> > Points;
 	QwtPlot			*plotgrid;
 	int			_OutputRate;
 	int			Radius;

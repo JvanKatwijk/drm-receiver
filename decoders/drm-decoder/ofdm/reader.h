@@ -24,7 +24,7 @@
 #ifndef	__READER__
 #define	__READER__
 
-#include	"radio-constants.h"
+#include	"basics.h"
 #include	"ringbuffer.h"
 
 class	drmDecoder;
@@ -35,20 +35,20 @@ class	drmDecoder;
 //	a secret. In a next version we eliminate the ringbuffer.
 class	Reader {
 public:
-			Reader (RingBuffer<DSPCOMPLEX> *,
+			Reader (RingBuffer<std::complex<JAN>> *,
 	                           int, drmDecoder *);
 			~Reader (void);
 	void		waitfor		(int32_t);
 	void		shiftBuffer	(int16_t);
 	void		stop		();
 	uint32_t	bufSize;
-	DSPCOMPLEX	*data;
+	std::complex<JAN>	*data;
 	uint32_t	currentIndex;
 protected:
 	bool		stopSignal;
 	uint32_t	Contents	(void);
 	uint32_t	firstFreeCell;
-	RingBuffer<DSPCOMPLEX> * ringBuffer;
+	RingBuffer<std::complex<JAN>> * ringBuffer;
 	drmDecoder		*master;
 };
 

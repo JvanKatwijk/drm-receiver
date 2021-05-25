@@ -220,9 +220,9 @@ std::vector<uint8_t> audioDescriptor =
 	   int32_t	rate;
 	   if (f [index]. length < 0)
 	      continue;
-#if 0
-	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
-	                          index, numFrames, f [index]. length + 1);
+#if 1
+	   fprintf (stderr, "Frame %d (numFrames %d) length %d rate %d\n",
+	                          index, numFrames, f [index]. length + 1, rate);
 #endif
 	   my_aacDecoder ->  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
 	                                 f [index]. length + 1,

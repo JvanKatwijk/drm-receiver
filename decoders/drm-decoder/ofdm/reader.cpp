@@ -28,13 +28,13 @@
 //	A simple interface class to the ringBuffer
 //	The methods are called from the drmdecoder
 
-	Reader::Reader (RingBuffer<std::complex<float>> *r,
+	Reader::Reader (RingBuffer<std::complex<JAN>> *r,
 	                int s, 
 	                drmDecoder *mr) {
 	ringBuffer		= r;
 	this	-> bufSize	= 16 * 8192;
-	data			= new std::complex<float> [this -> bufSize];
-	memset (data, 0, bufSize * sizeof (std::complex<float>));
+	data			= new std::complex<JAN> [this -> bufSize];
+	memset (data, 0, bufSize * sizeof (std::complex<JAN>));
 	master			= mr;
 	currentIndex		= 0;
 	firstFreeCell		= 0;
@@ -69,6 +69,8 @@ void	Reader::waitfor (int32_t amount) {
 uint32_t	tobeRead;
 int32_t		contents	= Contents ();
 
+	if (stopSignal)
+	   throw (2);
 	if (contents >= amount)
 	   return;
 	tobeRead	= amount - contents;
@@ -93,8 +95,9 @@ int32_t		contents	= Contents ();
 }
 
 void	Reader::shiftBuffer (int16_t n) {
-	if (n > 0)
+	if (n > 0) {
 	   waitfor (n + 20);
-	currentIndex = (currentIndex + n) % bufSize;
+	   currentIndex = (currentIndex + n) % bufSize;
+	}
 }
 

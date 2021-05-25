@@ -37,22 +37,21 @@ int16_t	i;
 	                                  Kmin (Mode, Spectrum) + 1;
 	
 	init_gain_ref_cells ();
-	this	-> refFrame	= new std::complex<float> *[symbolsinFrame];
+	this	-> refFrame = new std::complex<JAN> * [symbolsinFrame];
+	this	-> testFrame = new std::complex<JAN> * [symbolsinFrame];
 	for (i = 0; i < symbolsinFrame; i ++)
-	   refFrame [i] = new std::complex<float> [carriersinSymbol];
-	this	-> testFrame	= new std::complex<float> *[symbolsinFrame];
+	   refFrame [i] = new std::complex<JAN> [carriersinSymbol];
 	for (i = 0; i < symbolsinFrame; i ++)
-	   testFrame [i] = new std::complex<float> [carriersinSymbol];
+	   testFrame [i] = new std::complex<JAN> [carriersinSymbol];
 }
 
 		equalizer_base::~equalizer_base (void) {
-int16_t	i;
-	for (i = 0; i < symbolsinFrame; i ++) {
-	   delete refFrame [i];
-	   delete testFrame [i];
+	for (int i = 0; i < symbolsinFrame; i ++) {
+	   delete [] refFrame [i];
+	   delete [] testFrame [i];
 	}
-	delete []	refFrame;
-	delete []	testFrame;
+	delete [] testFrame;
+	delete [] refFrame;
 }
 
 int16_t	equalizer_base::indexFor (int16_t carrier) {
@@ -61,7 +60,7 @@ int16_t	equalizer_base::indexFor (int16_t carrier) {
 	
 void	equalizer_base::init_gain_ref_cells (void) {
 int16_t symbol, carrier;
-float	mean_energy	= 0;
+JAN	mean_energy	= 0;
 int16_t	cellCount	= 0;
 int16_t	totalCount	= 0;
 
@@ -96,8 +95,8 @@ int16_t	totalCount	= 0;
 	mean_energy /= totalCount;
 	meanEnergy	= mean_energy;
 	nrCells		= totalCount;
-	fprintf (stderr, " energy %f, cells  %d (total %d)\n",
-	                       meanEnergy, cellCount, totalCount);
+//	fprintf (stderr, " energy %f, cells  %d (total %d)\n",
+//	                       meanEnergy, cellCount, totalCount);
 }
 
 int16_t	equalizer_base::actualRow (int16_t symbol, int16_t firstRow) {
@@ -105,17 +104,17 @@ int16_t	equalizer_base::actualRow (int16_t symbol, int16_t firstRow) {
 	         symbol + firstRow - symbolsinFrame : symbol + firstRow;
 }
 
-float	equalizer_base::getMeanEnergy	(void) {
+JAN	equalizer_base::getMeanEnergy	(void) {
 	return meanEnergy;
 }
 
-DSPCOMPLEX **equalizer_base::getChannels	(void) {
+std::complex<JAN> **equalizer_base::getChannels	(void) {
 	return refFrame;
 }
 
 //
 //
-bool	equalizer_base::equalize (std::complex<float> *testRow, int16_t index,
+bool	equalizer_base::equalize (std::complex<JAN> *testRow, int16_t index,
 	                          theSignal **outFrame) {
 	(void) testRow;
 	(void) index;
@@ -123,12 +122,12 @@ bool	equalizer_base::equalize (std::complex<float> *testRow, int16_t index,
 	return false;
 }
 
-bool	equalizer_base::equalize (std::complex<float> *testRow, int16_t index,
+bool	equalizer_base::equalize (std::complex<JAN> *testRow, int16_t index,
 	                          theSignal **outFrame,
 	                          int16_t *intout,
-	                          float *fractout,
-	                          float *freqOut,
-	                          float *sampleclockOffset) {
+	                          JAN *fractout,
+	                          JAN *freqOut,
+	                          JAN *sampleclockOffset) {
 	(void) testRow;
 	(void) index;
 	(void) outFrame; 
@@ -139,7 +138,7 @@ bool	equalizer_base::equalize (std::complex<float> *testRow, int16_t index,
 	return false;
 }
 
-void	equalizer_base::getEq (int16_t s, std::complex<float> *outVec) {
+void	equalizer_base::getEq (int16_t s, std::complex<JAN> *outVec) {
 int16_t	carrier;
 
 	for (carrier = Kmin (Mode, Spectrum);

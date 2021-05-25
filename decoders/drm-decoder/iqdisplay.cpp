@@ -37,7 +37,7 @@ QwtLinearColorMap *colorMap  = new QwtLinearColorMap (Qt::black, Qt::white);
 	x_amount	= x;
 	CycleCount	= 0;
 	Points. resize (x_amount);
-	memset (Points. data(), 0, x_amount * sizeof (std::complex<float>));
+	memset (Points. data(), 0, x_amount * sizeof (std::complex<JAN>));
 	this		-> setColorMap (colorMap);
 	plotData. resize (2 * Radius * 2 * Radius);
 	plot2.	  resize (2 * Radius * 2 * Radius);
@@ -61,7 +61,7 @@ QwtLinearColorMap *colorMap  = new QwtLinearColorMap (Qt::black, Qt::white);
 //	delete		IQData;
 }
 
-void	IQDisplay::DisplayIQ (std::complex<float> *z, float scale) {
+void	IQDisplay::DisplayIQ (std::complex<JAN> *z, JAN scale) {
 int16_t	i;
 
 	for (i = 0; i < x_amount; i ++) {
@@ -83,7 +83,7 @@ int16_t	i;
 	   if (y <= - Radius)
 	      y = -(Radius - 1);
 
-	   Points [i] = std::complex<float> (x, y);
+	   Points [i] = std::complex<JAN> (x, y);
 	   plotData [(x + Radius - 1) * 2 * Radius + y + Radius - 1] = 500;
 	}
 

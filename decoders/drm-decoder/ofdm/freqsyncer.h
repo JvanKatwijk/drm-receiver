@@ -30,7 +30,7 @@
 #include	<stdlib.h>
 #include	<cstring>
 #include	<math.h>
-//#include	<fftw3.h>
+#include	<fftw3.h>
 #include	"shifter.h"
 
 class	Reader;
@@ -46,15 +46,16 @@ public:
 			~freqSyncer 		(void);
 	bool		frequencySync 		(smodeInfo *);
 private:
-	int16_t		getWord			(DSPCOMPLEX *,
+	int16_t		getWord			(std::complex<JAN> *,
 	                                         int32_t,
 	                                         int32_t,
 	                                         int16_t,
-	                                         float);
+	                                         int,
+	                                         JAN);
 	int32_t		get_zeroBin 		(int16_t);
-	float		get_spectrumOccupancy	(uint8_t,
+	JAN		get_spectrumOccupancy	(uint8_t,
 	                                         int16_t);
-	Reader		* buffer;
+	Reader		*theReader;
 	int32_t		sampleRate;
 	uint8_t		Mode;
 	uint8_t		Spectrum;
@@ -69,8 +70,8 @@ private:
 	int16_t		N_symbols;
 	int16_t		bufferIndex;
 	DSPCOMPLEX	**symbolBuffer;
-//	DSPCOMPLEX	*fft_vector;
-//	fftwf_plan	hetPlan;
+	DSPCOMPLEX	*fft_vector;
+	fftwf_plan	hetPlan;
 	shifter		theShifter;
 //
 signals:

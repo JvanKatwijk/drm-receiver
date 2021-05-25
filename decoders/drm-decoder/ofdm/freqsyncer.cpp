@@ -29,7 +29,6 @@
 #include	"basics.h"
 #include	"referenceframe.h"
 
-#include	"fft-complex.h"
 //
 struct testCells {
 	int	index;
@@ -70,7 +69,7 @@ struct testCells testCellsforModeD [] = {
 	                        drmDecoder	*mr):
 	                                 theShifter (100 * sampleRate) {
 int16_t	i;
-	this	-> buffer	= b;
+	this	-> theReader	= b;
 	this	-> Mode		= m -> Mode;
 	this	-> Spectrum	= m -> Spectrum;
 	this	-> sampleRate	= sampleRate;
@@ -81,9 +80,6 @@ int16_t	i;
 	this	-> displayCount	= 0;
 	this	-> N_symbols	= symbolsperFrame (Mode);
 
-//	for detecting pilots:
-	int16_t cnt	= 0;
-
 	struct testCells *base =
 	            Mode == Mode_A ? testCellsforModeA :
 	            Mode == Mode_B ? testCellsforModeB :
@@ -93,17 +89,16 @@ int16_t	i;
 	this	-> k_pilot2 = base [1]. index + Tu / 2;
 	this	-> k_pilot3 = base [2]. index + Tu / 2;
 
-	this	-> bufferIndex	= 0;
 	this	-> symbolBuffer	= new std::complex<float> *[N_symbols];
 	for (i = 0; i < N_symbols; i ++)
 	   symbolBuffer [i] = new std::complex<float> [Tu_of (Mode)];
-//	fft_vector		= (std::complex<float> *)
-//	                               fftwf_malloc (Tu_of (Mode) *
-//	                                            sizeof (fftwf_complex));
-//	hetPlan			= fftwf_plan_dft_1d (Tu_of (Mode),
-//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-//	                    reinterpret_cast <fftwf_complex *>(fft_vector),
-//	                    FFTW_FORWARD, FFTW_ESTIMATE);
+	fft_vector		= (std::complex<float> *)
+	                               fftwf_malloc (Tu_of (Mode) *
+	                                            sizeof (fftwf_complex));
+	hetPlan			= fftwf_plan_dft_1d (Tu_of (Mode),
+	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+	                    reinterpret_cast <fftwf_complex *>(fft_vector),
+	                    FFTW_FORWARD, FFTW_ESTIMATE);
 	connect (this, SIGNAL (show_fineOffset (float)),
 	         mr, SLOT (show_fineOffset (float)));
 	connect (this, SIGNAL (show_coarseOffset (float)),
@@ -120,30 +115,32 @@ int16_t	i;
 
 		freqSyncer::~freqSyncer (void) {
 int16_t	i;
-//	fftwf_free (fft_vector);
-//	fftwf_destroy_plan (hetPlan);
+	fftwf_free (fft_vector);
+	fftwf_destroy_plan (hetPlan);
 	for (i = 0; i < N_symbols; i ++)
 	   delete[]  symbolBuffer [i];
 	delete[] symbolBuffer;
 }
 
 bool freqSyncer::frequencySync (smodeInfo *m) {
+int16_t	i;
 int32_t	localIndex	= 0;
 float	occupancyIndicator [6];
 uint8_t	spectrum;
 
-	buffer	-> waitfor (N_symbols * Ts + Ts);
+	theReader	-> waitfor (N_symbols * Ts + 4 * Ts);
 //
 //	first, load spectra for the first N_symbol symbols
 //	into the (circular) buffer "symbolBuffer",
 //	However: do not move the "currentIndex" in the Reader,
 //	i.e. do not consume the words from the input
-	for (int i = 0; i < N_symbols; i ++) {
+	for (i = 0; i < N_symbols; i ++) {
 	 int16_t  time_offset_integer =
-	          getWord (buffer -> data,
-	                   buffer -> bufSize,
-	                   buffer -> currentIndex + localIndex,
+	          getWord (theReader -> data,
+	                   theReader -> bufSize,
+	                   theReader -> currentIndex + localIndex,
 	                   i,
+	                   0,
 	                   m -> timeOffset_fractional);
 	   localIndex += Ts + time_offset_integer;
 	}
@@ -154,15 +151,27 @@ uint8_t	spectrum;
 	binNumber = get_zeroBin (0);
 	m -> freqOffset_integer	= binNumber * sampleRate / Tu;
 
-//	fprintf (stderr, "bin 0 = %d\n", binNumber);
+	localIndex	= 0;
+	for (i = 0; i < N_symbols; i ++) {
+	 int16_t  time_offset_integer =
+	          getWord (theReader -> data,
+	                   theReader -> bufSize,
+	                   theReader -> currentIndex + localIndex,
+	                   i,
+	                   m -> freqOffset_integer,
+	                   m -> timeOffset_fractional);
+	   localIndex += Ts + time_offset_integer;
+	}
+
+	fprintf (stderr, "bin 0 = %d\n", binNumber);
 //	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
-	for (int i = 0; i <= 3; i ++) 
-	   occupancyIndicator [i] = get_spectrumOccupancy (i, binNumber);
+	for (i = 0; i <= 3; i ++) 
+	   occupancyIndicator [i] = get_spectrumOccupancy (i, 0);
 
 	float tmp1	= 0.0;
 	for (spectrum = 0; spectrum <= 3; spectrum ++) {	
-//	   fprintf (stderr, "spectrum %d, indicator %f\n",
-//	                     spectrum, occupancyIndicator [spectrum]);
+	   fprintf (stderr, "spectrum %d, indicator %f\n",
+	                     spectrum, occupancyIndicator [spectrum]);
 	   if (occupancyIndicator [spectrum] >= tmp1) {
 	      tmp1 = occupancyIndicator [spectrum];
 	      m -> Spectrum = spectrum;
@@ -178,7 +187,8 @@ uint8_t	spectrum;
 //	in the rows the computed spectra of the last N_symbols ofdm words,
 //	starting at start (i.e. circular)
 
-float	square (std::complex<float> v) {
+static inline
+JAN	square (std::complex<JAN> v) {
 	return real (v * conj (v));
 }
 
@@ -209,31 +219,50 @@ float	squares [Tu];
 	                                        conj (symbolBuffer [jj][i]);
 	      correlationSum [i] += tmp1;
 	      squares [i] += square (symbolBuffer [jmin1][i]) +
-	                                    square (symbolBuffer [jj][i]);
+	                                square (symbolBuffer [jj][i]);
 	   }
 	}
 //
 	for (i = 0; i < Tu; i++) 
-	   abs_sum [i] = abs (squares [i] - 2 * abs (correlationSum [i]));
+	   abs_sum [i] = abs (squares [i] - abs (correlationSum [i]));
 
-	float	lowest		= 1.0E10;
+	float	lowest		= 1.0E20;
 	int	dcOffset	= 0;
-//
+	float	highest		= 0;
+	int	altOffset	= 0;
+
+	for (int i = -10; i < 10; i ++) {
+	   float h = squares [k_pilot1 + i - 2] + squares [k_pilot1 + i - 1] +
+	             squares [k_pilot1 + i + 1] + squares [k_pilot1 + i + 2];
+	   float sum_1 = 4 * squares [k_pilot1 + i] / h;
+	   h = squares [k_pilot2 + i - 2] + squares [k_pilot2 + i - 1] +
+	             squares [k_pilot2 + i + 1] + squares [k_pilot2 + i + 2];
+	   float sum_2 = 4 * squares [k_pilot2 + i] / h;
+	   h = squares [k_pilot3 + i - 2] + squares [k_pilot3 + i - 1] +
+	             squares [k_pilot3 + i + 1] + squares [k_pilot3 + i + 2];
+	   float sum_3 = 4 * squares [k_pilot3 + i] / h;
+	   if ((sum_1 > 1) && (sum_2 > 1) && (sum_3 > 1)) {
+	      if (sum_1 + sum_2 + sum_3 > highest) {
+	         highest = sum_1 + sum_2 + sum_3;
+	         altOffset = i;
+	      }
+	   }
+	}
 //	recall that the pilots are relative to -Tu / 2
-	for (i = - Tu / 20; i < Tu / 20; i ++) {
+	for (i = - 10; i < 10; i ++) {
 	   float sum = abs_sum [k_pilot1 + i] +
 	               abs_sum [k_pilot2 + i] +
 	               abs_sum [k_pilot3 + i];
-	   if (sum < lowest) {
-	      dcOffset = i;
-	      lowest = sum;
+	   if (sum > highest) {
+	      dcOffset	= i;
+	      highest	= sum;
 	   }
 	}
-
+	return altOffset;
 	return dcOffset;
 }
 
-float	freqSyncer::get_spectrumOccupancy (uint8_t spectrum,
+JAN	freqSyncer::get_spectrumOccupancy (uint8_t spectrum,
 	                                   int16_t baseBin) {
 int16_t	i, j;
 int16_t K_min_ = Kmin (Mode, spectrum);
@@ -258,28 +287,21 @@ int16_t K_max_ = Kmax (Mode, spectrum);
 	   for (j = 0; j < 10; j ++) {
 	      int ind1 = (K_min_indx - 2 - j) % Tu;
 	      int ind2 = (K_min_indx + 2 + j) % Tu;
-	      tmp3 += real (symbolBuffer [i][ind1] *
-	                                  conj (symbolBuffer [i][ind1]));
-	      tmp4 += real (symbolBuffer [i][ind2] *
-	                                  conj (symbolBuffer [i][ind2]));
-	
-//	      tmp3 += real (symbolBuffer [i][K_min_indx - 4 - j] *
-//	                    conj (symbolBuffer [i][K_min_indx - 4 - j]));
-//	      tmp4 += real (symbolBuffer [i][K_min_indx + 4 + j] *
-//	                    conj (symbolBuffer [i][K_min_indx + 4 + j]));
+	      if (ind1 < 0) 
+	         fprintf (stderr, "fout met %d %d\n", K_min_indx, j);
+	      tmp3 += abs (real (symbolBuffer [i][ind1] *
+	                                  conj (symbolBuffer [i][ind1])));
+	      tmp4 += abs (real (symbolBuffer [i][ind2] *
+	                                  conj (symbolBuffer [i][ind2])));
 	   }
 //	near the carrier with the highest index
 	   for (j = 0; j < 20; j ++) {
 	      int ind1 = (K_max_indx - 2 - j) % Tu;
 	      int ind2 = (K_max_indx + 2 + j) % Tu;
-	      tmp5 += real (symbolBuffer [i][ind1] *
-	                                     conj (symbolBuffer [i][ind1]));
-	      tmp6 += real (symbolBuffer [i][ind2] *
-	                                     conj (symbolBuffer [i][ind2]));
-//	      tmp5 += real (symbolBuffer [i][K_max_indx - 4 - j] *
-//	                    conj (symbolBuffer [i][K_max_indx - 4 - j]));
-//	      tmp6 += real (symbolBuffer [i][K_max_indx + 4 + j] *
-//	                    conj (symbolBuffer [i][K_max_indx + 4 + j]));
+	      tmp5 += abs (real (symbolBuffer [i][ind1] *
+	                                 conj (symbolBuffer [i][ind1])));
+	      tmp6 += abs (real (symbolBuffer [i][ind2] *
+	                                 conj (symbolBuffer [i][ind2])));
 	   }
 	}
 
@@ -300,16 +322,18 @@ int16_t K_max_ = Kmax (Mode, spectrum);
 //	No reduction of the output to the Kmin .. Kmax useful
 //	carriers is made, but the order of the low-high freqencies
 //	is change to reflect the "lower .. higher" frequencies in order.
-int16_t	freqSyncer::getWord (std::complex<float> *buffer,
+int16_t	freqSyncer::getWord (std::complex<JAN> *buffer,
 	                     int32_t		bufSize,
 	                     int32_t		theIndex,
 	                     int16_t		wordNumber,
-	                     float		offsetFractional) {
+	                     int		intOffset,
+	                     JAN		offsetFractional) {
 std::complex<float> temp [Ts];
 int16_t		i;
-int16_t		bufMask	= bufSize - 1;
+uint32_t	bufMask	= bufSize - 1;
 std:;complex<float> angle	= std::complex<float> (0, 0);
 
+	
 //	To take into account the fractional timing difference,
 //	we do some interpolation between samples in the time domain
 	int f	= (int)(floor (theIndex)) & bufMask;
@@ -317,13 +341,15 @@ std:;complex<float> angle	= std::complex<float> (0, 0);
 	   offsetFractional = 1 + offsetFractional;
 	   f -= 1;
 	}
+
 	for (i = 0; i < Ts; i ++) {
-	   std::complex<float> een = buffer [(f + i) & bufMask];
-	   std::complex<float> twee = buffer [(f + i + 1) & bufMask];
+	   std::complex<JAN> een = buffer [(f + i) & bufMask];
+	   std::complex<JAN> twee = buffer [(f + i + 1) & bufMask];
 	   temp [i] = cmul (een, 1 - offsetFractional) +
 	              cmul (twee, offsetFractional);
 	}
 
+	theShifter. do_shift (temp, Ts, intOffset * 100);
 //	Now: estimate the fine grain offset.
 	for (i = 0; i < Tg; i ++)
 	   angle += conj (temp [Tu + i]) * temp [i];
@@ -334,29 +360,22 @@ std:;complex<float> angle	= std::complex<float> (0, 0);
 	float offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (++displayCount > 20) {
 	   displayCount = 0;
-	   show_coarseOffset	(0);
+	   show_coarseOffset	(intOffset);
 	   show_fineOffset	(- offset / 100);
 	   show_angle		(arg (angle));
 	   show_timeDelay	(offsetFractional);
 	}
 
-	if (abs (offset) > 2300) {
-	   fprintf (stderr, "angle = %f %f, offset = %f (sampleRate %d, Tu %d)\n",
-	             arg (angle), theAngle, offset, sampleRate, Tu);
-	   offset = offset < 0 ? -23 : 23;
-	}
-	   
-	if (offset == offset)	// precaution to handle undefines
+	if (!isnan (offset))	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts, -offset);
 
 //	and extract the Tu set of samples for fft processsing
-//	memcpy (fft_vector, &temp [Tg], Tu * sizeof (std::complex<float>));
-	Fft_transform (&temp [Tg], Tu, false);
-//	fftwf_execute (hetPlan);
+	memcpy (fft_vector, &temp [Tg], Tu * sizeof (std::complex<float>));
+	fftwf_execute (hetPlan);
 	memcpy (symbolBuffer [wordNumber],
-	        &temp [Tg + Tu / 2], Tu / 2 * sizeof (std::complex<float>));
+	        &fft_vector [Tu / 2], Tu / 2 * sizeof (std::complex<float>));
 	memcpy (&symbolBuffer [wordNumber] [Tu / 2],
-	        &temp [Tg] , Tu / 2 * sizeof (std::complex<float>));
+	        fft_vector , Tu / 2 * sizeof (std::complex<float>));
 	return 0;
 }
 

@@ -23,18 +23,18 @@
 #ifndef	__REFERENCE_FRAME
 #define	__REFERENCE_FRAME
 
-#include	"radio-constants.h"
+#include	"basics.h"
 
 bool		isTimeCell	(uint8_t, int16_t, int16_t);
 bool		isPilotCell	(uint8_t, int16_t, int16_t);
 bool		isBoostCell	(uint8_t, uint8_t, int16_t);
 bool		isFreqCell	(uint8_t, int16_t, int16_t);
-DSPCOMPLEX	getFreqRef	(uint8_t, int16_t, int16_t);
-DSPCOMPLEX	getTimeRef	(uint8_t, int16_t, int16_t);
-DSPCOMPLEX	getGainRef	(uint8_t, int16_t, int16_t);
-DSPCOMPLEX	getPilotValue	(uint8_t, uint8_t, int16_t, int16_t);
-float		init_gain_ref_cells (int16_t *cells_k,
-	                             DSPCOMPLEX *cells_v, int16_t *cnt);
+std::complex<JAN>	getFreqRef	(uint8_t, int16_t, int16_t);
+std::complex<JAN>	getTimeRef	(uint8_t, int16_t, int16_t);
+std::complex<JAN>	getGainRef	(uint8_t, int16_t, int16_t);
+std::complex<JAN>	getPilotValue	(uint8_t, uint8_t, int16_t, int16_t);
+JAN		init_gain_ref_cells (int16_t *cells_k,
+	                             std::complex<JAN> *cells_v, int16_t *cnt);
 #endif
 
 

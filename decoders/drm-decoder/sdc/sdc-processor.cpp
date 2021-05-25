@@ -91,6 +91,7 @@ int16_t	index;
 	         master, SLOT (show_timeLabel    (const QString &)));
 	connect (this, SIGNAL (show_mer (float)),
 	         master, SLOT (show_sdc_mer (float)));
+
 	rmFlag	= theState	-> RMflag;
 	SDCmode	= theState	-> sdcMode;
 	qammode	= (rmFlag == 0 && SDCmode == 0) ? QAM16 : QAM4;
@@ -146,7 +147,7 @@ uint8_t sdcBits [4 + stream_0 -> lengthOut ()];
 metrics	rawBits [2 * nrCells];
 uint8_t	reconstructed [2 * nrCells];
 mer4_compute   computeMER;
-float   mer     = 10 * log10 (computeMER. computemer (v. data (), nrCells));
+JAN   mer     = 10 * log10 (computeMER. computemer (v. data (), nrCells));
 	show_mer (mer);
 
 	my_qam4_metrics -> computemetrics (v. data (), nrCells, rawBits);
@@ -157,7 +158,8 @@ float   mer     = 10 * log10 (computeMER. computemer (v. data (), nrCells));
 	thePRBS		-> doPRBS (&sdcBits [4]);
 
 	sdcBits [0] = sdcBits [1] = sdcBits [2] = sdcBits [3] = 0;
-	if (!theCRC. doCRC (sdcBits, 4 + lengthofSDC)) {
+//	if (!theCRC. doCRC (sdcBits, 4 + lengthofSDC)) {
+	if (!theCRC. doCRC (sdcBits, 4 + stream_0 -> lengthOut ())) {
 	   return false;
 	}
 
@@ -172,7 +174,7 @@ metrics Y1_stream	[2 * nrCells];
 uint8_t level_0		[2 * nrCells];
 uint8_t level_1		[2 * nrCells];
 mer16_compute	computeMER;
-float mer = 10 * log10 (computeMER. computemer (v. data (), nrCells));
+JAN mer = 10 * log10 (computeMER. computemer (v. data (), nrCells));
 	show_mer (mer);
 	for (int i = 0; i < 4; i ++) {
 	   my_qam16_metrics	-> computemetrics (v. data (), nrCells, 0, 
@@ -318,7 +320,7 @@ uint8_t	language [3], country [2];
 	      s. append (char (0));
 	      if (lengthofBody > 1) {
 	         char *s2 = s. toLatin1 (). data ();
-	         strcpy (theState -> streams [shortId]. serviceName, s2);
+//	         strcpy (theState -> streams [shortId]. serviceName, s2);
 	      }
 	      show_stationLabel (QString (s), shortId);
 	      return;

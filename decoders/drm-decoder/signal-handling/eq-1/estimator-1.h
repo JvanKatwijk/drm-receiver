@@ -33,11 +33,11 @@
 //	symbol
 class	estimator_1: public estimatorBase {
 public:
-		estimator_1	(std::complex<float> **,
+		estimator_1	(std::complex<JAN> **,
 	                              uint8_t, uint8_t, int16_t);
 		~estimator_1	(void);
-	void	estimate	(std::complex<float> *,
-	                                   std::complex<float> *);
+	void	estimate	(std::complex<JAN> *,
+	                                   std::complex<JAN> *);
 private:
 };
 

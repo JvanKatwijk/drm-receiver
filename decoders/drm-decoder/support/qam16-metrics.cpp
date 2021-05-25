@@ -56,7 +56,7 @@
 #include	"basics.h"
 
 static
-const float rTableQAM16 [4][2] = {
+const JAN rTableQAM16 [4][2] = {
     { 0.9486832980,  0.9486832980},
     {-0.3162277660, -0.3162277660},
     { 0.3162277660,  0.3162277660},

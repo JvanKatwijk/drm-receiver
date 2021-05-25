@@ -17,7 +17,7 @@ class	backendController: public QObject {
 Q_OBJECT
 public:
 		backendController	(drmDecoder *,
-	                                 RingBuffer<std::complex<float>> *,
+	                                 RingBuffer<std::complex<JAN>> *,
 	                                 int8_t);
 		~backendController	();
 	void	newFrame		(stateDescriptor *);
@@ -27,7 +27,7 @@ public:
 
 private:
 	drmDecoder	*drmMaster;
-	RingBuffer<std::complex<float>> *iqBuffer;
+	RingBuffer<std::complex<JAN>> *iqBuffer;
 	mscProcessor	*theWorker;
 	stateDescriptor	*theState;
 	int8_t		qam64Roulette;

@@ -85,13 +85,13 @@ uint8_t punctureTable [] = {
 //	5. dispersion
 //	6. CRC checking, resulting in 64 nice bits
 //
-bool	facProcessor:: processFAC (float	meanEnergy,
-	                           std::complex<float> **H,
+bool	facProcessor:: processFAC (JAN	meanEnergy,
+	                           std::complex<JAN> **H,
 	                           myArray<theSignal> *outbank,
 	                           stateDescriptor *theState) {
 theSignal       facVector [100];
-float           sqrdNoiseSeq [100];
-float           sqrdWeightSeq [100];
+JAN           sqrdNoiseSeq [100];
+JAN           sqrdWeightSeq [100];
 int16_t         i;
 float   sum_WMERFAC     = 0;
 float   sum_weight_FAC  = 0;

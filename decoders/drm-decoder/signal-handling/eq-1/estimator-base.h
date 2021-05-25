@@ -26,17 +26,17 @@
 #ifndef	__ESTIMATOR_BASE__
 #define	__ESTIMATOR_BASE__
 
-#include	"radio-constants.h"
+#include	"basics.h"
 #include	"referenceframe.h"
 #include	<QString>
 
 class	estimatorBase {
 public:
-		estimatorBase	(DSPCOMPLEX **, uint8_t, uint8_t, int16_t);
+		estimatorBase	(std::complex<JAN> **, uint8_t, uint8_t, int16_t);
 virtual		~estimatorBase	(void);
-virtual	void	estimate	(DSPCOMPLEX *, DSPCOMPLEX *);
+virtual	void	estimate	(std::complex<JAN> *, std::complex<JAN> *);
 protected:
-	DSPCOMPLEX	**refFrame;
+	std::complex<JAN>	**refFrame;
 	uint8_t		Mode;
 	uint8_t		Spectrum;
 	int16_t		refSymbol;

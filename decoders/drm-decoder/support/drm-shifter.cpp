@@ -20,25 +20,25 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include	"shifter.h"
+#include	"drm-shifter.h"
 #include	<math.h>
 
-	shifter::shifter	(int32_t size) {
+	drmShifter::drmShifter	(int32_t size) {
 int i;
 	this	->tableSize	= size;
 	phase			= 0;
-	table			= new std::complex<float> [size];
+	table			= new std::complex<JAN> [size];
 	for (i = 0; i < size; i ++)
-	   table [i] = std::complex<float>
+	   table [i] = std::complex<JAN>
 	                        (cos ((float) i / (float)size * 2 * M_PI),
 	                         sin ((float) i / (float)size * 2 * M_PI));
 }
 
-	shifter::~shifter	(void) {
+	drmShifter::~drmShifter	(void) {
 	delete[] table;
 }
 
-void	shifter::do_shift	(std::complex<float>	*buffer,
+void	drmShifter::do_shift	(std::complex<JAN>	*buffer,
 	                         int32_t	bufLen,
 	                         int32_t	freq) {
 int32_t i;
@@ -52,17 +52,14 @@ int32_t i;
 	}
 }
 
-std::complex<float>
-	shifter::do_shift	(std::complex<float> z, int32_t freq) {
-std::complex<float> res	= z * table [phase];
+std::complex<JAN>
+	drmShifter::do_shift	(std::complex<JAN> z, int32_t freq) {
+std::complex<JAN> res	= z * table [phase];
 	phase	-= freq;
-        if (phase < 0) {
+        if (phase < 0)
            phase += tableSize;
-	}
         if (phase >= tableSize)
            phase -= tableSize;
-	if ((phase < 0) || (phase >= tableSize))
-	   fprintf (stderr, "probleem %d %d\n", phase, freq);
 	return res;
 }
 

@@ -71,13 +71,13 @@
 	                                  uint8_t	Mode,
 	                                  uint8_t	Spectrum,
 	                                  int8_t	strength,
-	                                  RingBuffer<std::complex<float>> *b):
+	                                  RingBuffer<std::complex<JAN>> *b):
 	                                     equalizer_base (Mode, Spectrum) {
 int16_t	i, window;
-float	sigmaq_noise_list [] = {16.0, 14.0, 14.0, 12.0};
-float	sigmaq_noise	= pow (10.0, - sigmaq_noise_list [Mode - Mode_A] / 10.0);
-float	**PHI;
-float	*THETA;
+JAN	sigmaq_noise_list [] = {16.0, 14.0, 14.0, 12.0};
+JAN	sigmaq_noise	= pow (10.0, - sigmaq_noise_list [Mode - Mode_A] / 10.0);
+JAN	**PHI;
+JAN	*THETA;
 
 	this	-> parent	= parent;
 	this	-> eqBuffer	= b;
@@ -137,8 +137,8 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //
 //	values taken from diorama
 	f_cut_t = 0.0675 / symbols_to_delay;
-	f_cut_k = 1.75 * (float) Tg / (float) Tu;
-	f_cut_k = 2.0 * (float) Tg / (float) Tu;
+	f_cut_k = 1.75 * (JAN) Tg / (JAN) Tu;
+	f_cut_k = 2.0 * (JAN) Tg / (JAN) Tu;
 //
 //	This code is based on the diorama Matlab code, and a
 //	(complete)rewrite of the C translation of this Matlab code by Ties Bos.
@@ -160,16 +160,19 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 	   trainer	*currentTrainers	= theTrainers [window] . data ();
 	   int16_t	trainer_1, trainer_2, carrier;
 //
-	   W_symbol_blk [window]	= new double  *[carriersinSymbol];
+//	   W_symbol_blk [window]	= new double  *[carriersinSymbol];
+//	   for (i = 0; i < carriersinSymbol; i ++)
+//	      W_symbol_blk [window][i] = new double [trainers_in_window];
+	   W_symbol_blk [window]. resize (carriersinSymbol);
 	   for (i = 0; i < carriersinSymbol; i ++)
-	      W_symbol_blk [window][i] = new double [trainers_in_window];
+	      W_symbol_blk [window][i]. resize (trainers_in_window);
 
-	   PHI		= new float *[trainers_in_window];
+	   PHI		= new JAN *[trainers_in_window];
 	   int cc;
 	   for (cc = 0; cc < trainers_in_window; cc ++) {
-	      PHI [cc] = new float [trainers_in_window];
+	      PHI [cc] = new JAN [trainers_in_window];
 	   }
-	   THETA	= new float [trainers_in_window];
+	   THETA	= new JAN [trainers_in_window];
 //
 //	No need to set the PHI and THETA to zero, first access
 //	is a normal assigment
@@ -193,9 +196,9 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 	   for (trainer_1 = 0; trainer_1 < trainers_in_window; trainer_1++) {
 	      int16_t sym	= currentTrainers [trainer_1]. symbol;
 	      int16_t car	= currentTrainers [trainer_1]. carrier;
-	      std::complex<float> v = getPilotValue (Mode, Spectrum,
+	      std::complex<JAN> v = getPilotValue (Mode, Spectrum,
 	                                             sym + window, car);
-	      float amp = real (v * conj (v));
+	      JAN amp = real (v * conj (v));
 	      PHI [trainer_1][trainer_1] += sigmaq_noise * 2.0 / amp;
 	   }
 //
@@ -258,11 +261,11 @@ int16_t	i;
 	delete [] Estimators;
 //
 //	W_symbol_blk is a matrix with three dimensions
-	for (int window = 0; window < windowsinFrame; window ++) { 
-	   for (i = 0; i < carriersinSymbol; i ++)
-	      delete W_symbol_blk [window][i];
-	   delete W_symbol_blk [window];
-	}
+//	for (int window = 0; window < windowsinFrame; window ++) { 
+//	   for (i = 0; i < carriersinSymbol; i ++)
+//	      delete W_symbol_blk [window][i];
+//	   delete W_symbol_blk [window];
+//	}
 }
 //
 //	The "trainers" are built over the "regular" pilots, i.e.
@@ -288,12 +291,12 @@ int16_t	myCount	= 0;
 	return myCount;
 }
 
-bool	equalizer_1::equalize (std::complex<float> *testRow,
+bool	equalizer_1::equalize (std::complex<JAN> *testRow,
 	                       int16_t	newSymbol,
 	                       myArray<theSignal>*outFrame,
-	                       float	*offset_fractional,
-	                       float	*delta_freq_offset,
-	                       float	*sampleclockOffset) {
+	                       JAN	*offset_fractional,
+	                       JAN	*delta_freq_offset,
+	                       JAN	*sampleclockOffset) {
 int16_t	carrier;
 int16_t	symbol_to_process;
 int16_t	i;
@@ -304,17 +307,17 @@ int16_t	i;
 //
 //	Tracking the freqency offset is done by looking at the
 //	phase difference of frequency pilots in subsequent words
-	std::complex<float>	offs1	= std::complex<float> (0, 0);
-	std::complex<float>	offs2	= std::complex<float> (0, 0);
-	float		offsa	= 0;
+	std::complex<JAN>	offs1	= std::complex<JAN> (0, 0);
+	std::complex<JAN>	offs2	= std::complex<JAN> (0, 0);
+	JAN		offsa	= 0;
 	int		offs3	= 0;
 	int		offsb	= 0;
-	std::complex<float>	offs7	= std::complex<float> (0, 0);
+	std::complex<JAN>	offs7	= std::complex<JAN> (0, 0);
 	
 	for (carrier = K_min; carrier <= K_max; carrier ++) {
 	   if (carrier == 0)
 	      continue;
-	   std::complex<float> oldValue	= 
+	   std::complex<JAN> oldValue	= 
 	                  testFrame [newSymbol][indexFor (carrier)];
 	   testFrame [newSymbol][indexFor (carrier)] = 
 	                                 testRow [indexFor (carrier)];
@@ -341,10 +344,10 @@ int16_t	i;
 //	symbols with the same pilot layout
 	   if (isPilotCell (Mode, newSymbol, carrier)) {
 	      int16_t helpme = realSym (newSymbol - periodforSymbols);
-	      std::complex<float> f1 =
+	      std::complex<JAN> f1 =
 	               testFrame [newSymbol][indexFor (carrier)] *
 	                   conj (getPilotValue (Mode, Spectrum, newSymbol, carrier));
-	      std::complex<float> f2 =
+	      std::complex<JAN> f2 =
 	               testFrame [helpme][indexFor (carrier)] *
 	                   conj (getPilotValue (Mode, Spectrum, helpme, carrier));
 	      offs7 += f1 * conj (f2);
@@ -354,8 +357,8 @@ int16_t	i;
 //	For an estimate of the residual sample time offset (includes
 //	the phase offset of the LO), we look at the average of the
 //	phase offsets of the subsequent pilots in the current symbol
-	std::complex<float> prev_1 = std::complex<float> (0, 0);
-	std::complex<float> prev_2 = std::complex<float> (0, 0);
+	std::complex<JAN> prev_1 = std::complex<JAN> (0, 0);
+	std::complex<JAN> prev_2 = std::complex<JAN> (0, 0);
 	for (carrier = K_min; carrier <= K_max; carrier ++) {
 	   if (isPilotCell (Mode, newSymbol, carrier)) {
 //	Formula 5.26 (page 99, Tsai et al), average phase offset
@@ -373,7 +376,7 @@ int16_t	i;
 //	the SCO is then
 //	arg (offsa) / symbolsinFrame / (2 * M_PI * Ts / Tu * offsb)) * Ts;
 //	The measured offset is in radials
-	*sampleclockOffset = arg (offsa) / (2 * M_PI * (float (Ts) / Tu) * offsb);
+	*sampleclockOffset = arg (offsa) / (2 * M_PI * (JAN (Ts) / Tu) * offsb);
 
 //	still wondering about the scale
 	*offset_fractional	= arg (offs2) / (2 * M_PI * periodforPilots);
@@ -407,7 +410,7 @@ int16_t	i;
 	return symbol_to_process == symbolsinFrame - 1;
 }
 //
-bool	equalizer_1::equalize (std::complex<float> *testRow,
+bool	equalizer_1::equalize (std::complex<JAN> *testRow,
 	                       int16_t newSymbol,
 	                       myArray<theSignal>*outFrame) {
 int16_t	carrier;
@@ -501,13 +504,13 @@ int16_t	carrier;
 //	The transfer function is now there, stored in the appropriate
 //	entry in the refFrame, so let us equalize
 	for (carrier = K_min; carrier <= K_max; carrier ++) {
-	   std::complex<float> temp	=
+	   std::complex<JAN> temp	=
 	                   refFrame [symbol] [indexFor (carrier)];
 	   if (carrier == 0)
 	      outVector [indexFor (0)]. signalValue = 
-	                                     std::complex<float> (0, 0);
+	                                     std::complex<JAN> (0, 0);
 	   else {
-	      std::complex<float> qq =
+	      std::complex<JAN> qq =
 	                 testFrame [symbol][indexFor (carrier)] / temp;
 	      outVector [indexFor (carrier)] . signalValue = qq;
 	   }

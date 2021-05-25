@@ -31,7 +31,7 @@ static size_t reverse_bits (size_t val, int width);
 static void *memdup (const void *src, size_t n);
 
 
-bool	Fft_transform (std::complex<float> vec[], size_t n, bool inverse) {
+bool	Fft_transform (std::complex<JAN> vec[], size_t n, bool inverse) {
 	if (n == 0)
 	   return true;
 	else
@@ -41,7 +41,7 @@ bool	Fft_transform (std::complex<float> vec[], size_t n, bool inverse) {
 	   return Fft_transformBluestein (vec, n, inverse);
 }
 
-bool	Fft_transformRadix2 (std::complex<float> vec[],
+bool	Fft_transformRadix2 (std::complex<JAN> vec[],
 	                                   size_t n, bool inverse) {
 // Length variables
 int levels = 0;  // Compute levels = floor(log2(n))
@@ -53,22 +53,22 @@ int levels = 0;  // Compute levels = floor(log2(n))
 	   return false;  // n is not a power of 2
 	
 	// Trigonometric tables
-	if (SIZE_MAX / sizeof(std::complex<float>) < n / 2)
+	if (SIZE_MAX / sizeof(std::complex<JAN>) < n / 2)
 	   return false;
 
-	std::complex<float> *exptable =
-	 (std::complex<float> *)malloc ((n / 2) * sizeof (std::complex<float>));
+	std::complex<JAN> *exptable =
+	 (std::complex<JAN> *)malloc ((n / 2) * sizeof (std::complex<JAN>));
 	if (exptable == NULL)
 	   return false;
 	for (size_t i = 0; i < n / 2; i++)
 	   exptable [i] = std::exp (
-	         std::complex<float> (0, (inverse ? 2 : -2) * M_PI * i / n));
+	         std::complex<JAN> (0, (inverse ? 2 : -2) * M_PI * i / n));
 	
 // Bit-reversed addressing permutation
 	for (size_t i = 0; i < n; i++) {
 	   size_t j = reverse_bits(i, levels);
 	   if (j > i) {
-	      std::complex<float> temp = vec[i];
+	      std::complex<JAN> temp = vec[i];
 	      vec [i] = vec [j];
 	      vec [j] = temp;
 	   }
@@ -81,7 +81,7 @@ int levels = 0;  // Compute levels = floor(log2(n))
 	   for (size_t i = 0; i < n; i += size) {
 	      for (size_t j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
 	         size_t l = j + halfsize;
-	         std::complex<float> temp = vec [l] * exptable [k];
+	         std::complex<JAN> temp = vec [l] * exptable [k];
 	         vec [l] = vec [j] - temp;
 	         vec [j] += temp;
 	      }
@@ -96,7 +96,7 @@ int levels = 0;  // Compute levels = floor(log2(n))
 }
 
 
-bool	Fft_transformBluestein (std::complex<float> vec[],
+bool	Fft_transformBluestein (std::complex<JAN> vec[],
 	                                   size_t n, bool inverse) {
 bool status = false;
 	
@@ -109,25 +109,25 @@ size_t m = 1;
 	}
 	
 // Allocate memory
-	if ((SIZE_MAX / sizeof (std::complex<float>) < n) ||
-	               (SIZE_MAX / sizeof (std::complex<float>) < m))
+	if ((SIZE_MAX / sizeof (std::complex<JAN>) < n) ||
+	               (SIZE_MAX / sizeof (std::complex<JAN>) < m))
 	   return false;
-	std::complex<float> *exptable =
-	        (std::complex<float> *)malloc(n * sizeof (std::complex<float>));
-	std::complex<float> *avec =
-	     (std::complex<float> *)calloc (m, sizeof (std::complex<float>));
-	std::complex<float> *bvec =
-	     (std::complex<float> *)calloc (m, sizeof (std::complex<float>));
-	std::complex<float> *cvec =
-	     (std::complex<float> *) malloc (m * sizeof (std::complex<float>));
+	std::complex<JAN> *exptable =
+	        (std::complex<JAN> *)malloc(n * sizeof (std::complex<JAN>));
+	std::complex<JAN> *avec =
+	     (std::complex<JAN> *)calloc (m, sizeof (std::complex<JAN>));
+	std::complex<JAN> *bvec =
+	     (std::complex<JAN> *)calloc (m, sizeof (std::complex<JAN>));
+	std::complex<JAN> *cvec =
+	     (std::complex<JAN> *) malloc (m * sizeof (std::complex<JAN>));
 	if (exptable == NULL || avec == NULL || bvec == NULL || cvec == NULL)
 		goto cleanup;
 	
 	// Trigonometric tables
 	for (size_t i = 0; i < n; i++) {
 	   uintmax_t temp = ((uintmax_t)i * i) % ((uintmax_t)n * 2);
-	   float angle = (inverse ? M_PI : -M_PI) * temp / n;
-	   exptable [i] = std::exp (std::complex<float> (0, angle));
+	   JAN angle = (inverse ? M_PI : -M_PI) * temp / n;
+	   exptable [i] = std::exp (std::complex<JAN> (0, angle));
 	}
 	
 	// Temporary vectors and preprocessing
@@ -155,20 +155,20 @@ cleanup:
 	return status;
 }
 
-bool Fft_convolve (const std::complex<float> xvec[],
-	           const std::complex<float> yvec[],
-	           std::complex<float> outvec [], size_t n) {
+bool Fft_convolve (const std::complex<JAN> xvec[],
+	           const std::complex<JAN> yvec[],
+	           std::complex<JAN> outvec [], size_t n) {
 	
 bool status = false;
 
-	if (SIZE_MAX / sizeof (std::complex<float>) < n)
+	if (SIZE_MAX / sizeof (std::complex<JAN>) < n)
 	   return false;
-	std::complex<float> *xv =
-	     (std::complex<float> *) memdup (xvec,
-	                                     n * sizeof (std::complex<float>));
-	std::complex<float> *yv =
-	     (std::complex<float> *) memdup (yvec,
-	                                     n * sizeof (std::complex<float>));
+	std::complex<JAN> *xv =
+	     (std::complex<JAN> *) memdup (xvec,
+	                                     n * sizeof (std::complex<JAN>));
+	std::complex<JAN> *yv =
+	     (std::complex<JAN> *) memdup (yvec,
+	                                     n * sizeof (std::complex<JAN>));
 	if (xv == NULL || yv == NULL)
 	   goto cleanup;
 	
@@ -182,7 +182,7 @@ bool status = false;
 	   goto cleanup;
 // Scaling (because this FFT implementation omits it)
 	for (size_t i = 0; i < n; i++)
-	   outvec[i] =  std::complex<float> (real (xv[i]) / n, imag (xv [i]) / n);
+	   outvec[i] =  std::complex<JAN> (real (xv[i]) / n, imag (xv [i]) / n);
 	status = true;
 	
 cleanup:

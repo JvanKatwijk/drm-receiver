@@ -2,8 +2,8 @@
 #include	"correlator.h"
 
 static inline
-std::complex<float>	valueFor (float amp, int16_t phase) {
-	return std::complex<float> (amp * cos (2 * M_PI * phase / 1024),
+std::complex<JAN>	valueFor (JAN amp, int16_t phase) {
+	return std::complex<JAN> (amp * cos (2 * M_PI * phase / 1024),
 	                            amp * sin (2 * M_PI * phase / 1024));
 }
 
@@ -136,9 +136,9 @@ void	correlator::cleanUp	() {
 	   corrTable [i] = 0;
 }
 
-void	correlator::correlate (std::complex<float> *input, int wordNo) {
-float	sum	= 0;
-float	sqrt_2	= sqrt (2);
+void	correlator::correlate (std::complex<JAN> *input, int wordNo) {
+JAN	sum	= 0;
+JAN	sqrt_2	= sqrt (2);
 
 	for (int i = 0; refTable [i]. index != -1; i ++)
 	   sum +=  (real (input [refTable [i]. index - K_min] *
@@ -148,7 +148,7 @@ float	sqrt_2	= sqrt (2);
 
 int	correlator::maxIndex	() {
 int	maxIndex	= 0;
-float	max		= corrTable [0];
+JAN	max		= corrTable [0];
 
 	for (int i = 1 ; i < corrTable. size (); i ++) {
 	   if (corrTable [i] > max) {
@@ -160,7 +160,7 @@ float	max		= corrTable [0];
 }
 
 bool	correlator::bestIndex	(int ind) {
-float	maxV	= corrTable [ind];
+JAN	maxV	= corrTable [ind];
 
 	for (int i = 0; i < corrTable. size (); i ++) 
 	   if ((i != ind) && (corrTable [i] > maxV))

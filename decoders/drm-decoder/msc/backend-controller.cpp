@@ -31,7 +31,7 @@
 
 	backendController::
 	           backendController	(drmDecoder	*drmDecoder,
-	                                 RingBuffer<std::complex<float>> *iqBuffer,
+	                                 RingBuffer<std::complex<JAN>> *iqBuffer,
 	                                 int8_t		qam64Roulette) {
 	drmMaster	= drmDecoder;
 	this	-> iqBuffer	= iqBuffer;
@@ -72,7 +72,7 @@ void	backendController::addtoMux	(int16_t blockno,
 	if (theWorker == NULL)	// should not happen
 	   return;
 
-	std::complex<float> temp = v. signalValue;
+	std::complex<JAN> temp = v. signalValue;
 	iqBuffer	-> putDataIntoBuffer (&temp, 1);
 	if (iqBuffer -> GetRingBufferReadAvailable () > 512)
 	   showIQ (512);

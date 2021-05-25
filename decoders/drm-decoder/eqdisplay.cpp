@@ -34,7 +34,7 @@
 
 	EQDisplay::~EQDisplay	() {}
 
-void	EQDisplay::show		(std::complex<float> *v, int amount) {
+void	EQDisplay::show		(std::complex<JAN> *v, int amount) {
 double	max	= 0;
 int	i;
 double X_axis	[amount];

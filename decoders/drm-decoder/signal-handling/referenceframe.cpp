@@ -28,8 +28,8 @@
 //	support functions
 //
 static inline
-std::complex<float>	valueFor (float amp, int16_t phase) {
-	return std::complex<float> (amp * cos (2 * M_PI * phase / 1024),
+std::complex<JAN>	valueFor (JAN amp, int16_t phase) {
+	return std::complex<JAN> (amp * cos (2 * M_PI * phase / 1024),
 	                            amp * sin (2 * M_PI * phase / 1024));
 }
 
@@ -161,7 +161,7 @@ int16_t	i;
 	return false;
 }
 
-std::complex<float> getTimeRef (uint8_t Mode,
+std::complex<JAN> getTimeRef (uint8_t Mode,
 	                        int16_t symbol, int16_t carrier) {
 struct timeCells *table = tableforMode (Mode);
 int16_t i;
@@ -223,7 +223,7 @@ int16_t	i;
 	return false;
 }
 
-std::complex<float> getFreqRef (uint8_t Mode,
+std::complex<JAN> getFreqRef (uint8_t Mode,
 	                        int16_t symbol, int16_t carrier) {
 struct timeCells *table;
 int16_t	i;
@@ -429,7 +429,7 @@ bool	isBoostCell (uint8_t Mode, uint8_t spectrum,
 	}
 }
 
-std::complex<float>	getPilotValue (uint8_t Mode,
+std::complex<JAN>	getPilotValue (uint8_t Mode,
 	                       uint8_t Spectrum, int16_t symbol, int16_t carrier) {
 int16_t	x	= Mode == Mode_A ? 4 :
 	          Mode == Mode_B ? 2 :
@@ -441,7 +441,7 @@ int16_t	k0	= Mode == Mode_A ? 2 : 1;
 
 int16_t	n	= symbol % y;
 int16_t	m	= floor (symbol / y);
-int16_t	p	= int16_t((float(carrier - k0 - n * x)) / (x * y));
+int16_t	p	= int16_t((JAN(carrier - k0 - n * x)) / (x * y));
 
 int16_t	phase	= (4 * Z_256 (Mode, n , m) + p * W_1024 (Mode, n, m) +
 	          (p * p) * (1 + symbol) * Q_1024 (Mode)) % 1024;

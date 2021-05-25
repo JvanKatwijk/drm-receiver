@@ -33,20 +33,20 @@ Q_OBJECT
 public:
 			equalizer_base 	(uint8_t Mode, uint8_t Spectrum);
 virtual			~equalizer_base	(void);
-virtual	bool		equalize	(std::complex<float> *,
+virtual	bool		equalize	(std::complex<JAN> *,
 	                                 int16_t, theSignal **);
-virtual	bool		equalize	(std::complex<float> *,
+virtual	bool		equalize	(std::complex<JAN> *,
 	                                 int16_t, theSignal **,
-	                                 int16_t *, float *, float *, float *);
-	void		getEq		(int16_t, DSPCOMPLEX *);
+	                                 int16_t *, JAN *, JAN *, JAN *);
+	void		getEq		(int16_t, std::complex<JAN> *);
 	int16_t		indexFor	(int16_t);
-	DSPCOMPLEX	**getChannels	(void);
-	float		getMeanEnergy	(void);
+	std::complex<JAN>	**getChannels	(void);
+	JAN		getMeanEnergy	(void);
 signals:
 	void		show_eqsymbol	(int);
 protected:
-	DSPCOMPLEX	**testFrame;
-	DSPCOMPLEX	**refFrame;
+	std::complex<JAN>	**testFrame;
+	std::complex<JAN>	**refFrame;
 	uint8_t		Mode;
 	uint8_t		Spectrum;
 	int16_t		K_min;
@@ -54,7 +54,7 @@ protected:
 	int16_t		symbolsinFrame;
 	int16_t		carriersinSymbol;
 	int16_t		actualRow		(int16_t, int16_t);
-	float		meanEnergy;
+	JAN		meanEnergy;
 	int16_t		nrCells;
 	void		init_gain_ref_cells	(void);
 //	int16_t		gain_ref_cells_k	[1500];

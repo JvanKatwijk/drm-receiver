@@ -50,6 +50,9 @@
 }
 
 	upConverter::~upConverter (void) {
+	delete src_data;
+	delete[] inBuffer;
+	delete[] outBuffer;
 }
 
 void	upConverter::handle	(DSPCOMPLEX *buffer, int32_t amount) {

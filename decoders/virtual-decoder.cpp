@@ -9,6 +9,7 @@
 }
 
 	virtualDecoder::~virtualDecoder	(void) {
+	fprintf (stderr, "en nu dan\n");
 }
 
 void	virtualDecoder::process (std::complex<float> v) {

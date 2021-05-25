@@ -27,7 +27,7 @@
 #include	<QThread>
 #include	<QString>
 #include	<atomic>
-#include	"radio-constants.h"
+//#include	"radio-constants.h"
 #include	"ringbuffer.h"
 #include	"drm-decoder.h"
 #include	"basics.h"
@@ -54,21 +54,21 @@ class	frameProcessor: public QThread {
 Q_OBJECT
 public:
 			frameProcessor	(drmDecoder *,
-	                                 RingBuffer<DSPCOMPLEX> *,
-	                                 RingBuffer<DSPCOMPLEX> *,
-	                                 RingBuffer<DSPCOMPLEX> *,
+	                                 RingBuffer<std::complex<JAN>> *,
+	                                 RingBuffer<std::complex<JAN>> *,
+	                                 RingBuffer<std::complex<JAN>> *,
 	                                 int32_t,	// samplerate
 	                                 int16_t,	// number of symbs
 	                                 int8_t,	// windowDepth
 	                                 int8_t);	// qam64
-			~frameProcessor (void);
-	void		stop		(void);
+			~frameProcessor ();
+	void		stop		();
 private:
         Reader          my_Reader;              // single instance during life
 	drmDecoder	*theDecoder;
-	RingBuffer<std::complex<float>> *buffer;
-	RingBuffer<std::complex<float>> *iqBuffer;
-	RingBuffer<std::complex<float>> *eqBuffer;
+	RingBuffer<std::complex<JAN>> *buffer;
+	RingBuffer<std::complex<JAN>> *iqBuffer;
+	RingBuffer<std::complex<JAN>> *eqBuffer;
 	backendController	my_backendController;
 	int16_t		nSymbols;
 	int32_t		sampleRate;
@@ -87,7 +87,7 @@ private:
 	bool		isLastFrame	(stateDescriptor *);
 	bool		isSDCcell	(smodeInfo *, int16_t, int16_t);
 	bool		isFACcell	(smodeInfo *, int16_t, int16_t);
-//	bool		processFac	(float, DSPCOMPLEX **, myArray<theSignal> *);
+//	bool		processFac	(JAN, DSPCOMPLEX **, myArray<theSignal> *);
 	void		addtoSuperFrame	(smodeInfo *,
 	                                 int16_t, myArray<theSignal> *);
 	bool		isDatacell	(smodeInfo *,
@@ -107,8 +107,6 @@ signals:
 	void		show_services	(int, int);
 	void		show_audioMode	(QString);
 	void		showEq		(int);
-	void		showSNR		(float);
-	void		show_freq2	(float);
 };
 
 #endif

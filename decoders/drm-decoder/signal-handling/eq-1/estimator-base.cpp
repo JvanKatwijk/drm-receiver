@@ -29,7 +29,7 @@
 //	We create a single "estimator" for each of the symbols
 //	of a frame.
 //
-	estimatorBase::estimatorBase (std::complex<float> **refFrame,
+	estimatorBase::estimatorBase (std::complex<JAN> **refFrame,
 	                              uint8_t	Mode,
 	                              uint8_t	Spectrum,
 	                              int16_t	refSymbol) {
@@ -44,8 +44,8 @@
 	estimatorBase::~estimatorBase (void) {
 }
 //
-void	estimatorBase::estimate (std::complex<float> *testRow,
-	                         std::complex<float> *resultRow) {
+void	estimatorBase::estimate (std::complex<JAN> *testRow,
+	                         std::complex<JAN> *resultRow) {
 	(void)testRow; (void)resultRow;
 }
 

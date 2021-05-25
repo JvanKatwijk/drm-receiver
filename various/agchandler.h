@@ -30,6 +30,7 @@
 #include	<QString>
 #include	<stdint.h>
 #include	<math.h>
+#include	<vector>
 #include	"radio-constants.h"
 
 class	agcHandler {
@@ -60,7 +61,7 @@ private:
 	float		attackAverage;
 	float		decayAverage;
 	int32_t		bufferSize;
-	float		*buffer;
+	std::vector<float> buffer;
 	int32_t		bufferP;
 	float		ThresholdValue;
 	float		agcHangtime;

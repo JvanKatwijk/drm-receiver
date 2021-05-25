@@ -46,9 +46,9 @@
 //	size of the window used for equalization and the
 //	number of iterations for the multi-level decoding
 	frameProcessor::frameProcessor (drmDecoder	*mr,
-	                                RingBuffer<std::complex<float>> *buffer,
-	                                RingBuffer<std::complex<float>> *iqBuffer,
-	                                RingBuffer<std::complex<float>> *eqBuffer,
+	                                RingBuffer<std::complex<JAN>> *buffer,
+	                                RingBuffer<std::complex<JAN>> *iqBuffer,
+	                                RingBuffer<std::complex<JAN>> *eqBuffer,
 	                                int32_t		sampleRate,
 	                                int16_t		nSymbols,
 	                                int8_t		windowDepth,
@@ -84,8 +84,6 @@
 	         theDecoder, SLOT (show_channels (int, int)));
 	connect (this, SIGNAL (show_audioMode (QString)),
 	         theDecoder, SLOT (show_audioMode (QString)));
-//	connect (this, SIGNAL (showSNR (float)),
-//	         theDecoder, SLOT (showSNR (float)));
 }
 
 	frameProcessor::~frameProcessor (void) {
@@ -113,10 +111,10 @@ bool		frameReady;
 int16_t		missers;
 timeSyncer  my_Syncer (&my_Reader, sampleRate,  55);
 //timeSyncer  my_Syncer (&my_Reader, sampleRate,  nSymbols);
-float	offsetFractional	= 0;	//
+JAN	offsetFractional	= 0;	//
 int16_t	offsetInteger		= 0;
-float	deltaFreqOffset		= 0;
-float	sampleclockOffset	= 0;
+JAN	deltaFreqOffset		= 0;
+JAN	sampleclockOffset	= 0;
 //
 	try {
 restart:
@@ -164,7 +162,7 @@ restart:
 	   int nrCarriers	= Kmax (modeInf. Mode, modeInf. Spectrum) -
 	                          Kmin (modeInf. Mode, modeInf. Spectrum) + 1;
 
-	   myArray<std::complex<float>> inbank (nrSymbols, nrCarriers);
+	   myArray<std::complex<JAN>> inbank (nrSymbols + 2, nrCarriers + 10);
 	   myArray<theSignal> outbank (nrSymbols, nrCarriers);
 	   correlator myCorrelator (&modeInf);
 	   equalizer_1 my_Equalizer (theDecoder,
@@ -276,22 +274,16 @@ restart:
 	         bool sdcOK = my_sdcProcessor. processSDC (&outbank);
 	         setSDCSync (sdcOK);
 	         if (sdcOK) {
-	            threeinaRow ++;
+	            show_services (getnrAudio (&theState),
+	                           getnrData (&theState));
+	            blockCount	= 0;
 	         }
-	               
-	         show_services (getnrAudio (&theState),
-	                        getnrData (&theState));
-	         blockCount	= 0;
 //
 //	if we seem to have the start of a superframe, we
 //	re-create a backend with the right parameters
 	         if (!superframer && sdcOK)
 	            my_backendController. reset (&theState);
-//	we allow one sdc to fail, but only after having at least
-//	three frames correct
-	         superframer	= sdcOK || threeinaRow >= 3;
-	         if (!sdcOK)
-	            threeinaRow	= 0;
+	         superframer	= sdcOK ;
 	      }
 //
 //	when here, add the current frame to the superframe.
@@ -333,7 +325,7 @@ restart:
 	      else {
 	         setFACSync (false); setSDCSync (false);
 	         superframer		= false;
-	         if (missers++ < 3)
+	         if (missers++ < 2)
 	            continue;
 	         goto restart;	// ... or give up and start all over
 	      }
@@ -498,9 +490,6 @@ int	cnt	= 0;
 	         cnt ++;
 	      }
 	}
-
-	fprintf (stderr, "for Mode %d, spectrum %d, we have %d sdc cells\n",
-	                       Mode, Spectrum, cnt);
 }
 //
 //	just for readability

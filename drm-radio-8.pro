@@ -11,6 +11,9 @@ TARGET	= drm-radio
 QMAKE_CFLAGS	+= -g
 QMAKE_CXXFLAGS	+= -g
 QMAKE_LFLAGS	+= -g
+QMAKE_CXXFLAGS	+= -fsanitize=address
+QMAKE_CFLAGS	+= -fsanitize=address
+QMAKE_LFLAGS	+= -fsanitize=address
 RC_ICONS        =  swradio.ico
 RESOURCES       += resources.qrc
 
@@ -118,6 +121,7 @@ HEADERS += ./radio-constants.h \
 	   ./decoders/drm-decoder/support/mer16-values.h \
 	   ./decoders/drm-decoder/support/mer64-values.h \
 	   ./decoders/drm-decoder/support/fft-complex.h \
+	   ./decoders/drm-decoder/support/drm-shifter.h \
 	   ./decoders/drm-decoder/parameters/state-descriptor.h \
 	   ./decoders/drm-decoder/parameters/puncture-tables.h \
 	   ./decoders/drm-decoder/fac/fac-tables.h \
@@ -201,6 +205,7 @@ SOURCES += ./main.cpp \
 	   ./decoders/drm-decoder/support/mer16-values.cpp \
 	   ./decoders/drm-decoder/support/mer64-values.cpp \
 	   ./decoders/drm-decoder/support/fft-complex.cpp \
+	   ./decoders/drm-decoder/support/drm-shifter.cpp \
 	   ./decoders/drm-decoder/parameters/state-descriptor.cpp \
 	   ./decoders/drm-decoder/parameters/puncture-tables.cpp \
 	   ./decoders/drm-decoder/fac/fac-tables.cpp \

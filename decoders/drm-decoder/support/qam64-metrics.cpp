@@ -42,7 +42,7 @@
 #include	"qam64-metrics.h"
 #include	"basics.h"
 
-const float rTableQAM64SM [8][2] = {
+const JAN rTableQAM64SM [8][2] = {
     { 1.0801234497f,  1.0801234497f},
     {-0.1543033499f, -0.1543033499f},
     { 0.4629100498f,  0.4629100498f},

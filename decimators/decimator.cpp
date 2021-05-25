@@ -24,6 +24,9 @@
 }
 
 	decimator::~decimator (void) {
+        delete	src_data;
+        delete[]	inBuffer;
+        delete[]	outBuffer;
 }
 
 int32_t	decimator::inSize (void) {

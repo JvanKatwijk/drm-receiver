@@ -32,7 +32,8 @@
 #include	<QObject>
 #include	<complex>
 #include	<vector>
-#include	"radio-constants.h"
+#include	"basics.h"
+//#include	"radio-constants.h"
 #include	"fir-filters.h"
 #include	"ui_drmdecoder.h"
 #include	"ringbuffer.h"
@@ -50,21 +51,21 @@ public:
 			drmDecoder		(int32_t,
 	                                         RingBuffer<std::complex<float> > *,
 	                                         QSettings *);
-			~drmDecoder		(void);
+			~drmDecoder		();
 	void		processBuffer		(std::complex<float> *, int);
 	void		process			(std::complex<float>);
 //
 //	For internal use:
-	void		show			(std::complex<float>);
+	void		show			(std::complex<JAN>);
 	bool		haltSignal		(void);
 	int16_t		getAudioChannel		(void);
 	int16_t		getDataChannel		(void);
 	bool		isSelectedDataChannel	(int16_t);
 private:
 	QFrame		myFrame;
-	RingBuffer<std::complex<float>> iqBuffer;
-	RingBuffer<std::complex<float>> eqBuffer;
-	RingBuffer<std::complex<float>> buffer;
+	RingBuffer<std::complex<JAN>> iqBuffer;
+	RingBuffer<std::complex<JAN>> eqBuffer;
+	RingBuffer<std::complex<JAN>> buffer;
 	lowpassFIR	Filter_10;
 	bandpassFIR	Filter_20;
 	basicFIR	*theFilter;
@@ -77,7 +78,7 @@ private:
 
 	int16_t		bufferLength;
 	int32_t		theRate;
-	std::vector<std::complex<float> > localOscillator;
+	std::vector<std::complex<JAN> > localOscillator;
 	int		currentPhase;
 	int		phaseOffset;
 	int32_t		workingRate;

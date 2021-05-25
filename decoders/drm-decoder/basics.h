@@ -25,21 +25,36 @@
 //	just some very general stuff
 #ifndef	__DRM_BASICS__
 #define	__DRM_BASICS__
-#include	"radio-constants.h"
+
+#include	<stdio.h>
+#include	<stdint.h>
+#include	<complex>
 
 enum    {
         QAM4, QAM16, QAM64
 };
 
+typedef	double JAN;
+
+static inline
+std::complex<JAN> cmul (std::complex<JAN> a, JAN b) {
+	return std::complex<JAN> (real (a) * b, imag (a) * b);
+}
+
+static inline
+std::complex<JAN> cdiv (std::complex<JAN> a, JAN b) {
+	return std::complex<JAN> (real (a) / b, imag (a) / b);
+}
+
 struct	modeinfo {
 	int16_t		Mode;
 	uint8_t		Spectrum;
-	float		sampleRate_offset;
-//	float		timeOffset;
-	float		freqOffset_fract;
+	JAN		sampleRate_offset;
+//	JAN		timeOffset;
+	JAN		freqOffset_fract;
 	int		freqOffset_integer;
 	int16_t		timeOffset_integer;
-	float		timeOffset_fractional;
+	JAN		timeOffset_fractional;
 };
 
 typedef	struct modeinfo smodeInfo;
@@ -50,13 +65,13 @@ typedef struct {
 } sdcCell;
 
 typedef struct	ourSignal {
-	DSPCOMPLEX	signalValue;
+	std::complex<JAN>	signalValue;
 	double		rTrans;
 } theSignal;
 
 struct metrics_struct {
-	float	rTow0;
-	float	rTow1;
+	JAN	rTow0;
+	JAN	rTow1;
 };
 
 typedef struct metrics_struct metrics;
@@ -66,7 +81,7 @@ typedef struct metrics_struct metrics;
 //	in the current setting, the best results are
 //	with a plain rDist (or squared)
 static inline
-float computeMetric (const float rDist, const float rChan) {
+JAN computeMetric (const JAN rDist, const JAN rChan) {
 	return rDist * rDist * rChan;
 //	return rDist * rChan;
 //	return rDist * rDist;
@@ -81,19 +96,19 @@ float computeMetric (const float rDist, const float rChan) {
 }
 
 static inline
-float Minimum1 (const float rA, const float rB, const float rChan) {
+JAN Minimum1 (const JAN rA, const JAN rB, const JAN rChan) {
 //	The minimum in case of only one parameter is trivial 
 	return computeMetric (fabs(rA - rB), rChan);
 }
 
 static inline
-float	Minimum2 (const float rA,	// value to consider
-	          const float rB1,	// reference 1
-	          const float rB2,	// reference 2
-	          const float rChan) {
+JAN	Minimum2 (const JAN rA,	// value to consider
+	          const JAN rB1,	// reference 1
+	          const JAN rB2,	// reference 2
+	          const JAN rChan) {
         /* First, calculate all distances */
-const float rResult1 = fabs (rA - rB1);
-const float rResult2 = fabs (rA - rB2);
+const JAN rResult1 = fabs (rA - rB1);
+const JAN rResult2 = fabs (rA - rB2);
 
 /* Return smallest one */
         return  (rResult1 < rResult2) ?
@@ -102,17 +117,17 @@ const float rResult2 = fabs (rA - rB2);
 }
 
 static inline
-float	Minimum2 (const float rA,
-	          const float rX0,
-	          const float rX1,
-                  const float rChan,
-	          const float rLVal0) {
+JAN	Minimum2 (const JAN rA,
+	          const JAN rX0,
+	          const JAN rX1,
+                  const JAN rChan,
+	          const JAN rLVal0) {
         /* X0: L0 < 0
            X1: L0 > 0 */
 
 /* First, calculate all distances */
-float rResult1	= computeMetric (fabs (rA - rX0), rChan);
-float rResult2	= computeMetric (fabs (rA - rX1), rChan);
+JAN rResult1	= computeMetric (fabs (rA - rX0), rChan);
+JAN rResult2	= computeMetric (fabs (rA - rX1), rChan);
 
 /* Add L-value to metrics which to not correspond to correct hard decision */
 	if (rLVal0 > 0.0)
@@ -128,16 +143,16 @@ float rResult2	= computeMetric (fabs (rA - rX1), rChan);
 }
 
 static inline 
-float	Minimum4 (const float rA, const float rB1, const float rB2,
-	          const float rB3, float rB4, const float rChan) {
+JAN	Minimum4 (const JAN rA, const JAN rB1, const JAN rB2,
+	          const JAN rB3, JAN rB4, const JAN rChan) {
 /* First, calculate all distances */
-const float rResult1 = fabs (rA - rB1);
-const float rResult2 = fabs (rA - rB2);
-const float rResult3 = fabs (rA - rB3);
-const float rResult4 = fabs (rA - rB4);
+const JAN rResult1 = fabs (rA - rB1);
+const JAN rResult2 = fabs (rA - rB2);
+const JAN rResult3 = fabs (rA - rB3);
+const JAN rResult4 = fabs (rA - rB4);
 
         /* Search for smallest one */
-float rReturn = rResult1;
+JAN rReturn = rResult1;
         if (rResult2 < rReturn)
             rReturn = rResult2;
         if (rResult3 < rReturn)
@@ -165,6 +180,6 @@ int16_t		symbolsperGroup	(uint8_t);
 int16_t		Kmin		(uint8_t, uint8_t);
 int16_t		Kmax		(uint8_t, uint8_t);
 int16_t		ususedCarriers	(uint8_t);
-float		sinc		(float);
+JAN		sinc		(JAN);
 #endif
 

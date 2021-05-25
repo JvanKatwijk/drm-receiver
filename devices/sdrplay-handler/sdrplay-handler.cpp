@@ -114,7 +114,8 @@ int16_t	bank_rsp1 (int32_t freq) {
 	                                 int32_t	outputRate,
 	                                 RingBuffer<DSPCOMPLEX> *r,
 	                                 QSettings	*s):
-	                                              deviceHandler (mr) {
+	                                      deviceHandler (mr),
+	                                      myFrame (nullptr) {
 mir_sdr_ErrT err;
 float	ver;
 mir_sdr_DeviceT devDesc [4];
@@ -122,9 +123,8 @@ sdrplaySelect	*sdrplaySelector;
 
 	this	-> outputRate	= outputRate;
 	this	-> sdrplaySettings	= s;
-	this	-> myFrame	= new QFrame (NULL);
-	setupUi (this -> myFrame);
-	this	-> myFrame	-> show ();
+	setupUi (&myFrame);
+	myFrame. show ();
 	antennaSelector		-> hide ();
 	tunerSelector		-> hide ();
 	this	-> inputRate	= kHz (2112);
@@ -145,7 +145,6 @@ ULONG APIkeyValue_length = 255;
               fprintf (stderr,
 	               "failed to locate API registry entry, error = %d\n",
 	               (int)GetLastError());
-	      delete myFrame;
 	      throw (21);
 	   }
 
@@ -163,7 +162,6 @@ ULONG APIkeyValue_length = 255;
 	   Handle	= LoadLibrary (x);
 	   if (Handle == NULL) {
 	      fprintf (stderr, "Failed to open mir_sdr_api.dll\n");
-	      delete myFrame;
 	      throw (22);
 	   }
 	}
@@ -176,7 +174,6 @@ ULONG APIkeyValue_length = 255;
 	fprintf (stderr, "library loaded\n");
 	if (Handle == NULL) {
 	   fprintf (stderr, "error report %s\n", dlerror ());
-	   delete myFrame;
 	   throw (23);
 	}
 #endif
@@ -189,7 +186,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-	   delete myFrame;
 	   throw (23);
 	}
 
@@ -202,7 +198,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-           delete myFrame;
            throw (24);
         }
 
@@ -213,7 +208,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-	   delete myFrame;
 	   throw (24);
 	}
 
@@ -236,7 +230,7 @@ ULONG APIkeyValue_length = 255;
 
         sdrplaySettings -> endGroup ();
 
-	oscillatorTable	= new std::complex<float> [inputRate];
+	oscillatorTable	. resize (inputRate);
 	for (int32_t i = 0; i < (int)inputRate; i ++)
 	   oscillatorTable [i] = std::complex<float> (
 	                           cos ((float) i * 2 * M_PI / inputRate),
@@ -260,7 +254,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-           delete myFrame;
            throw (25);
         }
 
@@ -271,7 +264,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-	   delete myFrame;
 	   throw (25);
 	}
 
@@ -305,7 +297,6 @@ ULONG APIkeyValue_length = 255;
 #else
            dlclose (Handle);
 #endif
-           delete myFrame;
            throw (25);
         }
 
@@ -384,11 +375,11 @@ ULONG APIkeyValue_length = 255;
 
 	if (!libraryLoaded)	// should not happen
 	   return;
-	delete	myFrame;
 
 	if (numofDevs > 0)
 	   my_mir_sdr_ReleaseDeviceIdx (deviceIndex);
 
+	delete filter;
 #ifdef __MINGW32__
         FreeLibrary (Handle);
 #else
