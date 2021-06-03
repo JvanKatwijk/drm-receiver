@@ -51,7 +51,7 @@ struct	modeinfo {
 	uint8_t		Spectrum;
 	JAN		sampleRate_offset;
 //	JAN		timeOffset;
-	JAN		freqOffset_fract;
+	JAN		freqOffset_fractional;
 	int		freqOffset_integer;
 	int16_t		timeOffset_integer;
 	JAN		timeOffset_fractional;

@@ -50,7 +50,6 @@
 	this	-> Mode		= modeInf -> Mode;
 	this	-> Spectrum	= modeInf -> Spectrum;
 	this	-> theAngle	= 0;
-	this	-> theAngle_2	= 0;
 	this	-> Tu		= Tu_of (Mode);
 	this	-> Ts		= Ts_of (Mode);
 	this	-> Tg		= Tg_of (Mode);
@@ -74,25 +73,23 @@
 		wordCollector::~wordCollector (void) {
 }
 
-static JAN theOffset= 0;
 //	when starting up, we "borrow" the precomputed frequency offset
 //	and start building up the spectrumbuffer.
 //	
 void	wordCollector::getWord (std::complex<JAN>	*out,
 	                        int32_t		initialFreq,
-	                        JAN		offsetFractional) {
+	                        float		offsetFractional,
+	                        float		freqOffset_fractional) {
 std::complex<JAN>	temp [Ts + 100];
-std::complex<JAN>	angle	= std::complex<JAN> (0, 0);
 int	f	= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
-	theOffset = 0;
+	theAngle	= freqOffset_fractional;
 
 //	correction of the time offset by interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<JAN> one = buffer ->  data [(f + i) & bufMask];
 	   std::complex<JAN> two = buffer ->  data [(f + i + 1)& bufMask];
-//	   temp [i] = one;
 	   temp [i] = cmul (one, 1 - offsetFractional) +
 	                  cmul (two, offsetFractional);
 	}
@@ -100,25 +97,17 @@ int	f	= buffer -> currentIndex;
 //	And we shift the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & bufMask;
 
-//	theShifter. do_shift (temp, Ts, 100 * initialFreq);
-//	Now: determine the fine grain offset.
-	for (int i = 0; i < Tg; i ++)
-	   angle += conj (temp [Tu + i]) * temp [i];
-//	simple averaging
-	theAngle	= 0.6 * theAngle + 0.4 * arg (angle);
-	theAngle_2	= theAngle;
-//
 //	offset  (and shift) in Hz / 100
 	JAN offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (!isnan (offset))	// precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
 	                     100 * initialFreq - offset);
 
-	if (++displayCount > 20) {
+	if (++displayCount > 10) {
 	   displayCount = 0;
 	   show_coarseOffset	(initialFreq);
-	   show_fineOffset	(- offset / 100);
-	   show_angle		(arg (angle));
+	   show_fineOffset	(offset / 100);
+	   show_angle		(freqOffset_fractional);
 	   show_timeDelay	(offsetFractional);
 	}
 
@@ -129,7 +118,6 @@ int	f	= buffer -> currentIndex;
 //	a next ofdm word
 void	wordCollector::getWord (std::complex<JAN>	*out,
 	                        int32_t		initialFreq,
-	                        bool		firstTime,
 	                        JAN		offsetFractional,
 	                        JAN		angle,
 	                        JAN		clockOffset) {
@@ -138,46 +126,29 @@ int	f		= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 
-	theOffset	= offsetFractional + clockOffset;
-//	if  (theOffset < -0.5) {
-//	   theOffset += 1;
-//	   fprintf (stderr, "-1 due to fractionalOffset %f\n", offsetFractional);
-//	   buffer -> currentIndex --;
-//	}
-//	else
-//	if (theOffset >= 0.5 ) {
-//	   theOffset -= 1;
-//	   fprintf (stderr, "+1 due to fractionalOffset %f\n", offsetFractional);
-//	   buffer -> currentIndex ++;
-//	}
-//
-//	if (theOffset < 0) {
-//	   f --;
-//	   theOffset += 1;
-//	}
-
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<JAN> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<JAN> two = buffer -> data [(f + i + 1) & bufMask];
-	   temp [i] = 
-	             cmul (one, 1 - theOffset) + cmul (two, theOffset);
+	   temp [i] = cmul (one, 1 - offsetFractional) +
+	                         cmul (two, offsetFractional);
 	}
 
 //	And we adjust the bufferpointer here
-	buffer -> currentIndex = (buffer -> currentIndex + Ts) & bufMask;
-
-	std::complex<float> phaseError = std::complex<float> (0, 0);
-//	Now: determine the fine grain offset.
-//	for (int i = 1; i < Tg - 1; i ++)
-//	   phaseError += conj (temp [Tu + i]) * temp [i];
-//	simple averaging
-//	theAngle_2	= 0.9 * theAngle + 0.1 * arg (phaseError);
+	buffer -> currentIndex = (f + Ts) & bufMask;
 
 //	correct the phase
-	theAngle	= theAngle - 0.1 * angle;
-
+	theAngle	= theAngle - 0.2 * angle;
+	if (theAngle < - M_PI) {
+	   theAngle += M_PI;
+	   modeInf -> freqOffset_integer -= sampleRate / Tu;
+	}
+	if (theAngle >= M_PI) {
+	   theAngle -= M_PI;
+	   modeInf -> freqOffset_integer += sampleRate / Tu;
+	}
+	  
 //	offset in 0.01 * Hz
-	JAN freqOff          = theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	JAN freqOff	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (!isnan (freqOff)) { // precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
 	                         100 * modeInf -> freqOffset_integer -
@@ -186,12 +157,12 @@ int	f		= buffer -> currentIndex;
 	else
 	   theAngle = 0;
 
-	if (++displayCount > 20) {
+	if (++displayCount > 10) {
 	   displayCount = 0;
 	   show_coarseOffset	(initialFreq);
-	   show_fineOffset	(- freqOff / 100);
+	   show_fineOffset	(freqOff / 100);
 	   show_angle		(angle);
-	   show_timeOffset	(theOffset);
+	   show_timeOffset	(offsetFractional);
 	   show_clockOffset	(Ts * clockOffset);
 	}
 

@@ -102,7 +102,7 @@ int16_t	theMode;
 	   result	-> timeOffset_integer	= 0;
 	   result	-> timeOffset_fractional	= 0;
 	   result	-> freqOffset_integer	= 0;
-	   result	-> freqOffset_fract	= 0.0;
+	   result	-> freqOffset_fractional	= 0.0;
 	   return;
 	}
 //
@@ -118,7 +118,7 @@ int16_t	theMode;
 	result	-> timeOffset_integer	= list_Offsets [theMode - Mode_A];
 	result	-> timeOffset_fractional = 0;
 	result	-> freqOffset_integer	= 0;
-	result -> freqOffset_fract	= list_epsilon [theMode - Mode_A];
+	result -> freqOffset_fractional	= list_epsilon [theMode - Mode_A];
 }
 
 void	timeSyncer::compute_gammaRelative (uint8_t	mode,

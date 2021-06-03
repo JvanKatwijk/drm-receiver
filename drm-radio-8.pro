@@ -5,15 +5,15 @@ TEMPLATE = app
 QT	+= widgets xml
 CONFIG	-= console
 TARGET	= drm-radio
-#QMAKE_CFLAGS	+= -flto -ffast-math 
-#QMAKE_CXXFLAGS	+= -flto -ffast-math 
-#QMAKE_LFLAGS	+= -flto
-QMAKE_CFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -g
-QMAKE_LFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -fsanitize=address
-QMAKE_CFLAGS	+= -fsanitize=address
-QMAKE_LFLAGS	+= -fsanitize=address
+QMAKE_CFLAGS	+= -flto -ffast-math 
+QMAKE_CXXFLAGS	+= -flto -ffast-math 
+QMAKE_LFLAGS	+= -flto
+#QMAKE_CFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -g
+#QMAKE_LFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -fsanitize=address
+#QMAKE_CFLAGS	+= -fsanitize=address
+#QMAKE_LFLAGS	+= -fsanitize=address
 RC_ICONS        =  swradio.ico
 RESOURCES       += resources.qrc
 

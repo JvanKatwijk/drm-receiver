@@ -14,9 +14,9 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DGITHASH=\"86bf9b6\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -g -fsanitize=address -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -g -fsanitize=address -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
+DEFINES       = -DGITHASH=\"dcf3404\" -DHAVE_DRM_DECODER -DESTIMATOR_1 -DHAVE_SDRPLAY -D__WITH_FAAD__ -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB
+CFLAGS        = -pipe -flto -ffast-math -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -flto -ffast-math -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -I. -Idecimators -Ifilters -Ivarious -Ioutput -Iscopes-qwt6 -Idevices -Idevices/filereader -Idecoders -Idecoders/drm-decoder -Idecoders/drm-decoder/ofdm -Idecoders/drm-decoder/signal-handling -Idecoders/drm-decoder/signal-handling/eq-1 -Idecoders/drm-decoder/support -Idecoders/drm-decoder/parameters -Idecoders/drm-decoder/msc -Idecoders/drm-decoder/sdc -Idecoders/drm-decoder/fac -Idecoders/drm-decoder/data -I../../../include/qt5/qwt -Idevices/sdrplay-handler -I../../../include/qt5 -I../../../include/qt5/QtWidgets -I../../../include/qt5/QtGui -I../../../include/qt5/QtXml -I../../../include/qt5/QtCore -I. -I. -I/../lib64/qt5/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake-qt5
 DEL_FILE      = rm -f
@@ -39,7 +39,7 @@ COMPRESS      = gzip -9f
 DISTNAME      = drm-radio1.0.0
 DISTDIR = /usr/shared/systems/drm-receiver/.tmp/drm-radio1.0.0
 LINK          = g++
-LFLAGS        = -g -fsanitize=address -Wl,-O1
+LFLAGS        = -flto -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/lib64 -L/lib64 -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl -lfaad_drm /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Xml.so /usr/lib64/libQt5Core.so -lGL -lpthread   
 AR            = ar cqs
 RANLIB        = 
@@ -288,6 +288,8 @@ DIST          = /../lib64/qt5/mkspecs/features/spec_pre.prf \
 		/../lib64/qt5/mkspecs/qconfig.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri \
+		/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri \
+		/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_core.pri \
@@ -549,6 +551,8 @@ Makefile: drm-radio-8.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 		/../lib64/qt5/mkspecs/qconfig.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri \
+		/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri \
+		/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_core.pri \
@@ -631,6 +635,8 @@ Makefile: drm-radio-8.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 /../lib64/qt5/mkspecs/qconfig.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri:
+/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri:
+/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_core.pri:
@@ -756,7 +762,7 @@ compiler_moc_predefs_make_all: moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) moc_predefs.h
 moc_predefs.h: /../lib64/qt5/mkspecs/features/data/dummy.cpp
-	g++ -pipe -g -fsanitize=address -O2 -Wall -Wextra -dM -E -o moc_predefs.h /../lib64/qt5/mkspecs/features/data/dummy.cpp
+	g++ -pipe -flto -ffast-math -O2 -Wall -Wextra -dM -E -o moc_predefs.h /../lib64/qt5/mkspecs/features/data/dummy.cpp
 
 compiler_moc_header_make_all: moc_radio.cpp moc_program-list.cpp moc_popup-keypad.cpp moc_virtual-scope.cpp moc_waterfall-scope.cpp moc_spectrum-scope.cpp moc_scope.cpp moc_fft-scope.cpp moc_device-handler.cpp moc_filereader.cpp moc_filehulp.cpp moc_virtual-decoder.cpp moc_drm-decoder.cpp moc_iqdisplay.cpp moc_frame-processor.cpp moc_freqsyncer.cpp moc_word-collector.cpp moc_equalizer-base.cpp moc_fac-processor.cpp moc_sdc-processor.cpp moc_backend-controller.cpp moc_msc-handler.cpp moc_data-processor.cpp moc_message-processor.cpp moc_mot-data.cpp moc_sdrplay-handler.cpp moc_sdrplayselect.cpp moc_aac-processor-faad.cpp moc_drm-aacdecoder.cpp
 compiler_moc_header_clean:
@@ -881,6 +887,53 @@ moc_radio.cpp: radio.h \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		radio-constants.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
@@ -2101,6 +2154,25 @@ moc_filereader.cpp: devices/filereader/filereader.h \
 		../../../include/qt5/QtWidgets/QDialog \
 		../../../include/qt5/QtWidgets/qdialog.h \
 		ui_filereader-widget.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QScrollBar \
+		../../../include/qt5/QtWidgets/qscrollbar.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
 		various/ringbuffer.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
@@ -2291,21 +2363,36 @@ moc_drm-decoder.cpp: decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -2315,36 +2402,54 @@ moc_drm-decoder.cpp: decoders/drm-decoder/drm-decoder.h \
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
 	/../lib64/qt5/bin/moc $(DEFINES) --include /usr/shared/systems/drm-receiver/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver/decimators -I/usr/shared/systems/drm-receiver/filters -I/usr/shared/systems/drm-receiver/various -I/usr/shared/systems/drm-receiver/output -I/usr/shared/systems/drm-receiver/scopes-qwt6 -I/usr/shared/systems/drm-receiver/devices -I/usr/shared/systems/drm-receiver/devices/filereader -I/usr/shared/systems/drm-receiver/decoders -I/usr/shared/systems/drm-receiver/decoders/drm-decoder -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/ofdm -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/support -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/parameters -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/msc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/sdc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/fac -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5/qwt -I/usr/shared/systems/drm-receiver/devices/sdrplay-handler -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/10 -I/usr/include/c++/10/x86_64-redhat-linux -I/usr/include/c++/10/backward -I/usr/lib/gcc/x86_64-redhat-linux/10/include -I/usr/local/include -I/usr/include decoders/drm-decoder/drm-decoder.h -o moc_drm-decoder.cpp
@@ -2574,20 +2679,36 @@ moc_frame-processor.cpp: decoders/drm-decoder/frame-processor.h \
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -2597,36 +2718,53 @@ moc_frame-processor.cpp: decoders/drm-decoder/frame-processor.h \
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		decoders/drm-decoder/ofdm/timesync.h \
 		decoders/drm-decoder/ofdm/reader.h \
 		decoders/drm-decoder/msc/backend-controller.h \
@@ -2635,8 +2773,9 @@ moc_frame-processor.cpp: decoders/drm-decoder/frame-processor.h \
 		decoders/drm-decoder/signal-handling/equalizer-base.h \
 		decoders/drm-decoder/support/my-array.h \
 		decoders/drm-decoder/ofdm/freqsyncer.h \
-		decoders/drm-decoder/support/drm-shifter.h \
+		various/shifter.h \
 		decoders/drm-decoder/ofdm/word-collector.h \
+		decoders/drm-decoder/support/drm-shifter.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
 	/../lib64/qt5/bin/moc $(DEFINES) --include /usr/shared/systems/drm-receiver/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver/decimators -I/usr/shared/systems/drm-receiver/filters -I/usr/shared/systems/drm-receiver/various -I/usr/shared/systems/drm-receiver/output -I/usr/shared/systems/drm-receiver/scopes-qwt6 -I/usr/shared/systems/drm-receiver/devices -I/usr/shared/systems/drm-receiver/devices/filereader -I/usr/shared/systems/drm-receiver/decoders -I/usr/shared/systems/drm-receiver/decoders/drm-decoder -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/ofdm -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/support -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/parameters -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/msc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/sdc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/fac -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5/qwt -I/usr/shared/systems/drm-receiver/devices/sdrplay-handler -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/10 -I/usr/include/c++/10/x86_64-redhat-linux -I/usr/include/c++/10/backward -I/usr/lib/gcc/x86_64-redhat-linux/10/include -I/usr/local/include -I/usr/include decoders/drm-decoder/frame-processor.h -o moc_frame-processor.cpp
@@ -2697,7 +2836,8 @@ moc_freqsyncer.cpp: decoders/drm-decoder/ofdm/freqsyncer.h \
 		../../../include/qt5/QtCore/qcontainerfwd.h \
 		../../../include/qt5/QtCore/qobject_impl.h \
 		decoders/drm-decoder/basics.h \
-		decoders/drm-decoder/support/drm-shifter.h \
+		radio-constants.h \
+		various/shifter.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
 	/../lib64/qt5/bin/moc $(DEFINES) --include /usr/shared/systems/drm-receiver/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver -I/usr/shared/systems/drm-receiver/decimators -I/usr/shared/systems/drm-receiver/filters -I/usr/shared/systems/drm-receiver/various -I/usr/shared/systems/drm-receiver/output -I/usr/shared/systems/drm-receiver/scopes-qwt6 -I/usr/shared/systems/drm-receiver/devices -I/usr/shared/systems/drm-receiver/devices/filereader -I/usr/shared/systems/drm-receiver/decoders -I/usr/shared/systems/drm-receiver/decoders/drm-decoder -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/ofdm -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/signal-handling/eq-1 -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/support -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/parameters -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/msc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/sdc -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/fac -I/usr/shared/systems/drm-receiver/decoders/drm-decoder/data -I/usr/include/qt5/qwt -I/usr/shared/systems/drm-receiver/devices/sdrplay-handler -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtCore -I/usr/include/c++/10 -I/usr/include/c++/10/x86_64-redhat-linux -I/usr/include/c++/10/backward -I/usr/lib/gcc/x86_64-redhat-linux/10/include -I/usr/local/include -I/usr/include decoders/drm-decoder/ofdm/freqsyncer.h -o moc_freqsyncer.cpp
@@ -3446,6 +3586,39 @@ moc_sdrplay-handler.cpp: devices/sdrplay-handler/sdrplay-handler.h \
 		../../../include/qt5/QtWidgets/QDialog \
 		../../../include/qt5/QtWidgets/qdialog.h \
 		ui_sdrplay-widget.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QCheckBox \
+		../../../include/qt5/QtWidgets/qcheckbox.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qtabwidget.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QWidget \
 		devices/sdrplay-handler/mirsdrapi-rsp.h \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
@@ -4111,6 +4284,46 @@ main.o: main.cpp ../../../include/qt5/QtWidgets/QApplication \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		radio-constants.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
@@ -4128,7 +4341,6 @@ main.o: main.cpp ../../../include/qt5/QtWidgets/QApplication \
 		../../../include/qt5/QtCore/QtCoreDepends \
 		../../../include/qt5/QtCore/qabstractanimation.h \
 		../../../include/qt5/QtCore/qabstracteventdispatcher.h \
-		../../../include/qt5/QtCore/qabstractitemmodel.h \
 		../../../include/qt5/QtCore/qabstractnativeeventfilter.h \
 		../../../include/qt5/QtCore/qabstractproxymodel.h \
 		../../../include/qt5/QtCore/qabstractstate.h \
@@ -4145,7 +4357,6 @@ main.o: main.cpp ../../../include/qt5/QtWidgets/QApplication \
 		../../../include/qt5/QtCore/qcborvalue.h \
 		../../../include/qt5/QtCore/qdatetime.h \
 		../../../include/qt5/QtCore/qcborcommon.h \
-		../../../include/qt5/QtCore/qregularexpression.h \
 		../../../include/qt5/QtCore/quuid.h \
 		../../../include/qt5/QtCore/qcbormap.h \
 		../../../include/qt5/QtCore/qcborstream.h \
@@ -4387,6 +4598,53 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		radio-constants.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
@@ -4400,23 +4658,9 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		scopes-qwt6/fft-scope.h \
 		scopes-qwt6/virtual-scope.h \
 		../../../include/qt5/qwt/qwt.h \
-		../../../include/qt5/qwt/qwt_global.h \
-		../../../include/qt5/qwt/qwt_plot.h \
-		../../../include/qt5/qwt/qwt_text.h \
-		../../../include/qt5/qwt/qwt_plot_dict.h \
-		../../../include/qt5/qwt/qwt_plot_item.h \
-		../../../include/qt5/qwt/qwt_legend_data.h \
-		../../../include/qt5/qwt/qwt_graphic.h \
-		../../../include/qt5/qwt/qwt_null_paintdevice.h \
-		../../../include/qt5/QtGui/qpaintengine.h \
-		../../../include/qt5/QtGui/qpainter.h \
-		../../../include/qt5/qwt/qwt_scale_map.h \
-		../../../include/qt5/qwt/qwt_transform.h \
-		../../../include/qt5/qwt/qwt_interval.h \
 		output/upconverter.h \
 		output/audiosink.h \
 		various/popup-keypad.h \
-		../../../include/qt5/QtWidgets/QWidget \
 		../../../include/qt5/QtWidgets/QGridLayout \
 		../../../include/qt5/QtWidgets/qgridlayout.h \
 		../../../include/qt5/QtWidgets/qlayout.h \
@@ -4424,11 +4668,6 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		../../../include/qt5/QtWidgets/qboxlayout.h \
 		../../../include/qt5/QtWidgets/QButtonGroup \
 		../../../include/qt5/QtWidgets/qbuttongroup.h \
-		../../../include/qt5/QtWidgets/QPushButton \
-		../../../include/qt5/QtWidgets/qpushbutton.h \
-		../../../include/qt5/QtWidgets/qabstractbutton.h \
-		../../../include/qt5/QtWidgets/QLCDNumber \
-		../../../include/qt5/QtWidgets/qlcdnumber.h \
 		various/program-list.h \
 		../../../include/qt5/QtWidgets/QScrollArea \
 		../../../include/qt5/QtWidgets/qscrollarea.h \
@@ -4437,18 +4676,7 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		../../../include/qt5/QtWidgets/qtablewidget.h \
 		../../../include/qt5/QtWidgets/qtableview.h \
 		../../../include/qt5/QtWidgets/qabstractitemview.h \
-		../../../include/qt5/QtCore/qabstractitemmodel.h \
 		../../../include/qt5/QtCore/qitemselectionmodel.h \
-		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
-		../../../include/qt5/QtWidgets/qstyleoption.h \
-		../../../include/qt5/QtWidgets/qabstractspinbox.h \
-		../../../include/qt5/QtGui/qvalidator.h \
-		../../../include/qt5/QtCore/qregularexpression.h \
-		../../../include/qt5/QtWidgets/qslider.h \
-		../../../include/qt5/QtWidgets/qabstractslider.h \
-		../../../include/qt5/QtWidgets/qstyle.h \
-		../../../include/qt5/QtWidgets/qtabbar.h \
-		../../../include/qt5/QtWidgets/qrubberband.h \
 		../../../include/qt5/QtCore/QStringList \
 		../../../include/qt5/QtWidgets/QTableWidgetItem \
 		bandplan.h \
@@ -4458,7 +4686,6 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		../../../include/qt5/QtCore/QtCoreDepends \
 		../../../include/qt5/QtCore/qabstractanimation.h \
 		../../../include/qt5/QtCore/qabstracteventdispatcher.h \
-		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtCore/qabstractnativeeventfilter.h \
 		../../../include/qt5/QtCore/qabstractproxymodel.h \
 		../../../include/qt5/QtCore/qabstractstate.h \
@@ -4483,7 +4710,6 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		../../../include/qt5/QtCore/qcollator.h \
 		../../../include/qt5/QtCore/qcommandlineoption.h \
 		../../../include/qt5/QtCore/qcommandlineparser.h \
-		../../../include/qt5/QtCore/qcoreapplication.h \
 		../../../include/qt5/QtCore/qconcatenatetablesproxymodel.h \
 		../../../include/qt5/QtCore/qcryptographichash.h \
 		../../../include/qt5/QtCore/qdeadlinetimer.h \
@@ -4582,14 +4808,16 @@ radio.o: radio.cpp ../../../include/qt5/QtCore/QSettings \
 		devices/filereader/filereader.h \
 		../../../include/qt5/QtWidgets/QFrame \
 		ui_filereader-widget.h \
+		../../../include/qt5/QtWidgets/QScrollBar \
+		../../../include/qt5/QtWidgets/qscrollbar.h \
 		devices/sdrplay-handler/sdrplay-handler.h \
 		ui_sdrplay-widget.h \
+		../../../include/qt5/QtWidgets/QCheckBox \
+		../../../include/qt5/QtWidgets/qcheckbox.h \
 		devices/sdrplay-handler/mirsdrapi-rsp.h \
 		decoders/drm-decoder/drm-decoder.h \
 		decoders/drm-decoder/basics.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
 		../../../include/qt5/QtGui/QCloseEvent
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o radio.o radio.cpp
 
@@ -5058,6 +5286,47 @@ popup-keypad.o: various/popup-keypad.cpp various/popup-keypad.h \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		radio-constants.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
@@ -5233,6 +5502,41 @@ program-list.o: various/program-list.cpp ../../../include/qt5/QtCore/QFile \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		radio-constants.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
@@ -6203,6 +6507,53 @@ device-handler.o: devices/device-handler.cpp devices/device-handler.h \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
 		filters/fft-filters.h \
@@ -6342,6 +6693,51 @@ filereader.o: devices/filereader/filereader.cpp ../../../include/qt5/QtWidgets/Q
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		various/ringbuffer.h \
 		decimators/decimator.h \
 		filters/fft-filters.h \
@@ -6357,12 +6753,13 @@ filereader.o: devices/filereader/filereader.cpp ../../../include/qt5/QtWidgets/Q
 		../../../include/qt5/QtCore/qdeadlinetimer.h \
 		../../../include/qt5/QtCore/qelapsedtimer.h \
 		devices/filereader/filereader.h \
-		../../../include/qt5/QtWidgets/QWidget \
 		../../../include/qt5/QtWidgets/QFrame \
 		devices/device-handler.h \
 		../../../include/qt5/QtCore/QObject \
 		../../../include/qt5/QtWidgets/QDialog \
-		ui_filereader-widget.h
+		ui_filereader-widget.h \
+		../../../include/qt5/QtWidgets/QScrollBar \
+		../../../include/qt5/QtWidgets/qscrollbar.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filereader.o devices/filereader/filereader.cpp
 
 filehulp.o: devices/filereader/filehulp.cpp ../../../include/qt5/QtWidgets/QFrame \
@@ -6605,6 +7002,53 @@ virtual-decoder.o: decoders/virtual-decoder.cpp decoders/virtual-decoder.h \
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		decimators/decimator.h \
 		filters/fft-filters.h \
 		filters/fir-filters.h \
@@ -6732,14 +7176,45 @@ drm-decoder.o: decoders/drm-decoder/drm-decoder.cpp ../../../include/qt5/QtCore/
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
 		../../../include/qt5/QtWidgets/QLabel \
 		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		radio.h \
 		../../../include/qt5/QtWidgets/QMainWindow \
 		../../../include/qt5/QtWidgets/qmainwindow.h \
 		../../../include/qt5/QtWidgets/qtabwidget.h \
-		../../../include/qt5/QtGui/qicon.h \
 		../../../include/qt5/QtCore/QTimer \
 		../../../include/qt5/QtCore/qtimer.h \
 		../../../include/qt5/QtCore/qbasictimer.h \
@@ -6748,9 +7223,22 @@ drm-decoder.o: decoders/drm-decoder/drm-decoder.cpp ../../../include/qt5/QtCore/
 		../../../include/qt5/QtWidgets/qlineedit.h \
 		../../../include/qt5/QtGui/qtextcursor.h \
 		../../../include/qt5/QtGui/qtextformat.h \
-		../../../include/qt5/QtGui/qpen.h \
-		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
+		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../../include/qt5/QtWidgets/qstyleoption.h \
+		../../../include/qt5/QtWidgets/qabstractspinbox.h \
+		../../../include/qt5/QtGui/qvalidator.h \
+		../../../include/qt5/QtCore/qregularexpression.h \
+		../../../include/qt5/QtWidgets/qstyle.h \
+		../../../include/qt5/QtWidgets/qtabbar.h \
+		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
 		decimators/decimator.h \
 		filters/fft-filters.h \
 		various/fft.h \
@@ -6771,26 +7259,13 @@ drm-decoder.o: decoders/drm-decoder/drm-decoder.cpp ../../../include/qt5/QtCore/
 		decoders/drm-decoder/signal-handling/equalizer-base.h \
 		decoders/drm-decoder/support/my-array.h \
 		decoders/drm-decoder/ofdm/freqsyncer.h \
-		decoders/drm-decoder/support/drm-shifter.h \
 		decoders/drm-decoder/ofdm/word-collector.h \
+		decoders/drm-decoder/support/drm-shifter.h \
 		decoders/drm-decoder/iqdisplay.h \
 		../../../include/qt5/qwt/qwt.h \
-		../../../include/qt5/qwt/qwt_global.h \
 		../../../include/qt5/qwt/qwt_slider.h \
 		../../../include/qt5/qwt/qwt_abstract_slider.h \
 		../../../include/qt5/qwt/qwt_abstract_scale.h \
-		../../../include/qt5/qwt/qwt_plot.h \
-		../../../include/qt5/qwt/qwt_text.h \
-		../../../include/qt5/qwt/qwt_plot_dict.h \
-		../../../include/qt5/qwt/qwt_plot_item.h \
-		../../../include/qt5/qwt/qwt_legend_data.h \
-		../../../include/qt5/qwt/qwt_graphic.h \
-		../../../include/qt5/qwt/qwt_null_paintdevice.h \
-		../../../include/qt5/QtGui/qpaintengine.h \
-		../../../include/qt5/QtGui/qpainter.h \
-		../../../include/qt5/qwt/qwt_scale_map.h \
-		../../../include/qt5/qwt/qwt_transform.h \
-		../../../include/qt5/qwt/qwt_interval.h \
 		../../../include/qt5/qwt/qwt_plot_curve.h \
 		../../../include/qt5/qwt/qwt_plot_seriesitem.h \
 		../../../include/qt5/qwt/qwt_scale_div.h \
@@ -7201,21 +7676,36 @@ frame-processor.o: decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7225,36 +7715,54 @@ frame-processor.o: decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/frame-processor.h \
 		../../../include/qt5/QtCore/QThread \
 		../../../include/qt5/QtCore/qthread.h \
@@ -7269,8 +7777,9 @@ frame-processor.o: decoders/drm-decoder/frame-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/signal-handling/equalizer-base.h \
 		decoders/drm-decoder/support/my-array.h \
 		decoders/drm-decoder/ofdm/freqsyncer.h \
-		decoders/drm-decoder/support/drm-shifter.h \
+		various/shifter.h \
 		decoders/drm-decoder/ofdm/word-collector.h \
+		decoders/drm-decoder/support/drm-shifter.h \
 		decoders/drm-decoder/fac/fac-processor.h \
 		decoders/drm-decoder/support/mapper.h \
 		decoders/drm-decoder/support/qam4-metrics.h \
@@ -7355,20 +7864,36 @@ reader.o: decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/reader.
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7378,36 +7903,53 @@ reader.o: decoders/drm-decoder/ofdm/reader.cpp decoders/drm-decoder/ofdm/reader.
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
-		../../../include/qt5/QtGui/qtouchdevice.h
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o reader.o decoders/drm-decoder/ofdm/reader.cpp
 
 correlator.o: decoders/drm-decoder/ofdm/correlator.cpp decoders/drm-decoder/ofdm/correlator.h \
@@ -7476,20 +8018,36 @@ timesync.o: decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/tim
 		../../../include/qt5/QtCore/qobject_impl.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7499,36 +8057,53 @@ timesync.o: decoders/drm-decoder/ofdm/timesync.cpp decoders/drm-decoder/ofdm/tim
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
-		../../../include/qt5/QtGui/qtouchdevice.h
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o timesync.o decoders/drm-decoder/ofdm/timesync.cpp
 
 freqsyncer.o: decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm/freqsyncer.h \
@@ -7587,27 +8162,43 @@ freqsyncer.o: decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm
 		../../../include/qt5/QtCore/qcontainerfwd.h \
 		../../../include/qt5/QtCore/qobject_impl.h \
 		decoders/drm-decoder/basics.h \
-		decoders/drm-decoder/support/drm-shifter.h \
+		radio-constants.h \
+		various/shifter.h \
 		decoders/drm-decoder/ofdm/reader.h \
 		various/ringbuffer.h \
 		decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
-		radio-constants.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7617,38 +8208,54 @@ freqsyncer.o: decoders/drm-decoder/ofdm/freqsyncer.cpp decoders/drm-decoder/ofdm
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
-		decoders/drm-decoder/signal-handling/referenceframe.h \
-		decoders/drm-decoder/support/fft-complex.h
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		decoders/drm-decoder/signal-handling/referenceframe.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o freqsyncer.o decoders/drm-decoder/ofdm/freqsyncer.cpp
 
 word-collector.o: decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-decoder/ofdm/word-collector.h \
@@ -7714,20 +8321,36 @@ word-collector.o: decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-deco
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7737,36 +8360,53 @@ word-collector.o: decoders/drm-decoder/ofdm/word-collector.cpp decoders/drm-deco
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		decoders/drm-decoder/support/fft-complex.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o word-collector.o decoders/drm-decoder/ofdm/word-collector.cpp
 
@@ -7926,20 +8566,24 @@ equalizer-1.o: decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp ../../.
 		decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -7958,7 +8602,6 @@ equalizer-1.o: decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp ../../.
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
 		../../../include/qt5/QtCore/qurl.h \
@@ -7967,6 +8610,36 @@ equalizer-1.o: decoders/drm-decoder/signal-handling/eq-1/equalizer-1.cpp ../../.
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		decoders/drm-decoder/signal-handling/eq-1/estimator-base.h \
 		decoders/drm-decoder/signal-handling/eq-1/estimator-1.h \
 		decoders/drm-decoder/signal-handling/eq-1/estimator-2.h \
@@ -8259,21 +8932,36 @@ fac-processor.o: decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8283,36 +8971,54 @@ fac-processor.o: decoders/drm-decoder/fac/fac-processor.cpp decoders/drm-decoder
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
-		../../../include/qt5/QtGui/qtouchdevice.h
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fac-processor.o decoders/drm-decoder/fac/fac-processor.cpp
 
 sdc-streamer.o: decoders/drm-decoder/sdc/sdc-streamer.cpp decoders/drm-decoder/sdc/sdc-streamer.h \
@@ -8385,21 +9091,36 @@ sdc-processor.o: decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8409,36 +9130,54 @@ sdc-processor.o: decoders/drm-decoder/sdc/sdc-processor.cpp decoders/drm-decoder
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
 		decoders/drm-decoder/signal-handling/referenceframe.h \
@@ -8524,21 +9263,36 @@ backend-controller.o: decoders/drm-decoder/msc/backend-controller.cpp decoders/d
 		decoders/drm-decoder/data/message-processor.h \
 		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8548,36 +9302,54 @@ backend-controller.o: decoders/drm-decoder/msc/backend-controller.cpp decoders/d
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
 		decoders/drm-decoder/msc/backend-controller.h
@@ -8654,21 +9426,36 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 		decoders/drm-decoder/data/message-processor.h \
 		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8678,36 +9465,54 @@ msc-processor.o: decoders/drm-decoder/msc/msc-processor.cpp decoders/drm-decoder
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
 		decoders/drm-decoder/support/deinterleaver.h \
@@ -8778,21 +9583,36 @@ msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8802,36 +9622,54 @@ msc-handler-qam16.o: decoders/drm-decoder/msc/msc-handler-qam16.cpp decoders/drm
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/msc/msc-handler-qam16.h \
 		decoders/drm-decoder/msc/msc-handler.h \
 		decoders/drm-decoder/support/qam16-metrics.h \
@@ -8904,21 +9742,36 @@ msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -8928,36 +9781,54 @@ msc-handler-qam64.o: decoders/drm-decoder/msc/msc-handler-qam64.cpp decoders/drm
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/msc/msc-handler-qam64.h \
 		decoders/drm-decoder/msc/msc-handler.h \
 		decoders/drm-decoder/support/qam64-metrics.h \
@@ -9076,21 +9947,36 @@ msc-handler.o: decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/msc
 		decoders/drm-decoder/drm-decoder.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -9100,36 +9986,54 @@ msc-handler.o: decoders/drm-decoder/msc/msc-handler.cpp decoders/drm-decoder/msc
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
-		../../../include/qt5/QtGui/qtouchdevice.h
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o msc-handler.o decoders/drm-decoder/msc/msc-handler.cpp
 
 data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-decoder/data/data-processor.h \
@@ -9202,21 +10106,36 @@ data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-deco
 		decoders/drm-decoder/data/message-processor.h \
 		decoders/drm-decoder/drm-decoder.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -9226,36 +10145,54 @@ data-processor.o: decoders/drm-decoder/data/data-processor.cpp decoders/drm-deco
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString \
 		decoders/drm-decoder/data/packet-assembler.h \
@@ -9371,21 +10308,36 @@ message-processor.o: decoders/drm-decoder/data/message-processor.cpp ../../../in
 		decoders/drm-decoder/basics.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -9395,36 +10347,54 @@ message-processor.o: decoders/drm-decoder/data/message-processor.cpp ../../../in
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/data/drm-aacdecoder.h \
 		neaacdec.h \
 		decoders/drm-decoder/data/message-processor.h
@@ -9665,6 +10635,39 @@ mot-data.o: decoders/drm-decoder/data/mot-data.cpp decoders/drm-decoder/data/mot
 		decoders/drm-decoder/basics.h \
 		filters/fir-filters.h \
 		ui_drmdecoder.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		various/ringbuffer.h \
 		../../../include/qt5/QtCore/QDir \
 		../../../include/qt5/QtCore/qdir.h \
@@ -9798,26 +10801,44 @@ sdrplay-handler.o: devices/sdrplay-handler/sdrplay-handler.cpp ../../../include/
 		../../../include/qt5/QtWidgets/QDialog \
 		../../../include/qt5/QtWidgets/qdialog.h \
 		ui_sdrplay-widget.h \
-		devices/sdrplay-handler/mirsdrapi-rsp.h \
-		devices/sdrplay-handler/sdrplayselect.h \
-		../../../include/qt5/QtWidgets/QListView \
-		../../../include/qt5/QtWidgets/qlistview.h \
-		../../../include/qt5/QtWidgets/qabstractitemview.h \
-		../../../include/qt5/QtWidgets/qabstractscrollarea.h \
-		../../../include/qt5/QtCore/qabstractitemmodel.h \
-		../../../include/qt5/QtCore/qitemselectionmodel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QCheckBox \
+		../../../include/qt5/QtWidgets/qcheckbox.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QComboBox \
+		../../../include/qt5/QtWidgets/qcombobox.h \
 		../../../include/qt5/QtWidgets/qabstractitemdelegate.h \
 		../../../include/qt5/QtWidgets/qstyleoption.h \
 		../../../include/qt5/QtWidgets/qabstractspinbox.h \
 		../../../include/qt5/QtGui/qvalidator.h \
 		../../../include/qt5/QtCore/qregularexpression.h \
-		../../../include/qt5/QtGui/qicon.h \
 		../../../include/qt5/QtWidgets/qslider.h \
 		../../../include/qt5/QtWidgets/qabstractslider.h \
 		../../../include/qt5/QtWidgets/qstyle.h \
 		../../../include/qt5/QtWidgets/qtabbar.h \
 		../../../include/qt5/QtWidgets/qtabwidget.h \
 		../../../include/qt5/QtWidgets/qrubberband.h \
+		../../../include/qt5/QtCore/qabstractitemmodel.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/QSpinBox \
+		../../../include/qt5/QtWidgets/qspinbox.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		devices/sdrplay-handler/mirsdrapi-rsp.h \
+		devices/sdrplay-handler/sdrplayselect.h \
+		../../../include/qt5/QtWidgets/QListView \
+		../../../include/qt5/QtWidgets/qlistview.h \
+		../../../include/qt5/QtWidgets/qabstractitemview.h \
+		../../../include/qt5/QtWidgets/qabstractscrollarea.h \
+		../../../include/qt5/QtCore/qitemselectionmodel.h \
 		../../../include/qt5/QtCore/QStringListModel \
 		../../../include/qt5/QtCore/qstringlistmodel.h \
 		../../../include/qt5/QtCore/QStringList \
@@ -9835,6 +10856,24 @@ sdrplay-handler.o: devices/sdrplay-handler/sdrplay-handler.cpp ../../../include/
 		../../../include/qt5/QtGui/qpen.h \
 		../../../include/qt5/QtGui/qtextoption.h \
 		ui_newradio.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/QStatusBar \
+		../../../include/qt5/QtWidgets/qstatusbar.h \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
 		decimators/decimator.h \
 		filters/fft-filters.h \
 		various/fft.h \
@@ -10043,21 +11082,36 @@ aac-processor-faad.o: decoders/drm-decoder/data/aac-processor-faad.cpp decoders/
 		decoders/drm-decoder/drm-decoder.h \
 		decoders/drm-decoder/basics.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -10067,36 +11121,54 @@ aac-processor-faad.o: decoders/drm-decoder/data/aac-processor-faad.cpp decoders/
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
 		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h \
 		decoders/drm-decoder/parameters/state-descriptor.h \
 		../../../include/qt5/QtCore/QString
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aac-processor-faad.o decoders/drm-decoder/data/aac-processor-faad.cpp
@@ -10162,21 +11234,36 @@ drm-aacdecoder.o: decoders/drm-decoder/data/drm-aacdecoder.cpp decoders/drm-deco
 		filters/fir-filters.h \
 		radio-constants.h \
 		ui_drmdecoder.h \
-		various/ringbuffer.h \
-		../../../include/qt5/QtWidgets/QLabel \
-		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtCore/QVariant \
+		../../../include/qt5/QtCore/qvariant.h \
+		../../../include/qt5/QtCore/qmap.h \
+		../../../include/qt5/QtCore/qdebug.h \
+		../../../include/qt5/QtCore/qhash.h \
+		../../../include/qt5/QtCore/qtextstream.h \
+		../../../include/qt5/QtCore/qiodevice.h \
+		../../../include/qt5/QtCore/qlocale.h \
+		../../../include/qt5/QtCore/qshareddata.h \
+		../../../include/qt5/QtCore/qset.h \
+		../../../include/qt5/QtCore/qcontiguouscache.h \
+		../../../include/qt5/QtCore/qsharedpointer.h \
+		../../../include/qt5/QtCore/qsharedpointer_impl.h \
+		../../../include/qt5/QtWidgets/QApplication \
+		../../../include/qt5/QtWidgets/qapplication.h \
 		../../../include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../../../include/qt5/QtGui/qtguiglobal.h \
 		../../../include/qt5/QtGui/qtgui-config.h \
 		../../../include/qt5/QtWidgets/qtwidgets-config.h \
-		../../../include/qt5/QtWidgets/qframe.h \
-		../../../include/qt5/QtWidgets/qwidget.h \
+		../../../include/qt5/QtCore/qcoreapplication.h \
+		../../../include/qt5/QtCore/qeventloop.h \
 		../../../include/qt5/QtGui/qwindowdefs.h \
 		../../../include/qt5/QtGui/qwindowdefs_win.h \
+		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtCore/qmargins.h \
+		../../../include/qt5/QtGui/qcursor.h \
+		../../../include/qt5/QtWidgets/qdesktopwidget.h \
+		../../../include/qt5/QtWidgets/qwidget.h \
 		../../../include/qt5/QtGui/qpaintdevice.h \
 		../../../include/qt5/QtCore/qrect.h \
-		../../../include/qt5/QtCore/qsize.h \
 		../../../include/qt5/QtGui/qpalette.h \
 		../../../include/qt5/QtGui/qcolor.h \
 		../../../include/qt5/QtGui/qrgb.h \
@@ -10186,36 +11273,54 @@ drm-aacdecoder.o: decoders/drm-decoder/data/drm-aacdecoder.cpp decoders/drm-deco
 		../../../include/qt5/QtGui/qpolygon.h \
 		../../../include/qt5/QtGui/qregion.h \
 		../../../include/qt5/QtCore/qdatastream.h \
-		../../../include/qt5/QtCore/qiodevice.h \
 		../../../include/qt5/QtCore/qline.h \
 		../../../include/qt5/QtGui/qtransform.h \
 		../../../include/qt5/QtGui/qimage.h \
 		../../../include/qt5/QtGui/qpixelformat.h \
 		../../../include/qt5/QtGui/qpixmap.h \
-		../../../include/qt5/QtCore/qsharedpointer.h \
-		../../../include/qt5/QtCore/qshareddata.h \
-		../../../include/qt5/QtCore/qhash.h \
-		../../../include/qt5/QtCore/qsharedpointer_impl.h \
 		../../../include/qt5/QtGui/qfont.h \
 		../../../include/qt5/QtGui/qfontmetrics.h \
 		../../../include/qt5/QtGui/qfontinfo.h \
 		../../../include/qt5/QtWidgets/qsizepolicy.h \
-		../../../include/qt5/QtGui/qcursor.h \
 		../../../include/qt5/QtGui/qkeysequence.h \
 		../../../include/qt5/QtGui/qevent.h \
-		../../../include/qt5/QtCore/qvariant.h \
-		../../../include/qt5/QtCore/qmap.h \
-		../../../include/qt5/QtCore/qdebug.h \
-		../../../include/qt5/QtCore/qtextstream.h \
-		../../../include/qt5/QtCore/qlocale.h \
-		../../../include/qt5/QtCore/qset.h \
-		../../../include/qt5/QtCore/qcontiguouscache.h \
 		../../../include/qt5/QtCore/qurl.h \
 		../../../include/qt5/QtCore/qurlquery.h \
 		../../../include/qt5/QtCore/qfile.h \
 		../../../include/qt5/QtCore/qfiledevice.h \
 		../../../include/qt5/QtGui/qvector2d.h \
-		../../../include/qt5/QtGui/qtouchdevice.h
+		../../../include/qt5/QtGui/qtouchdevice.h \
+		../../../include/qt5/QtGui/qguiapplication.h \
+		../../../include/qt5/QtGui/qinputmethod.h \
+		../../../include/qt5/QtWidgets/QLCDNumber \
+		../../../include/qt5/QtWidgets/qlcdnumber.h \
+		../../../include/qt5/QtWidgets/qframe.h \
+		../../../include/qt5/QtWidgets/QLabel \
+		../../../include/qt5/QtWidgets/qlabel.h \
+		../../../include/qt5/QtWidgets/QPushButton \
+		../../../include/qt5/QtWidgets/qpushbutton.h \
+		../../../include/qt5/QtWidgets/qabstractbutton.h \
+		../../../include/qt5/QtGui/qicon.h \
+		../../../include/qt5/QtWidgets/QSlider \
+		../../../include/qt5/QtWidgets/qslider.h \
+		../../../include/qt5/QtWidgets/qabstractslider.h \
+		../../../include/qt5/QtWidgets/QWidget \
+		../../../include/qt5/qwt/qwt_plot.h \
+		../../../include/qt5/qwt/qwt_global.h \
+		../../../include/qt5/qwt/qwt_text.h \
+		../../../include/qt5/qwt/qwt_plot_dict.h \
+		../../../include/qt5/qwt/qwt_plot_item.h \
+		../../../include/qt5/qwt/qwt_legend_data.h \
+		../../../include/qt5/qwt/qwt_graphic.h \
+		../../../include/qt5/qwt/qwt_null_paintdevice.h \
+		../../../include/qt5/QtGui/qpaintengine.h \
+		../../../include/qt5/QtGui/qpainter.h \
+		../../../include/qt5/QtGui/qtextoption.h \
+		../../../include/qt5/QtGui/qpen.h \
+		../../../include/qt5/qwt/qwt_scale_map.h \
+		../../../include/qt5/qwt/qwt_transform.h \
+		../../../include/qt5/qwt/qwt_interval.h \
+		various/ringbuffer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o drm-aacdecoder.o decoders/drm-decoder/data/drm-aacdecoder.cpp
 
 qrc_resources.o: qrc_resources.cpp 

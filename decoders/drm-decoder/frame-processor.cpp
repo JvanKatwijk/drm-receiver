@@ -52,7 +52,7 @@
 	                                int32_t		sampleRate,
 	                                int16_t		nSymbols,
 	                                int8_t		windowDepth,
-                                        int8_t 		qam64Roulette) :
+	                                int8_t 		qam64Roulette) :
 	                                 my_Reader (buffer, 4 * 16384, mr),
 	                                 my_backendController (mr,
 	                                                       iqBuffer,
@@ -134,13 +134,13 @@ restart:
 	   while (modeInf. Mode == -1) {
 	      my_Reader. shiftBuffer (Ts_of (Mode_B) / 2);
 	      getMode (&my_Reader, &modeInf);
-           }
+	   }
 
 	   fprintf (stderr, "found: Mode = %d, time_offset = %d, sampleoff = %f freqoff = %f\n",
 	        modeInf. Mode,
 	        modeInf. timeOffset_integer,
 	        modeInf. sampleRate_offset,
-	        modeInf. freqOffset_fract);
+	        modeInf. freqOffset_fractional / (2 * M_PI) * 12000 / Tu_of (modeInf. Mode));
 
 	   if ((modeInf. Spectrum < 1) || (modeInf. Spectrum > 3))
 	      modeInf. Spectrum = 3;
@@ -151,7 +151,7 @@ restart:
 //	and create a reader/processor
 	   frequencySync (theDecoder, &my_Reader, &modeInf);
 
-//	   fprintf (stderr, "spectrum is gezet op %d\n", modeInf. Spectrum);
+	   fprintf (stderr, "spectrum is gezet op %d\n", modeInf. Spectrum);
 	   setTimeSync	(true);
 	   show_Mode (modeInf. Mode);
 	   show_Spectrum (modeInf. Spectrum);
@@ -180,10 +180,13 @@ restart:
 //	we know that - when starting - we are not "in sync" yet
 	   inSync		= false;
 
+	   fprintf (stderr, "De freq offset %f\n",
+	                 modeInf. freqOffset_fractional / (2 * M_PI) * sampleRate / Tu_of (modeInf. Mode));
 	   for (int symbol = 0; symbol < nrSymbols; symbol ++) {
 	      my_wordCollector. getWord (inbank. element (symbol),
 	                                 modeInf. freqOffset_integer,
-	                                 modeInf. timeOffset_fractional);
+	                                 modeInf. timeOffset_fractional,
+	                                 modeInf. freqOffset_fractional);
 	      myCorrelator. correlate (inbank. element (symbol), symbol);
 	   }
 
@@ -195,7 +198,8 @@ restart:
 	   while (true) {
 	      my_wordCollector. getWord (inbank. element (lc),
 	                                 modeInf. freqOffset_integer,
-	                                 modeInf. timeOffset_fractional);
+	                                 modeInf. timeOffset_fractional,
+	                                 modeInf. freqOffset_fractional);
 	      myCorrelator. correlate (inbank. element (lc), lc);
 	      lc = (lc + 1) % symbolsperFrame (modeInf. Mode);
 	      if (myCorrelator. bestIndex (lc))  {
@@ -223,19 +227,18 @@ restart:
 	      my_wordCollector.
 	            getWord (inbank. element (lc),
 	                     modeInf. freqOffset_integer,
-	                     false,
-                              modeInf. timeOffset_fractional,
-                              deltaFreqOffset,         // tracking value
-                              sampleclockOffset        // tracking value
-                             );
+	                     modeInf. timeOffset_fractional,
+	                     deltaFreqOffset,         // tracking value
+	                     sampleclockOffset        // tracking value
+	                    );
 
 	      frameReady = my_Equalizer.
 	                         equalize (inbank. element (lc),
-                                           symbol_no,
-                                           &outbank,
-                                           &modeInf. timeOffset_fractional,
-                                           &deltaFreqOffset,
-                                           &sampleclockOffset);
+	                                   symbol_no,
+	                                   &outbank,
+	                                   &modeInf. timeOffset_fractional,
+	                                   &deltaFreqOffset,
+	                                   &sampleclockOffset);
 
 	      lc = (lc + 1) % nrSymbols;
 	      symbol_no = (symbol_no + 1) % nrSymbols;
@@ -265,7 +268,6 @@ restart:
 	   sdcProcessor my_sdcProcessor (theDecoder, &modeInf,
 	                                 sdcTable, &theState);
 
-	   bool	firstTime	= true;
 	   while (true) {
 	      setFACSync (true);
 //	when we are here, we can start thinking about  SDC's and superframes
@@ -298,12 +300,10 @@ restart:
 	         my_wordCollector.
 	              getWord (inbank. element ((lc + i) % nrSymbols),
 	                       modeInf. freqOffset_integer,	// initial value
-	                       firstTime,
 	                       modeInf. timeOffset_fractional,
 	                       deltaFreqOffset,		// tracking value
 	                       sampleclockOffset	// tracking value
 	                      );
-	         firstTime = false;
 
 	         frameReady =
 	                  my_Equalizer.
@@ -465,16 +465,16 @@ int	carrier;
 int	cnt	= 0;
 	for (carrier = Kmin (Mode, Spectrum);
 	     carrier <= Kmax (Mode, Spectrum); carrier ++) {
-           if (isSDCcell (modeInf, 0, carrier)) {
+	   if (isSDCcell (modeInf, 0, carrier)) {
 	      sdcTable [cnt]. symbol = 0;
 	      sdcTable [cnt]. carrier = carrier;
 	      cnt ++;
 	   }
 	}
 
-        for (carrier = Kmin (Mode, Spectrum);
-             carrier <= Kmax (Mode, Spectrum); carrier ++) {
-           if (isSDCcell (modeInf, 1, carrier)) {
+	for (carrier = Kmin (Mode, Spectrum);
+	     carrier <= Kmax (Mode, Spectrum); carrier ++) {
+	   if (isSDCcell (modeInf, 1, carrier)) {
 	      sdcTable [cnt]. symbol = 1;
 	      sdcTable [cnt]. carrier = carrier;
 	      cnt ++;
@@ -501,11 +501,11 @@ uint8_t val = f -> spectrumBits;
 
 void    frameProcessor::getMode (Reader *my_Reader, smodeInfo *m) {
 timeSyncer  my_Syncer (my_Reader, sampleRate,  nSymbols);
-        my_Syncer. getMode (m);
+	my_Syncer. getMode (m);
 }
 
 void    frameProcessor::frequencySync (drmDecoder *mr,
-                                       Reader *my_Reader, smodeInfo *m) {
+	                               Reader *my_Reader, smodeInfo *m) {
 freqSyncer my_Syncer (my_Reader, m, sampleRate, mr);
 	my_Syncer. frequencySync (m);
 }

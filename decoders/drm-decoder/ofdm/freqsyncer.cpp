@@ -72,8 +72,8 @@ int16_t	i;
 	this	-> theReader	= b;
 	this	-> Mode		= m -> Mode;
 	this	-> Spectrum	= m -> Spectrum;
+	this	-> theAngle	= m -> freqOffset_fractional;
 	this	-> sampleRate	= sampleRate;
-	this	-> theAngle	= 0;
 	this	-> Tu		= Tu_of (Mode);
 	this	-> Ts		= Ts_of (Mode);
 	this	-> Tg		= Tg_of (Mode);
@@ -163,15 +163,15 @@ uint8_t	spectrum;
 	   localIndex += Ts + time_offset_integer;
 	}
 
-	fprintf (stderr, "bin 0 = %d\n", binNumber);
+//	fprintf (stderr, "bin 0 = %d\n", binNumber);
 //	binNumber = binNumber < 0 ? binNumber + Tu : binNumber;
 	for (i = 0; i <= 3; i ++) 
 	   occupancyIndicator [i] = get_spectrumOccupancy (i, 0);
 
 	float tmp1	= 0.0;
 	for (spectrum = 0; spectrum <= 3; spectrum ++) {	
-	   fprintf (stderr, "spectrum %d, indicator %f\n",
-	                     spectrum, occupancyIndicator [spectrum]);
+//	   fprintf (stderr, "spectrum %d, indicator %f\n",
+//	                     spectrum, occupancyIndicator [spectrum]);
 	   if (occupancyIndicator [spectrum] >= tmp1) {
 	      tmp1 = occupancyIndicator [spectrum];
 	      m -> Spectrum = spectrum;
@@ -350,18 +350,12 @@ std:;complex<float> angle	= std::complex<float> (0, 0);
 	}
 
 	theShifter. do_shift (temp, Ts, intOffset * 100);
-//	Now: estimate the fine grain offset.
-	for (i = 0; i < Tg; i ++)
-	   angle += conj (temp [Tu + i]) * temp [i];
-//	simple averaging:
-	theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
-
 //	offset in Hz / 100
 	float offset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
 	if (++displayCount > 20) {
 	   displayCount = 0;
 	   show_coarseOffset	(intOffset);
-	   show_fineOffset	(- offset / 100);
+//	   show_fineOffset	(offset / 100);
 	   show_angle		(arg (angle));
 	   show_timeDelay	(offsetFractional);
 	}

@@ -44,10 +44,10 @@ public:
 			~wordCollector 		(void);
 	void		getWord			(std::complex<JAN> *,
 	                                         int32_t,
-	                                         JAN);
+	                                         float,
+	                                         float);
 	void		getWord			(std::complex<JAN> *,
 	                                         int32_t,
-	                                         bool,
 	                                         JAN,
 	                                         JAN,
 	                                         JAN);
