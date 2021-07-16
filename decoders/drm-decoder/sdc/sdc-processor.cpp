@@ -319,8 +319,9 @@ uint8_t	language [3], country [2];
 	          s. append (get_SDCBits (v, 4 + 8 * i, 8));
 	      s. append (char (0));
 	      if (lengthofBody > 1) {
-	         char *s2 = s. toLatin1 (). data ();
-//	         strcpy (theState -> streams [shortId]. serviceName, s2);
+//	         char *s2 = s. toLatin1 (). data ();
+	         strcpy (theState -> streams [shortId]. serviceName,
+	                 s. toLatin1 (). data ());
 	      }
 	      show_stationLabel (QString (s), shortId);
 	      return;

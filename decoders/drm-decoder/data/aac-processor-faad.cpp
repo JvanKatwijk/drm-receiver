@@ -294,7 +294,7 @@ int16_t	i;
 	   return;
 	}
 	if (pcmRate == 24000) {
-	   std::complex<float> lbuffer [cnt];
+	   std::complex<float> lbuffer [cnt + 10];
 	   for (i = 0; i < cnt / 2; i ++) {
 	      upFilter_12000. Filter (std::complex<float> (
 	                                    buffer [2 * i] / 32767.0,

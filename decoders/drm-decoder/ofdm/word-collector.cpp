@@ -73,9 +73,11 @@
 		wordCollector::~wordCollector (void) {
 }
 
+static int amount = 0;
 //	when starting up, we "borrow" the precomputed frequency offset
 //	and start building up the spectrumbuffer.
 //	
+
 void	wordCollector::getWord (std::complex<JAN>	*out,
 	                        int32_t		initialFreq,
 	                        float		offsetFractional,
@@ -85,7 +87,6 @@ int	f	= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 	theAngle	= freqOffset_fractional;
-
 //	correction of the time offset by interpolation
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<JAN> one = buffer ->  data [(f + i) & bufMask];
@@ -126,11 +127,37 @@ int	f		= buffer -> currentIndex;
 
 	buffer		-> waitfor (Ts + Ts / 2);
 
+	amount ++;
+static int teller = 0;
+	teller ++;
+	if (amount >= 5) {
+	   buffer		-> waitfor (18 * Ts + Ts);
+	   int intOffs	= get_intOffset (2, 12, 10) - 2 * Ts;
+	   int sub	= get_intOffset (4 * Ts, 12, 10) - 4 * Ts;
+	   if (intOffs == sub)  {
+	      if (intOffs < -1) {
+	         fprintf (stderr, "offset %d, distance %d\n", intOffs, teller);
+	         f --;
+	         teller = 0;
+	      }
+	      if (intOffs > 1 ) {
+	         fprintf (stderr, "offset %d distance %d\n", intOffs, teller);
+	         f ++;
+	         teller = 0;
+	      }
+	      amount = 0;
+	   }
+	   else {
+//	      fprintf (stderr, "%d - %d\n", intOffs, sub);
+	      amount--;
+	   }
+	}
+
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<JAN> one = buffer -> data [(f + i) & bufMask];
 	   std::complex<JAN> two = buffer -> data [(f + i + 1) & bufMask];
 	   temp [i] = cmul (one, 1 - offsetFractional) +
-	                         cmul (two, offsetFractional);
+	              cmul (two, offsetFractional);
 	}
 
 //	And we adjust the bufferpointer here
@@ -138,7 +165,7 @@ int	f		= buffer -> currentIndex;
 
 //	correct the phase
 	theAngle	= theAngle - 0.2 * angle;
-	if (theAngle < - M_PI) {
+	if (theAngle < -M_PI) {
 	   theAngle += M_PI;
 	   modeInf -> freqOffset_integer -= sampleRate / Tu;
 	}
@@ -146,21 +173,18 @@ int	f		= buffer -> currentIndex;
 	   theAngle -= M_PI;
 	   modeInf -> freqOffset_integer += sampleRate / Tu;
 	}
-	  
+	   
 //	offset in 0.01 * Hz
-	JAN freqOff	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
-	if (!isnan (freqOff)) { // precaution to handle undefines
+	float fineOffset	= theAngle / (2 * M_PI) * 100 * sampleRate / Tu;
+	if (!isnan (fineOffset))  // precaution to handle undefines
 	   theShifter. do_shift (temp, Ts,
-	                         100 * modeInf -> freqOffset_integer -
-	                                         freqOff);
-	}
+	                        100 * modeInf -> freqOffset_integer - fineOffset);
 	else
 	   theAngle = 0;
-
 	if (++displayCount > 10) {
 	   displayCount = 0;
 	   show_coarseOffset	(initialFreq);
-	   show_fineOffset	(freqOff / 100);
+	   show_fineOffset	(fineOffset / 100);
 	   show_angle		(angle);
 	   show_timeOffset	(offsetFractional);
 	   show_clockOffset	(Ts * clockOffset);
@@ -172,11 +196,8 @@ int	f		= buffer -> currentIndex;
 void	wordCollector::fft_and_extract (std::complex<JAN> *in,
 	                                std::complex<JAN> *out) {
 //	and extract the Tu set of samples for fft processsing
-//std::complex<JAN> temp [Tu];
-
 //	memcpy (fft_vector, in, Tu * sizeof (std::complex<JAN>));
 	Fft_transform (in, Tu, false);
-//	fftwf_execute (hetPlan);
 //	extract the "useful" data
 	if (K_min < 0) {
 	   memcpy (out,
