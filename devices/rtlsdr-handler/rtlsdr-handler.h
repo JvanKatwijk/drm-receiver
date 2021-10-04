@@ -90,18 +90,17 @@ class	rtlsdrHandler: public deviceHandler, public Ui_rtlsdrWidget {
 Q_OBJECT
 public:
 		rtlsdrHandler		(RadioInterface *mr,
-                                         int32_t        outputRate,
-                                         RingBuffer<DSPCOMPLEX> *r,
+                                         RingBuffer<std::complex<float>> *r,
                                          QSettings      *s);
 
-		~rtlsdrHandler		(void);
-	int32_t	getRate			(void);
-	void	setVFOFrequency		(quint64);
-	quint64	getVFOFrequency		(void);
+		~rtlsdrHandler		();
+	int32_t	getRate			();
+	void	setVFOFrequency		(int32_t);
+	int32_t	getVFOFrequency		();
 	bool	legalFrequency		(int32_t);
-	bool	restartReader		(void);
-	void	stopReader		(void);
-	int16_t	bitDepth		(void);
+	bool	restartReader		();
+	void	stopReader		();
+	int16_t	bitDepth		();
 //
 //	I_Buffer needs to be visible for use within the callback
 	RingBuffer<std::complex<float>>	*_I_Buffer;
@@ -117,10 +116,10 @@ private slots:
 	void		setAgc		(int);
 
 private:
+	QFrame		myFrame;
 	dongleSelect	*dongleSelector;
 	QSettings	*rtlsdrSettings;
 	void		setupDevice	(int32_t, int32_t);
-	QFrame		*myFrame;
 	HINSTANCE	Handle;
 	int32_t		deviceCount;
 	dll_driver	*workerHandle;

@@ -2,25 +2,22 @@
 /*
  *    Copyright (C) 2010, 2011, 2012, 2013
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
+ *    This file is part of the drm2.
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    drm2 is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    drm2 is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with drm2; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * 	This particular driver is a very simple wrapper around the
@@ -103,10 +100,9 @@ void	dll_driver::run (void) {
 //	to keep things simple, we just load the osmocom function
 //	dynamically
 	rtlsdrHandler::rtlsdrHandler (RadioInterface *mr,
-                                      int32_t        outputRate,
-                                      RingBuffer<DSPCOMPLEX> *r,
+                                      RingBuffer<std::complex<float>> *r,
                                       QSettings      *s):
-                                               deviceHandler (mr) {
+                                               myFrame (nullptr) {
 int	res;
 int16_t	deviceIndex;
 int16_t	i;
@@ -114,9 +110,10 @@ int	inputRate;
 int	k;
 QString	temp;
 
-	this	-> myFrame	= new QFrame (NULL);
-	setupUi (this -> myFrame);
-        this    -> myFrame -> show ();
+	outputRate		= 2000000 / 32;
+	inputRate		= 2000000;
+	setupUi (&myFrame);
+        myFrame. show ();
         this    -> _I_Buffer   = r;
         this    -> rtlsdrSettings        = s;
 //
@@ -125,17 +122,12 @@ QString	temp;
 	for (i = 0; i < 256; i ++)
 	   convTable [i] = (i - 128.0) / 128.0;
 //
-//	for the rtlsdr based device, we take the first multiple
-//	of the outputrate that is > 1000000 as inputrate
-	inputRate	= outputRate;
-	while (inputRate < Khz (1000))
-	   inputRate += outputRate;
 	libraryLoaded	= false;
-	workerHandle	= NULL;
-	d_filter	= NULL;
-	workerHandle	= NULL;
+	workerHandle	= nullptr;
+	d_filter	= nullptr;
+	workerHandle	= nullptr;
 	open		= false;
-	gains		= NULL;
+	gains		= nullptr;
 
 	statusLabel	-> setText ("setting up");
 #ifdef	__MINGW32__
@@ -146,7 +138,6 @@ QString	temp;
 	if (Handle == NULL) {
 	   fprintf (stderr, "Failed to open rtlsdr.dll\n");
 	   statusLabel	-> setText ("no rtlsdr lib");
-	   delete myFrame;
 	   throw (21);
 	}
 //
@@ -262,7 +253,6 @@ err:
 	   delete d_filter;
 	if (gains != NULL)
 	   delete [] gains;
-	delete	myFrame;
 	throw (22);
 }
 
@@ -289,7 +279,6 @@ err:
 #endif
 	delete d_filter;
 	delete[] gains;
-	delete	myFrame;
 }
 
 int32_t	rtlsdrHandler::getRate	(void) {
@@ -297,14 +286,14 @@ int32_t	rtlsdrHandler::getRate	(void) {
 }
 //
 //
-quint64	rtlsdrHandler::getVFOFrequency	(void) {
+int32_t	rtlsdrHandler::getVFOFrequency	(void) {
 	if (!open || !libraryLoaded)
 	   return KHz (14070);
-	return (quint64)rtlsdr_get_center_freq (device);
+	return (int32_t)rtlsdr_get_center_freq (device);
 }
 //
 //
-void	rtlsdrHandler::setVFOFrequency	(quint64 f) {
+void	rtlsdrHandler::setVFOFrequency	(int32_t f) {
 	if (!open || !libraryLoaded)
 	   return;
 

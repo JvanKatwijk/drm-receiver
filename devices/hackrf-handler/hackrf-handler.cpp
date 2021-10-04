@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of swradio-8
+ *    This file is part of drm2
  *
  *    swradio-8 is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,19 +29,18 @@
 static float convTable [256];
 
 	hackrfHandler::hackrfHandler	(RadioInterface *mr,
-                                         int32_t        outputRate,
                                          RingBuffer<std::complex<float>> *r,
                                          QSettings      *s):
-                                                      deviceHandler (mr) {
+                                                      myFrame (nullptr) {
 int	err;
 int	res;
 int	i;
 
-	this    -> outputRate		= outputRate;
+	this    -> outputRate		= 2000000 / 32;
+	this    -> inputRate		= 2000000;
 	this	-> hackrfSettings	= s;
-	this	-> myFrame		= new QFrame (NULL);
-	setupUi (this -> myFrame);
-	this	-> myFrame	-> show ();
+	setupUi (&myFrame);
+	myFrame. show ();
 	this	-> inputRate		= Khz (24 * 96);
 	this	-> decimationFactor	= inputRate / outputRate;
 	_I_Buffer			= r;
@@ -61,7 +60,6 @@ int	i;
 
 	if (Handle == NULL) {
 	   fprintf (stderr, "failed to open %s\n", libraryString);
-	   delete myFrame;
 	   throw (20);
 	}
 
@@ -72,7 +70,6 @@ int	i;
 #else
            dlclose (Handle);
 #endif
-           delete myFrame;
            throw (21);
         }
 //
@@ -93,7 +90,6 @@ int	i;
 	   fprintf (stderr, "Problem with hackrf_init:");
 	   fprintf (stderr, "%s \n",
 	                 this -> hackrf_error_name (hackrf_error (res)));
-	   delete myFrame;
 	   throw (21);
 	}
 
@@ -102,7 +98,6 @@ int	i;
 	   fprintf (stderr, "Problem with hackrf_open:");
 	   fprintf (stderr, "%s \n",
 	                 this -> hackrf_error_name (hackrf_error (res)));
-	   delete myFrame;
 	   throw (22);
 	}
 
@@ -111,7 +106,6 @@ int	i;
 	   fprintf (stderr, "Problem with hackrf_set_samplerate:");
 	   fprintf (stderr, "%s \n",
 	                 this -> hackrf_error_name (hackrf_error (res)));
-	   delete myFrame;
 	   throw (23);
 	}
 
@@ -121,7 +115,6 @@ int	i;
 	   fprintf (stderr, "Problem with hackrf_set_bw:");
 	   fprintf (stderr, "%s \n",
 	                 this -> hackrf_error_name (hackrf_error (res)));
-	   delete myFrame;
 	   throw (24);
 	}
 
@@ -130,7 +123,6 @@ int	i;
 	   fprintf (stderr, "Problem with hackrf_set_freq: ");
 	   fprintf (stderr, "%s \n",
 	                 this -> hackrf_error_name (hackrf_error (res)));
-	   delete myFrame;
 	   throw (25);
 	}
 
@@ -164,7 +156,6 @@ int	i;
 	                setText (this -> hackrf_usb_board_id_name (board_id));
 	}
 
-
 	running. store (false);
 }
 
@@ -176,13 +167,12 @@ int	i;
 	hackrfSettings -> setValue ("hack_vgaGain",
 	                                 vgagainSlider	-> value ());
 	hackrfSettings	-> endGroup ();
-	delete myFrame;
 	this	-> hackrf_close (theDevice);
 	this	-> hackrf_exit ();
 }
 //
 
-void	hackrfHandler::setVFOFrequency	(quint64 newFrequency) {
+void	hackrfHandler::setVFOFrequency	(int32_t newFrequency) {
 int	res;
 	if (newFrequency < Mhz (1))
 	   return;
@@ -196,7 +186,7 @@ int	res;
 	lastFrequency = newFrequency;
 }
 
-quint64	hackrfHandler::getVFOFrequency	(void) {
+int32_t	hackrfHandler::getVFOFrequency	(void) {
 	return lastFrequency;
 }
 

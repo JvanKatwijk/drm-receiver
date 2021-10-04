@@ -4,19 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the sdr-j sw receiver
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the DRM-2
+ *
+ *    DRM-2 is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DRM-2 is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DRM-2; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -97,18 +98,16 @@ class	sdrplayHandler: public deviceHandler, public Ui_sdrplayWidget {
 Q_OBJECT
 public:
 		sdrplayHandler		(RadioInterface *,
-	                                 int32_t	outputRate,
 	                                 RingBuffer<std::complex<float>> *,
 	                                 QSettings	*);
-		~sdrplayHandler		(void);
-	int32_t	getRate			(void);
-	void	setVFOFrequency		(quint64);
-	quint64	getVFOFrequency		(void);
+		~sdrplayHandler		();
+	void	setVFOFrequency		(int32_t);
+	int32_t	getVFOFrequency		();
 
-	bool	restartReader		(void);
-	void	stopReader		(void);
-	void	resetBuffer		(void);
-	int16_t	bitDepth		(void);
+	bool	restartReader		();
+	void	stopReader		();
+	void	resetBuffer		();
+	int16_t	bitDepth		();
 //
 //	This buffer is used in the callback, it therefore
 //	should be visible
@@ -117,10 +116,8 @@ public:
 	uint32_t	inputRate;
 	int32_t		outputRate;
 	void		report_dataAvailable	(void);
-	decimatingFIR	*filter;
-	int32_t		localShift;
-	int32_t		oscillatorPhase;
-	std::vector<std::complex<float>> oscillatorTable;
+	decimatingFIR	*filter_1;
+	decimatingFIR	*filter_2;
 	int		denominator;
 private:
 	QFrame		myFrame;

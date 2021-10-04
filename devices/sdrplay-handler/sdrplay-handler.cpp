@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of swradio-8
+ *    This file is part of drm-2
  *
- *    swradio-8 is free software; you can redistribute it and/or modify
+ *    drm-2 is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation version 2 of the License.
  *
- *    swradio-8 is distributed in the hope that it will be useful,
+ *    drm-2 is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with swradio-8 if not, write to the Free Software
+ *    along with drm-2 if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -111,23 +111,21 @@ int16_t	bank_rsp1 (int32_t freq) {
 }
 
 	sdrplayHandler::sdrplayHandler  (RadioInterface *mr,
-	                                 int32_t	outputRate,
-	                                 RingBuffer<DSPCOMPLEX> *r,
+	                                 RingBuffer<std::complex<float>> *r,
 	                                 QSettings	*s):
-	                                      deviceHandler (mr),
 	                                      myFrame (nullptr) {
 mir_sdr_ErrT err;
 float	ver;
 mir_sdr_DeviceT devDesc [4];
 sdrplaySelect	*sdrplaySelector;
 
-	this	-> outputRate	= outputRate;
+	this	-> outputRate	= 2000000 / 32;
 	this	-> sdrplaySettings	= s;
 	setupUi (&myFrame);
 	myFrame. show ();
 	antennaSelector		-> hide ();
 	tunerSelector		-> hide ();
-	this	-> inputRate	= kHz (2112);
+	this	-> inputRate	= kHz (2000);
 	_I_Buffer		= r;
 	libraryLoaded		= false;
 
@@ -230,17 +228,14 @@ ULONG APIkeyValue_length = 255;
 
         sdrplaySettings -> endGroup ();
 
-	oscillatorTable	. resize (inputRate);
-	for (int32_t i = 0; i < (int)inputRate; i ++)
-	   oscillatorTable [i] = std::complex<float> (
-	                           cos ((float) i * 2 * M_PI / inputRate),
-	                           sin ((float) i * 2 * M_PI / inputRate));
-	localShift	= 0;
-	oscillatorPhase	= 0;
-	filter		= new decimatingFIR (inputRate / outputRate * 5 - 1,
+	filter_1	= new decimatingFIR (2 * 4 + 1,
 	                                     + outputRate / 2,
 	                                     inputRate,
-	                                     inputRate / outputRate);
+	                                     4);
+	filter_2	= new decimatingFIR (2 * 8 + 1,
+	                                     outputRate / 2,
+	                                     inputRate / 4, 8);
+	 
 	api_version	-> display (ver);
 	lastFrequency	= Khz (14070);
 //
@@ -379,16 +374,13 @@ ULONG APIkeyValue_length = 255;
 	if (numofDevs > 0)
 	   my_mir_sdr_ReleaseDeviceIdx (deviceIndex);
 
-	delete filter;
+	delete filter_1;
+	delete filter_2;
 #ifdef __MINGW32__
         FreeLibrary (Handle);
 #else
         dlclose (Handle);
 #endif
-}
-
-int32_t	sdrplayHandler::getRate	(void) {
-	return kHz (2112);
 }
 
 static	inline
@@ -438,7 +430,7 @@ int	lnaStates (int hwVersion, int band) {
 	}
 }
 
-void	sdrplayHandler::setVFOFrequency		(quint64 newFrequency) {
+void	sdrplayHandler::setVFOFrequency		(int32_t newFrequency) {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
@@ -448,14 +440,6 @@ int     lnaState        = lnaGainSetting        -> value ();
 	if (bank_rsp1 ((uint32_t)newFrequency) == -1)
 	   return;
 	
-	if (newFrequency < inputRate / 2) {
-	   localShift	= inputRate / 2 -  (uint32_t)newFrequency;
-	   newFrequency = inputRate / 2;
-	}
-	else
-	   localShift = 0;
-
-//	fprintf (stderr, "localShift = %d\n", localShift);
 	if (!running. load ()) {
 	   lastFrequency = newFrequency;
 	   return;
@@ -498,8 +482,8 @@ int     lnaState        = lnaGainSetting        -> value ();
 	lnaGRdBDisplay -> display (get_lnaGRdB (hwVersion, lnaState, bank));
 }
 
-quint64	sdrplayHandler::getVFOFrequency	(void) {
-	return lastFrequency - localShift;
+int32_t	sdrplayHandler::getVFOFrequency	(void) {
+	return lastFrequency;
 }
 
 void	sdrplayHandler::set_ifgainReduction (int newGain) {
@@ -566,16 +550,12 @@ int	cnt	= 0;
 	   std::complex<float> temp = 
 	                    std::complex<float> (float (xi [i]) / denominator,
 	                                         float (xq [i]) / denominator);
-	   temp	= temp * p -> oscillatorTable [p -> oscillatorPhase];
-	   p -> oscillatorPhase += p -> localShift;
-	   if (p -> oscillatorPhase < 0)
-	      p -> oscillatorPhase += p -> inputRate;
-	   if (p -> oscillatorPhase >=  (int)p -> inputRate)
-	      p -> oscillatorPhase -= p -> inputRate;
-
-	   if (p -> filter -> Pass (temp, &localBuf [cnt])) 
-	      if (localBuf [cnt] == localBuf [cnt])
-	         cnt ++;
+	   std::complex<float> tmp2 = 
+	                    std::complex<float> (0, 0);
+	   if (p -> filter_1 -> Pass (temp, &tmp2)) 
+	      if (p -> filter_2 -> Pass (tmp2, &localBuf [cnt]))
+	         if (localBuf [cnt] == localBuf [cnt])
+	            cnt ++;
 	}
 
 	p -> _I_Buffer -> putDataIntoBuffer (localBuf, cnt);

@@ -65,7 +65,7 @@ private:
 	quint64		panel;
 	bool		shown;
 signals:
-	void		newFrequency	(quint64);
+	void		newFrequency	(int32_t);
 };
 
 #endif

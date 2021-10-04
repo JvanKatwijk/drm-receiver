@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of drm receiver
+ *    This file is part of drm2
  *
  *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -33,8 +33,6 @@
 #include	"fft-scope.h"
 #include	"upconverter.h"
 #include        "audiosink.h"
-#include        "decimator.h"
-#include        "shifter.h"
 #include        "popup-keypad.h"
 #include        "program-list.h"
 #include	"bandplan.h"
@@ -42,11 +40,6 @@
 //      devices
 #include        "device-handler.h"
 #include        "filereader.h"
-#ifdef	HAVE_EXTIO
-#include	"extio-handler.h"
-#elif	HAVE_PMSDR
-#include	"pmsdr-handler.h"
-#else
 #ifdef	HAVE_SDRPLAY
 #include        "sdrplay-handler.h"
 #endif
@@ -55,7 +48,6 @@
 #endif
 #ifdef	HAVE_RTLSDR
 #include	"rtlsdr-handler.h"
-#endif
 #endif
 //
 #include	"drm-decoder.h"
@@ -68,7 +60,7 @@ int	res	= 1;
 	return res;
 }
 
-QString	FrequencytoString (quint64 freq) {
+QString	FrequencytoString (int32_t freq) {
 	if (freq < 10)
 	   return QString ('0' + (uint8_t)(freq % 10));
 	return 
@@ -78,26 +70,13 @@ QString	FrequencytoString (quint64 freq) {
 	RadioInterface::RadioInterface (QSettings	*sI,
 	                                QString		stationList,
 	                                bandPlan	*my_bandPlan,
-	                                int		inputRate,
-	                                int		decoderRate,
 	                                QWidget		*parent):
-	                                    QMainWindow (parent),
-	                                    hfShifter   (inputRate),
-	                                    hfFilter    (1024, 377),
-	                                    lfFilter    (1024, 127),
-	                                    agc         (decoderRate, 12),
-	                                    theDecimator (inputRate,
-	                                                       decoderRate) {
+	                                    QMainWindow (parent) {
 
 	this	-> settings	= sI;
 	this	-> my_bandPlan	= my_bandPlan;
-	this	-> inputRate	= inputRate;
-	this	-> decoderRate	= decoderRate;
+	this	-> inputRate	= 2000000 / 32;
 	setupUi (this);
-	QPalette *p = new QPalette;
-	p -> setColor (QPalette::WindowText, Qt::white);
-	frequencyDisplay -> setPalette (*p);
-	bandLabel -> setPalette (*p);
 //      and some buffers
 //	in comes:
         inputData       = new RingBuffer<std::complex<float> > (1024 * 1024);
@@ -106,14 +85,11 @@ QString	FrequencytoString (quint64 freq) {
 	audioRate		= 48000;
         audioData		= new RingBuffer<std::complex<float>> (audioRate);
 
-	theDecoder		= nullptr;
-	agc. setMode (agcHandler::AGC_OFF);
 //	and the decoders
 	displaySize		= 1024;
 	scopeWidth		= inputRate;
-	theBand. currentOffset	= scopeWidth / 4;
-	theBand. lowF		= -decoderRate / 2;
-	theBand. highF		= decoderRate / 2;
+	centerFrequency		= KHz (14070);
+	selectedFrequency	= KHz (14070);
 	mouseIncrement		= 5;
 //	scope and settings
 	hfScopeSlider	-> setValue (50);
@@ -124,7 +100,9 @@ QString	FrequencytoString (quint64 freq) {
                                         hfScopeSlider -> value (),
                                         8);
 	hfScope		-> set_bitDepth (12);	// default
-	hfScope	-> setScope (14070 * 1000, scopeWidth / 4);
+	centerFrequency		= KHz (14070);	// default
+	selectedFrequency	= KHz (14070);	// default
+	hfScope	-> setScope (centerFrequency, selectedFrequency - centerFrequency);
         connect (hfScope,
                  SIGNAL (clickedwithLeft (int)),
                  this,
@@ -134,25 +112,6 @@ QString	FrequencytoString (quint64 freq) {
 	         this, SLOT (switch_hfViewMode (int)));
         connect (hfScopeSlider, SIGNAL (valueChanged (int)),
                  this, SLOT (set_hfscopeLevel (int)));
-
-//      scope and settings
-	lfScopeSlider	-> setValue (50);
-        lfScope		= new fftScope (lfSpectrum,
-                                        displaySize,
-	                                1,
-                                        decoderRate,
-                                        lfScopeSlider -> value (),
-                                        8);
-	lfScope		-> set_bitDepth (12);
-        connect (lfScope,
-                 SIGNAL (clickedwithLeft (int)),
-                 this,
-                 SLOT (adjustFrequency_hz (int)));
-	connect (lfScope,
-	         SIGNAL (clickedwithRight (int)),
-	         this, SLOT (switch_lfViewMode (int)));
-        connect (lfScopeSlider, SIGNAL (valueChanged (int)),
-                 this, SLOT (set_lfscopeLevel (int)));
 
 //	output device
         audioHandler            = new audioSink (this -> audioRate, 16384);
@@ -175,20 +134,11 @@ QString	FrequencytoString (quint64 freq) {
         connect (freqButton, SIGNAL (clicked (void)),
                  this, SLOT (handle_freqButton (void)));
 
-	connect (middleButton, SIGNAL (clicked (void)),
-	         this, SLOT (set_inMiddle (void)));
-
 	connect (mouse_Inc, SIGNAL (valueChanged (int)),
 	         this, SLOT (set_mouseIncrement (int)));
 
         connect (streamOutSelector, SIGNAL (activated (int)),
                  this, SLOT (setStreamOutSelector (int)));
-
-	connect (AGC_select, SIGNAL (activated(const QString&) ),
-	         this, SLOT (set_AGCMode (const QString&) ) );
-
-	connect (agc_thresholdSlider, SIGNAL (valueChanged (int)),
-	         this, SLOT (set_agcThresholdSlider (int)));
 
 	connect (freqSave, SIGNAL (clicked (void)),
                  this, SLOT (set_freqSave (void)));
@@ -197,11 +147,10 @@ QString	FrequencytoString (quint64 freq) {
         myList  -> show ();
 	myLine	= NULL;
         audioHandler    -> selectDefaultDevice ();
-	theUpConverter	= new upConverter (decoderRate, 48000, audioHandler);
 
-	theDevice		= NULL;
+	theDevice		= nullptr;
 	delayCount		= 0;
-	dumpfilePointer		= NULL;
+	dumpfilePointer		= nullptr;
 
 	connect (dumpButton, SIGNAL (clicked (void)),
 	         this, SLOT (set_dumpButton (void)));
@@ -217,42 +166,14 @@ QString	FrequencytoString (quint64 freq) {
 	   exit (22);
 	}
 
-#ifdef	__MINGW32__
-//	communication from the dll to the main program is through signals
-#ifdef	HAVE_EXTIO
-//	The following signals originate from the Winrad Extio interface
-	   connect (theDevice, SIGNAL (set_ExtFrequency (int)),
-	            this, SLOT (set_ExtFrequency (int)));
-	   connect (theDevice, SIGNAL (set_ExtLO (int)),
-	            this, SLOT (set_ExtLO (int)));
-	   connect (theDevice, SIGNAL (set_lockLO (void)),
-	            this, SLOT (set_lockLO (void)));
-	   connect (theDevice, SIGNAL (set_unlockLO (void)),
-	            this, SLOT (set_unlockLO (void)));
-	   connect (theDevice, SIGNAL (set_stopHW (void)),
-	            this, SLOT (set_stopHW (void)));
-	   connect (theDevice, SIGNAL (set_startHW (void)),
-	            this, SLOT (set_startHW (void)));
-#endif
-#endif
 	hfScope		-> set_bitDepth (theDevice -> bitDepth ());
-	lfScope		-> set_bitDepth (theDevice -> bitDepth ());
-	agc. set_bitDepth (theDevice -> bitDepth ());
-	agc_thresholdSlider -> setMinimum (get_db (0,
-	                                   twoPower (theDevice -> bitDepth ())));
-        agc_thresholdSlider -> setMaximum (0);
-        agc_thresholdSlider -> setValue (get_db (0,
-	                                 twoPower (theDevice -> bitDepth ())));
 	connect (theDevice, SIGNAL (dataAvailable (int)),
 	         this, SLOT (sampleHandler (int)));
 //	and off we go
-	   theDecoder	= new drmDecoder (decoderRate,
-	                                   audioData, settings);
+	theDecoder	= new drmDecoder (this, audioData);
 //	bind the signals in the decoder to some slots
 	connect (theDecoder, SIGNAL (audioAvailable (int, int)),
 	         this, SLOT (processAudio (int, int)));
-//	connect (theDecoder, SIGNAL (setDetectorMarker (int)),
-//	         this, SLOT (setDetectorMarker (int)));
 	theDevice	-> restartReader ();
 }
 
@@ -273,59 +194,44 @@ void	RadioInterface::handle_quitButton	(void) {
 	myList		-> hide ();
 
 	fprintf (stderr, "we kappen ermee\n");
-	delete theDecoder;
+	delete		theDecoder;
 	secondsTimer. stop ();
-        delete  mykeyPad;
-        delete  myList;
-	delete	theUpConverter;
+        delete		myList;
 	delete []	outTable;
-	delete	audioData;
-        delete	inputData;
-	delete	hfScope;
-	delete	lfScope;
+	delete		audioData;
+        delete		inputData;
+	delete		hfScope;
+        delete		mykeyPad;
 }
 
-deviceHandler	*RadioInterface::setDevice (RingBuffer<std::complex<float>> *hfBuffer) {
-
+deviceHandler	*RadioInterface::
+	            setDevice (RingBuffer<std::complex<float>> *hfBuffer) {
 deviceHandler *res	= NULL;
-#ifdef	HAVE_EXTIO
-	if (res == NULL) {
-	   try {
-	      res = new extioHandler (this, inputRate, hfBuffer, settings);
-	   } catch (int e) {}
-	}
-
-#elif	HAVE_PMSDR
-	if (res == NULL) {
-	   try {
-	      res = new pmsdrHandler (this, inputRate, hfBuffer, settings);
-	   } catch (int e) {}
-	}
-#else
 #ifdef	HAVE_SDRPLAY
 	try {
-	   res  = new sdrplayHandler (this, inputRate, hfBuffer, settings);
-	} catch (int e) {}
+	   fprintf (stderr, "Testing for sdrplay\n");
+	   res  = new sdrplayHandler (this, hfBuffer, settings);
+	} catch (int e) {
+	}
 #endif
 #ifdef	HAVE_HACKRF
 	if (res == NULL) {
 	   try {
-	      res  = new hackrfHandler (this, inputRate, hfBuffer, settings);
+	      res  = new hackrfHandler (this, hfBuffer, settings);
 	   } catch (int e) {}
 	}
 #endif
 #ifdef	HAVE_RTLSDR
 	if (res == NULL) {
 	   try {
-	      res  = new rtlsdrHandler (this, inputRate, hfBuffer, settings);
+	      res  = new rtlsdrHandler (this, hfBuffer, settings);
 	   } catch (int e) {}
 	}
 #endif
 	
-#endif
 	if (res == NULL) {
 	   try {
-	      res	= new fileReader (this, inputRate, hfBuffer, settings);
+	      res	= new fileReader (this, hfBuffer, settings);
 	      bandLabel	-> hide ();
 	   } catch (int e) {}
 	}
@@ -343,17 +249,15 @@ void    RadioInterface::handle_freqButton (void) {
 
 //	setFrequency is called from the frequency panel
 //	as well as from inside to change VFO and offset
-void	RadioInterface::setFrequency (quint64 frequency) {
-quint64	VFOFrequency	= frequency - scopeWidth / 4;
-	theDevice	-> setVFOFrequency (VFOFrequency);
-	theBand. currentOffset	= scopeWidth / 4;
-	hfScope		-> setScope  (VFOFrequency, theBand. currentOffset);
-	hfFilter. setBand (theBand. currentOffset + theBand. lowF,
-	                   theBand. currentOffset + theBand. highF,
-	                                          inputRate);
-	QString ff	= FrequencytoString (frequency);
+void	RadioInterface::setFrequency (int32_t frequency) {
+	centerFrequency		= frequency;
+	selectedFrequency	= frequency;
+	theDevice	-> setVFOFrequency (centerFrequency);
+	hfScope		-> setScope  (centerFrequency,
+	                              centerFrequency - selectedFrequency);
+	QString ff	= FrequencytoString (selectedFrequency);
 	frequencyDisplay	-> display (ff);
-	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (frequency));
+	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (selectedFrequency));
 }
 //
 //	adjustFrequency is called whenever clicking the mouse
@@ -362,40 +266,29 @@ void	RadioInterface::adjustFrequency_khz (int32_t n) {
 }
 
 void	RadioInterface::adjustFrequency_hz (int32_t n) {
-int	lowF	= theBand. lowF;
-int	highF	= theBand. highF;
-int	currOff	= theBand. currentOffset;
-
-	if ((currOff + highF + n >= scopeWidth / 2 - scopeWidth / 20) ||
-	    (currOff + lowF + n <= - scopeWidth / 2 + scopeWidth / 20) ) {
-	   quint64 newFreq = theDevice -> getVFOFrequency () +
-	                                   theBand. currentOffset + n;
-	   setFrequency ((quint64)newFreq);
-	   return;
+	if ((selectedFrequency + n >= centerFrequency + KHz (27)) ||
+	    (selectedFrequency + n <= centerFrequency - KHz (27))) {
+	   setFrequency (centerFrequency + n);	
+	   centerFrequency = theDevice -> getVFOFrequency ();
+	   selectedFrequency = centerFrequency;
 	}
-	else {
-	   theBand. currentOffset += n;
-	   hfScope -> setScope (theDevice -> getVFOFrequency (),
-	                                   theBand. currentOffset);
-	   hfFilter. setBand (theBand. currentOffset + theBand. lowF,
-	                      theBand. currentOffset + theBand. highF,
-	                            inputRate);
-	}
+	else 
+	   selectedFrequency += n;
+	hfScope	-> setScope (centerFrequency,
+	              selectedFrequency - centerFrequency);
+	QString ff 		= FrequencytoString (selectedFrequency);
+	frequencyDisplay	-> display (selectedFrequency);
+	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (selectedFrequency));
+}
 
-	int freq		= theDevice -> getVFOFrequency () +
-	                                    theBand. currentOffset;
-	QString ff = FrequencytoString ((quint64)freq);
-	frequencyDisplay	-> display (ff);
-	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (freq));
+int32_t	RadioInterface::get_selectedFrequency	() {
+	return selectedFrequency;
+}
+
+int32_t	RadioInterface::get_centerFrequency	() {
+	return centerFrequency;
 }
 //
-//	just a convenience button
-void	RadioInterface::set_inMiddle (void) {
-	quint64 newFreq = theDevice -> getVFOFrequency () +
-	                                    theBand. currentOffset;
-	setFrequency (newFreq);
-}
-
 void    RadioInterface::set_freqSave    (void) {
         if (myLine == NULL)
            myLine  = new QLineEdit ();
@@ -404,48 +297,9 @@ void    RadioInterface::set_freqSave    (void) {
                  this, SLOT (handle_myLine (void)));
 }
 
-#ifdef	HAVE_EXTIO
-//	The following signals originate from the Winrad Extio interface
-//
-//	Note: the extio interface provides two signals
-//	one ExtLO signals that the external LO is set
-//	to a different value,
-//	the other one, ExtFreq, requests the client program
-//	to adapt its (local) tuning settings to a new frequency
-void	RadioInterface::set_ExtFrequency (int f) {
-int32_t	vfo	= theDevice	-> getVFOFrequency ();
-	setFrequency (vfo);
-}
-//
-//	From our perspective, the external device only provides us
-//	with a vfo
-void	RadioInterface::set_ExtLO	(int f) {
-	set_ExtFrequency (f);
-}
-
-void	RadioInterface::set_lockLO	(void) {
-//	fprintf (stderr, "ExtioLock is true\n");
-//	ExtioLock	= true;
-}
-
-void	RadioInterface::set_unlockLO	(void) {
-//	fprintf (stderr, "ExtioLock is false\n");
-//	ExtioLock	= false;
-}
-
-void	RadioInterface::set_stopHW	(void) {
-	theDevice	-> stopReader ();
-}
-
-void	RadioInterface::set_startHW	(void) {
-	theDevice -> restartReader ();
-}
-#endif
-
 void    RadioInterface::handle_myLine (void) {
-int32_t freq    = theDevice -> getVFOFrequency () + theBand. currentOffset;
 QString programName     = myLine -> text ();
-        myList  -> addRow (programName, QString::number (freq / Khz (1)));
+        myList  -> addRow (programName, QString::number (selectedFrequency / Khz (1)));
         disconnect (myLine, SIGNAL (returnPressed (void)),
                     this, SLOT (handle_myLine (void)));
         myLine  -> hide ();
@@ -463,8 +317,7 @@ void	RadioInterface::wheelEvent (QWheelEvent *e) {
 //////////////////////////////////////////////////////////////////
 //
 void	RadioInterface::sampleHandler (int amount) {
-std::complex<float>   buffer [theDecimator. inSize ()];
-std::complex<float> ifBuffer [theDecimator. outSize ()];
+std::complex<float>   buffer [512];
 float dumpBuffer [2 * 512];
 int	i, j;
 
@@ -480,29 +333,13 @@ int	i, j;
               sf_writef_float (dumpfilePointer, dumpBuffer, 512);
            }
 	      
-	   for (i = 0; i < 512; i ++) {
-	      float agcGain;
-	      std::complex<float> temp = hfFilter. Pass (buffer [i]);
-	      temp = hfShifter. do_shift (temp, theBand. currentOffset);
-	      if (theDecimator. add (temp, ifBuffer)) {
-	         lfScope -> addElements (ifBuffer, theDecimator. outSize ());
-	         for (j = 0; j < theDecimator. outSize (); j ++) {
-	            agcGain	= agc. doAgc (ifBuffer [j]);
-	            temp	= cmul (ifBuffer [j], agcGain);
-	            theDecoder -> process (temp);
-	         }
-	      }
-	   }
+	   theDecoder -> processBuffer (buffer, 512);
 	}
 }
 //
 //
 void    RadioInterface::set_hfscopeLevel (int level) {
         hfScope -> setLevel (level);
-}
-
-void    RadioInterface::set_lfscopeLevel (int level) {
-        lfScope -> setLevel (level);
 }
 
 //	do not forget that ocnt starts with 1, due
@@ -558,43 +395,14 @@ DSPCOMPLEX buffer [rate / 10];
 	usleep (1000);
         while (audioData -> GetRingBufferReadAvailable () >
                                                  (uint32_t)rate / 10) {
-           audioData -> getDataFromBuffer (buffer, rate / 10);
-//	   if (rate != 48000)
-//	      theUpConverter    -> handle (buffer, rate / 10);
-//	   else
-	      audioHandler      -> putSamples (buffer, rate / 10);
+           audioData	-> getDataFromBuffer (buffer, rate / 10);
+	   audioHandler      -> putSamples (buffer, rate / 10);
         }
-}
-
-void    RadioInterface::set_AGCMode (const QString &s) {
-uint8_t gainControl;
-
-        if (s == "AGC off")
-           gainControl  = agcHandler::AGC_OFF;
-        else
-        if (s == "slow")
-           gainControl  = agcHandler::AGC_SLOW;
-        else
-           gainControl  = agcHandler::AGC_FAST;
-        agc. setMode      (gainControl);
-}
-
-void    RadioInterface::set_agcThresholdSlider (int v) {
-        agc. setThreshold (v);
-}
-
-void	RadioInterface::setDetectorMarker	(int m) {
-	lfScope -> setScope  (0, m);
 }
 
 void	RadioInterface::switch_hfViewMode	(int d) {
 	(void)d;
 	hfScope	-> switch_viewMode ();
-}
-
-void	RadioInterface::switch_lfViewMode	(int d) {
-	(void)d;
-	lfScope	-> switch_viewMode ();
 }
 
 void	RadioInterface::updateTime		(void) {
@@ -653,5 +461,3 @@ void RadioInterface::closeEvent (QCloseEvent *event) {
         }
 }
 
-
-	

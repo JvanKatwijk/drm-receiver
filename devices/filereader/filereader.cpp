@@ -28,11 +28,9 @@
 #include	"filereader.h"
 
 	fileReader::fileReader	(RadioInterface *mr,
-	                         int32_t rate,
 	                         RingBuffer<std::complex<float>> *b,
-	                         QSettings *s):
-	                              deviceHandler (mr) {
-	theRate		= rate;
+	                         QSettings *s) {
+	theRate		= 2000000 / 32;
 	this	-> myFrame	= new QFrame;
 	(void)s;
 	setupUi		(myFrame);
@@ -45,7 +43,7 @@
 	                                  QDir::homePath (),
 	                                  tr ("sound (*.wav)"));
 	replayFile	= QDir::toNativeSeparators (replayFile);
-	myReader	= new fileHulp (replayFile, rate, b);
+	myReader	= new fileHulp (replayFile, theRate, b);
 	connect (myReader, SIGNAL (setProgress (int, float, float)),
 	         this, SLOT (setProgress (int, float, float)));
 	connect (myReader, SIGNAL (dataAvailable (int)),

@@ -69,27 +69,26 @@ class	hackrfHandler: public deviceHandler, public Ui_hackrfWidget {
 Q_OBJECT
 public:
 			hackrfHandler	(RadioInterface *mr,
-                                         int32_t        outputRate,
-                                         RingBuffer<DSPCOMPLEX> *r,
+                                         RingBuffer<std::complex<float>> *r,
                                          QSettings      *s);
-			~hackrfHandler		(void);
-	int32_t		getRate			(void);
-	void		setVFOFrequency		(quint64);
-	quint64		getVFOFrequency		(void);
+			~hackrfHandler		();
+	int32_t		getRate			();
+	void		setVFOFrequency		(int32_t);
+	int32_t		getVFOFrequency		();
 
-	bool		restartReader		(void);
-	void		stopReader		(void);
-	int16_t		bitDepth		(void);
+	bool		restartReader		();
+	void		stopReader		();
+	int16_t		bitDepth		();
 //
 //	The buffer should be visible by the callback function
 //
 //      This buffer is used in the callback, it therefore
 //      should be visible
-        RingBuffer<DSPCOMPLEX>  *_I_Buffer;
+        RingBuffer<std::complex<float>>  *_I_Buffer;
         int32_t         sampleCnt;
         int32_t         inputRate;
         int32_t         outputRate;
-        void            report_dataAvailable    (void);
+        void            report_dataAvailable    ();
         decimatingFIR   *filter;
         int32_t         localShift;
         int32_t         oscillatorPhase;
@@ -97,6 +96,7 @@ public:
 	hackrf_device	*theDevice;
 	int		decimationFactor;
 private:
+	QFrame		myFrame;
 
 	bool			load_hackrfFunctions	(void);
 	pfn_hackrf_init		hackrf_init;
@@ -119,7 +119,6 @@ private:
 	                        hackrf_usb_board_id_name;
 
 	QSettings	*hackrfSettings;
-	QFrame		*myFrame;
 	std::atomic<bool>	running;
 	HINSTANCE	Handle;
 	bool		libraryLoaded;
