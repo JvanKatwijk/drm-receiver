@@ -16,7 +16,7 @@ The drm receiver is an experimental tool, a heavily reduced swradio,
 with a single decoder, just for drm.
 
 -----------------------------------------------------------------------
-A short nore on DRM
+A short note on DRM
 -------------------------------------------------------------------------
 
 DRM, Digital Radio Mondiale, is a form of digital radio. Transmissions
@@ -157,7 +157,7 @@ is of type 3 (which just means 1 10 KHz spectrum), the mode is Mode B, the
 bits carrying the audio are encoded as QAM 64, and the audio is encoded as AAC.
 The empty box then is available for text messages.
 
-Below this, there are 4 numbers, giving some information on the quality of
+Below this, there are 3 numbers, giving some information on the quality of
 the signal
 
  * the number 68.59 tells that the quality of the signal in which the FAC is encoded is very good (FAC data is encoded as QAM4);
