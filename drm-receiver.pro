@@ -24,15 +24,15 @@ DEPENDPATH += .  \
 	      scopes-qwt6 \
 	      devices \
 	      devices/filereader \
-	      drm-decoder \
-	      drm-decoder/data \
-	      drm-decoder/fac \
-	      drm-decoder/equalizer \
-	      drm-decoder/msc \
-	      drm-decoder/ofdm \
-	      drm-decoder/parameters \
-	      drm-decoder/sdc \
-	      drm-decoder/support 
+	      the-decoder \
+	      the-decoder/data \
+	      the-decoder/fac \
+	      the-decoder/equalizer \
+	      the-decoder/msc \
+	      the-decoder/ofdm \
+	      the-decoder/parameters \
+	      the-decoder/sdc \
+	      the-decoder/support 
 
 INCLUDEPATH += .  \
 	      filters \
@@ -41,15 +41,15 @@ INCLUDEPATH += .  \
 	      scopes-qwt6 \
 	      devices \
 	      devices/filereader \
-	      drm-decoder \
-	      drm-decoder/data \
-	      drm-decoder/fac \
-	      drm-decoder/equalizer \
-	      drm-decoder/msc \
-	      drm-decoder/ofdm \
-	      drm-decoder/parameters \
-	      drm-decoder/sdc \
-	      drm-decoder/support 
+	      the-decoder \
+	      the-decoder/data \
+	      the-decoder/fac \
+	      the-decoder/equalizer \
+	      the-decoder/msc \
+	      the-decoder/ofdm \
+	      the-decoder/parameters \
+	      the-decoder/sdc \
+	      the-decoder/support 
 
 #CONFIG += static
 
@@ -80,63 +80,63 @@ HEADERS += ./radio-constants.h \
 	   ./devices/device-handler.h \
            ./devices/filereader/filereader.h \
            ./devices/filereader/filehulp.h \
-	   ./drm-decoder/drm-decoder.h \
-	   ./drm-decoder/decimator-25.h \
-	   ./drm-decoder/decimator.h \
-	   ./drm-decoder/drm-bandfilter.h \
-	   ./drm-decoder/eqdisplay.h \
-	   ./drm-decoder/iqdisplay.h \
-#	   ./drm-decoder/lowpassfilter.h \
-	   ./drm-decoder/basics.h \
-	   ./drm-decoder/utilities.h \
-#	   ./drm-decoder/data/neaacdec.h \
-#	   ./drm-decoder/data/aac-processor-faad.h \
-	   ./drm-decoder/data/data-processor.h \
-	   ./drm-decoder/data/message-processor.h \
-#	   ./drm-decoder/data/up-filter.h \
-	   ./drm-decoder/fac/fac-tables.h \
-	   ./drm-decoder/fac/fac-processor.h \
-	   ./drm-decoder/sdc/sdc-include.h \
-	   ./drm-decoder/sdc/sdc-processor.h \
-	   ./drm-decoder/sdc/sdc-streamer.h \
-	   ./drm-decoder/msc/backend-controller.h \
-	   ./drm-decoder/msc/msc-handler.h \
-	   ./drm-decoder/msc/msc-handler-qam16.h \
-	   ./drm-decoder/msc/msc-handler-qam64.h \
-	   ./drm-decoder/msc/msc-processor.h \
-	   ./drm-decoder/msc/msc-streamer.h \
-	   ./drm-decoder/ofdm/correlator.h \
-	   ./drm-decoder/ofdm/freqsyncer.h \
-	   ./drm-decoder/ofdm/reader.h \
-	   ./drm-decoder/ofdm/timesync.h \
-	   ./drm-decoder/ofdm/word-collector.h \
-	   ./drm-decoder/equalizer/equalizer-1.h \
-	   ./drm-decoder/equalizer/equalizer-base.h \
-	   ./drm-decoder/equalizer/estimator-1.h \
-	   ./drm-decoder/equalizer/matrix2.h \
-	   ./drm-decoder/equalizer/referenceframe.h \
-	   ./drm-decoder/parameters/msc-config.h \
-	   ./drm-decoder/parameters/puncture-tables.h \
-	   ./drm-decoder/parameters/state-descriptor.h \
-	   ./drm-decoder/support/checkcrc.h \
-	   ./drm-decoder/support/deinterleaver.h \
-	   ./drm-decoder/support/drm-shifter.h \
-	   ./drm-decoder/support/fft-complex.h \
-	   ./drm-decoder/support/mapper.h \
-	   ./drm-decoder/support/mer16-values.h \
-	   ./drm-decoder/support/mer4-values.h \
-	   ./drm-decoder/support/mer64-values.h \
-	   ./drm-decoder/support/my-array.h \
-	   ./drm-decoder/support/prbs.h \
-	   ./drm-decoder/support/protlevels.h \
-	   ./drm-decoder/support/qam16-metrics.h \
-	   ./drm-decoder/support/qam4-metrics.h \
-	   ./drm-decoder/support/qam64-metrics.h \
-	   ./drm-decoder/support/viterbi-drm.h 
+	   ./the-decoder/drm-decoder.h \
+	   ./the-decoder/decimator-25.h \
+	   ./the-decoder/decimator.h \
+	   ./the-decoder/drm-bandfilter.h \
+	   ./the-decoder/eqdisplay.h \
+	   ./the-decoder/iqdisplay.h \
+#	   ./the-decoder/lowpassfilter.h \
+	   ./the-decoder/basics.h \
+	   ./the-decoder/utilities.h \
+#	   ./the-decoder/data/neaacdec.h \
+#	   ./the-decoder/data/aac-processor-faad.h \
+	   ./the-decoder/data/data-processor.h \
+	   ./the-decoder/data/message-processor.h \
+#	   ./the-decoder/data/up-filter.h \
+	   ./the-decoder/fac/fac-tables.h \
+	   ./the-decoder/fac/fac-processor.h \
+	   ./the-decoder/sdc/sdc-include.h \
+	   ./the-decoder/sdc/sdc-processor.h \
+	   ./the-decoder/sdc/sdc-streamer.h \
+	   ./the-decoder/msc/backend-controller.h \
+	   ./the-decoder/msc/msc-handler.h \
+	   ./the-decoder/msc/msc-handler-qam16.h \
+	   ./the-decoder/msc/msc-handler-qam64.h \
+	   ./the-decoder/msc/msc-processor.h \
+	   ./the-decoder/msc/msc-streamer.h \
+	   ./the-decoder/ofdm/correlator.h \
+	   ./the-decoder/ofdm/freqsyncer.h \
+	   ./the-decoder/ofdm/reader.h \
+	   ./the-decoder/ofdm/timesync.h \
+	   ./the-decoder/ofdm/word-collector.h \
+	   ./the-decoder/equalizer/equalizer-1.h \
+	   ./the-decoder/equalizer/equalizer-base.h \
+	   ./the-decoder/equalizer/estimator-1.h \
+	   ./the-decoder/equalizer/matrix2.h \
+	   ./the-decoder/equalizer/referenceframe.h \
+	   ./the-decoder/parameters/msc-config.h \
+	   ./the-decoder/parameters/puncture-tables.h \
+	   ./the-decoder/parameters/state-descriptor.h \
+	   ./the-decoder/support/checkcrc.h \
+	   ./the-decoder/support/deinterleaver.h \
+	   ./the-decoder/support/drm-shifter.h \
+	   ./the-decoder/support/fft-complex.h \
+	   ./the-decoder/support/mapper.h \
+	   ./the-decoder/support/mer16-values.h \
+	   ./the-decoder/support/mer4-values.h \
+	   ./the-decoder/support/mer64-values.h \
+	   ./the-decoder/support/my-array.h \
+	   ./the-decoder/support/prbs.h \
+	   ./the-decoder/support/protlevels.h \
+	   ./the-decoder/support/qam16-metrics.h \
+	   ./the-decoder/support/qam4-metrics.h \
+	   ./the-decoder/support/qam64-metrics.h \
+	   ./the-decoder/support/viterbi-drm.h 
 
 FORMS	+= ./newradio.ui \
 	   ./devices/filereader/filereader-widget.ui
-FORMS	+= ./drm-decoder/drmdecoder.ui
+FORMS	+= ./the-decoder/drmdecoder.ui
 
 SOURCES += ./main.cpp \
 	   ./radio.cpp \
@@ -162,57 +162,57 @@ SOURCES += ./main.cpp \
 	   ./devices/device-handler.cpp \
            ./devices/filereader/filereader.cpp \
            ./devices/filereader/filehulp.cpp \
-	   ./drm-decoder/drm-decoder.cpp \
-	   ./drm-decoder/decimator-25.cpp \
-	   ./drm-decoder/decimator.cpp \
-	   ./drm-decoder/drm-bandfilter.cpp \
-	   ./drm-decoder/eqdisplay.cpp \
-	   ./drm-decoder/iqdisplay.cpp \
-#	   ./drm-decoder/lowpassfilter.cpp \
-	   ./drm-decoder/utilities.cpp \
-	   ./drm-decoder/basics.cpp \
-#	   ./drm-decoder/data/aac-processor-faad.cpp \
-	   ./drm-decoder/data/data-processor.cpp \
-	   ./drm-decoder/data/message-processor.cpp \
-#	   ./drm-decoder/data/lowpassfir.cpp \
-	   ./drm-decoder/data/up-filter.cpp \
-	   ./drm-decoder/fac/fac-tables.cpp \
-	   ./drm-decoder/fac/fac-processor.cpp \
-	   ./drm-decoder/sdc/sdc-processor.cpp \
-	   ./drm-decoder/sdc/sdc-streamer.cpp \
-	   ./drm-decoder/msc/backend-controller.cpp \
-	   ./drm-decoder/msc/msc-handler.cpp \
-	   ./drm-decoder/msc/msc-handler-qam16.cpp \
-	   ./drm-decoder/msc/msc-handler-qam64.cpp \
-	   ./drm-decoder/msc/msc-processor.cpp \
-	   ./drm-decoder/msc/msc-streamer.cpp \
-	   ./drm-decoder/ofdm/correlator.cpp \
-	   ./drm-decoder/ofdm/freqsyncer.cpp \
-	   ./drm-decoder/ofdm/reader.cpp \
-	   ./drm-decoder/ofdm/timesync.cpp \
-	   ./drm-decoder/ofdm/word-collector.cpp \
-	   ./drm-decoder/equalizer/equalizer-1.cpp \
-	   ./drm-decoder/equalizer/equalizer-base.cpp \
-	   ./drm-decoder/equalizer/estimator-1.cpp \
-	   ./drm-decoder/equalizer/matrix2.cpp \
-	   ./drm-decoder/equalizer/referenceframe.cpp \
-	   ./drm-decoder/parameters/msc-config.cpp \
-	   ./drm-decoder/parameters/puncture-tables.cpp \
-	   ./drm-decoder/parameters/state-descriptor.cpp \
-	   ./drm-decoder/support/checkcrc.cpp \
-	   ./drm-decoder/support/deinterleaver.cpp \
-	   ./drm-decoder/support/drm-shifter.cpp \
-	   ./drm-decoder/support/fft-complex.cpp \
-	   ./drm-decoder/support/mapper.cpp \
-	   ./drm-decoder/support/mer16-values.cpp \
-	   ./drm-decoder/support/mer4-values.cpp \
-	   ./drm-decoder/support/mer64-values.cpp \
-	   ./drm-decoder/support/prbs.cpp \
-	   ./drm-decoder/support/protlevels.cpp \
-	   ./drm-decoder/support/qam16-metrics.cpp \
-	   ./drm-decoder/support/qam4-metrics.cpp \
-	   ./drm-decoder/support/qam64-metrics.cpp \
-	   ./drm-decoder/support/viterbi-drm.cpp
+	   ./the-decoder/drm-decoder.cpp \
+	   ./the-decoder/decimator-25.cpp \
+	   ./the-decoder/decimator.cpp \
+	   ./the-decoder/drm-bandfilter.cpp \
+	   ./the-decoder/eqdisplay.cpp \
+	   ./the-decoder/iqdisplay.cpp \
+#	   ./the-decoder/lowpassfilter.cpp \
+	   ./the-decoder/utilities.cpp \
+	   ./the-decoder/basics.cpp \
+#	   ./the-decoder/data/aac-processor-faad.cpp \
+	   ./the-decoder/data/data-processor.cpp \
+	   ./the-decoder/data/message-processor.cpp \
+#	   ./the-decoder/data/lowpassfir.cpp \
+	   ./the-decoder/data/up-filter.cpp \
+	   ./the-decoder/fac/fac-tables.cpp \
+	   ./the-decoder/fac/fac-processor.cpp \
+	   ./the-decoder/sdc/sdc-processor.cpp \
+	   ./the-decoder/sdc/sdc-streamer.cpp \
+	   ./the-decoder/msc/backend-controller.cpp \
+	   ./the-decoder/msc/msc-handler.cpp \
+	   ./the-decoder/msc/msc-handler-qam16.cpp \
+	   ./the-decoder/msc/msc-handler-qam64.cpp \
+	   ./the-decoder/msc/msc-processor.cpp \
+	   ./the-decoder/msc/msc-streamer.cpp \
+	   ./the-decoder/ofdm/correlator.cpp \
+	   ./the-decoder/ofdm/freqsyncer.cpp \
+	   ./the-decoder/ofdm/reader.cpp \
+	   ./the-decoder/ofdm/timesync.cpp \
+	   ./the-decoder/ofdm/word-collector.cpp \
+	   ./the-decoder/equalizer/equalizer-1.cpp \
+	   ./the-decoder/equalizer/equalizer-base.cpp \
+	   ./the-decoder/equalizer/estimator-1.cpp \
+	   ./the-decoder/equalizer/matrix2.cpp \
+	   ./the-decoder/equalizer/referenceframe.cpp \
+	   ./the-decoder/parameters/msc-config.cpp \
+	   ./the-decoder/parameters/puncture-tables.cpp \
+	   ./the-decoder/parameters/state-descriptor.cpp \
+	   ./the-decoder/support/checkcrc.cpp \
+	   ./the-decoder/support/deinterleaver.cpp \
+	   ./the-decoder/support/drm-shifter.cpp \
+	   ./the-decoder/support/fft-complex.cpp \
+	   ./the-decoder/support/mapper.cpp \
+	   ./the-decoder/support/mer16-values.cpp \
+	   ./the-decoder/support/mer4-values.cpp \
+	   ./the-decoder/support/mer64-values.cpp \
+	   ./the-decoder/support/prbs.cpp \
+	   ./the-decoder/support/protlevels.cpp \
+	   ./the-decoder/support/qam16-metrics.cpp \
+	   ./the-decoder/support/qam4-metrics.cpp \
+	   ./the-decoder/support/qam64-metrics.cpp \
+	   ./the-decoder/support/viterbi-drm.cpp
 
 unix {
 exists ("./.git") {
@@ -347,19 +347,19 @@ LIBS		+= -lfdk-aac-2
 }
 #LIBS		+= -lfdk-aac -larmadillo
 INCLUDEPATH	+= /usr/local/include/fdk-aac
-HEADERS		+= ./drm-decoder/data/aac-processor-fdk.h \
-	           ./drm-decoder/data/xheaac-processor.h 
-SOURCES		+= ./drm-decoder/data/aac-processor-fdk.cpp \
-	           ./drm-decoder/data/xheaac-processor.cpp 
+HEADERS		+= ./the-decoder/data/aac-processor-fdk.h \
+	           ./the-decoder/data/xheaac-processor.h 
+SOURCES		+= ./the-decoder/data/aac-processor-fdk.cpp \
+	           ./the-decoder/data/xheaac-processor.cpp 
 }
 
 faad	{
 DEFINES		+= __WITH_FAAD__
-HEADERS		+=  ./drm-decoder/data/aac-processor-faad.h  \
-#	            ./drm-decoder/data/drm-aacdecoder.h \
-	            ./drm-decoder/data/neaacdec.h 
-SOURCES		+= ./drm-decoder/data/aac-processor-faad.cpp  
-#	           ./drm-decoder/data/drm-aacdecoder.cpp 
+HEADERS		+=  ./the-decoder/data/aac-processor-faad.h  \
+#	            ./the-decoder/data/drm-aacdecoder.h \
+	            ./the-decoder/data/neaacdec.h 
+SOURCES		+= ./the-decoder/data/aac-processor-faad.cpp  
+#	           ./the-decoder/data/drm-aacdecoder.cpp 
 LIBS		+= -lfaad_drm
 #LIBS		+= -lfaad_drm -larmadillo
 }
