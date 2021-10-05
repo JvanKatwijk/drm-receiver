@@ -42,9 +42,12 @@ The 256 "useful" samples of a word are fed into an FFT processor, mapping
 the samples as they were in the time domain, to values in the frequency
 domain.
 
-These values are then the basis for further processing.
-A group of these "words" form a frame. For Mode B, 15 such words
-form a frame. Such as frame then has 3840 cells with complex
+These "words" with frequency domain values (carriers) are then the basis for
+further processing.
+
+A group of these "words" forms a frame. For Mode B,
+a frame is built up from 15 such words.
+Such as frame then has 3840 cells with complex
 values.
 Note that in the time domain  such a frame takes 4800 samples, and with
 a samplerate of 12000 samples a second, slightly less than 3 frames a second
@@ -66,23 +69,33 @@ actual payload, the audio and data services that are
 carried in the transmission. The bits for the SDC content are usually 
 encoded in QAM16 (in DRM+ they are encoded QAM4)
 
- *MSC, Master Service Channel, containing the audio and data services. The bits
+ * MSC, Master Service Channel, containing the audio and data services. The bits
 are often encoded in QAM64, sometimes in QAM16.
 
-=========================================================================
-Decoder issues
-=========================================================================
+Actually, a group of three subsequent frames forms a so-called super frame,
+the FAC contains information on whether the frame is the first or the
+last of such a super frame. A superframe contains data, good for 1.2 seconds
+of audio.
 
-A decoder gets as input a sample stream.
-Of course, the first question is what mode and spectrum occupancy there are.
+------------------------------------------------------------------------
+Decoder issues
+-----------------------------------------------------------------------
+
+A decoder gets as input a sample stream, in our case with a rate of 12000
+samples a second.
+Of course, the first question that needs to be solved is what mode
+and spectrum occupancy there are.
 The Mode can be determined by correlation, the length of the prefix,
-mentioned before, is different for each mode.
+mentioned before, is different for each mode. Mode detection is simply by
+correlating the prefix with the supposed end of word. 
+In order to get a more reliable result, the process is done over a range
+of words, say 15 to 20. 
 
 Of course, by detecting the mode, the first sample of a word can be
 detected.
 A minor issue, though not unimportant is that there might be a clock offset
 in the decoder, compared to the clock in the transmitter.
-This implies that after the transmitter has sent N * 320 samples, the
+This might imply that after the transmitter has sent N * 320 samples, the
 receiver may be one or two samples off.
 So, a continuous monitoring that the time synchonization is still OK is a
 must.
@@ -101,6 +114,23 @@ Furthermore, by comparing the phases of the values in the prefix
 and the corresponding values at theend of the time domain words.
 a more precise error can be computed and corrected.
 
+
+Of course, if the frequency error is too large, decoding is impossible,
+conversely, if decoding is possible, then obviously, the frequency correction
+is more or less OK.
+
+So, the decoder has to deal with
+
+ * time synchronization to continuously detect the first sample of a word
+in the time domain;
+
+ * the decoding of the FAC, since the FAC is encoded QAM4 it is easy is the frequency correction is OK;
+
+ * the decoding of the SDC, slightly more complex that decoding the FAC;
+
+ * the decoding of the selected service in the MSC, usually AAC encoded audio.
+
+The decoder contains labels to show the correctness of these decoding.
 
 ![overview](/drm-decoder.png?raw=true)
 
