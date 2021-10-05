@@ -41,8 +41,6 @@ int	i;
 	this	-> hackrfSettings	= s;
 	setupUi (&myFrame);
 	myFrame. show ();
-	this	-> inputRate		= Khz (24 * 96);
-	this	-> decimationFactor	= inputRate / outputRate;
 	_I_Buffer			= r;
 
 	for (i = 0; i < 128; i ++)
@@ -126,18 +124,6 @@ int	i;
 	   throw (25);
 	}
 
-	oscillatorTable = new std::complex<float> [inputRate];
-	for (int32_t i = 0; i < inputRate; i ++)
-	   oscillatorTable [i] = std::complex<float> (
-	                           cos ((float) i * 2 * M_PI / inputRate),
-	                           sin ((float) i * 2 * M_PI / inputRate));
-	localShift      = 0;
-	oscillatorPhase = 0;
-	filter          = new decimatingFIR (inputRate / outputRate * 5 - 1,
-	                                     + outputRate / 2,
-	                                     inputRate,
-	                                     inputRate / outputRate);
-
 	setLNAGain	(lnagainSlider	-> value ());
 	setVGAGain	(vgagainSlider	-> value ());
 //	and be prepared for future changes in the settings
@@ -156,6 +142,13 @@ int	i;
 	                setText (this -> hackrf_usb_board_id_name (board_id));
 	}
 
+	filter_1        = new decimatingFIR (2 * 4 + 1,
+                                             + outputRate / 2,
+                                             inputRate,
+                                             4);
+        filter_2        = new decimatingFIR (2 * 8 + 1,
+                                             outputRate / 2,
+                                             inputRate / 4, 8);
 	running. store (false);
 }
 
@@ -169,6 +162,8 @@ int	i;
 	hackrfSettings	-> endGroup ();
 	this	-> hackrf_close (theDevice);
 	this	-> hackrf_exit ();
+	delete	filter_1;
+	delete	filter_2;
 }
 //
 
@@ -224,7 +219,7 @@ hackrfHandler *ctx = static_cast <hackrfHandler *>(transfer -> rx_ctx);
 uint8_t *p	= transfer -> buffer;
 int	i;
 RingBuffer<std::complex<float> > * q = ctx -> _I_Buffer;
-std::complex<float> localBuf [transfer -> valid_length / (2 * ctx -> decimationFactor) + 10];
+std::complex<float> localBuf [transfer -> valid_length / 2];
 int	cnt	= 0;
 
 	for (i = 0; i < transfer -> valid_length / 2; i ++) {
@@ -233,8 +228,10 @@ int	cnt	= 0;
 	   std::complex<float> temp  =
 	              std::complex<float> (((float)re) / 128.0,
 	                                   ((float)im) / 128.0);
+	   std::complex<float> tmp2;
 
-           if (ctx -> filter -> Pass (temp, &(localBuf [cnt])))
+           if (ctx -> filter_1 -> Pass (temp, &tmp2))
+	      if (ctx -> filter_2 -> Pass (tmp2,  &(localBuf [cnt])))
               if (localBuf [cnt] == localBuf [cnt])
                  cnt ++;
         }
@@ -285,15 +282,15 @@ int	res;
 	running. store (false);
 }
 
-int16_t	hackrfHandler::bitDepth	(void) {
+void	hackrfHandler::resetBuffer	() {
+      _I_Buffer       -> FlushRingBuffer ();
+}
+
+int16_t	hackrfHandler::bitDepth		() {
 	return 8;
 }
 
-int32_t hackrfHandler::getRate  (void) {
-	return Khz (2112);
-}
-
-bool	hackrfHandler::load_hackrfFunctions (void) {
+bool	hackrfHandler::load_hackrfFunctions () {
 //
 //	link the required procedures
 	this -> hackrf_init	= (pfn_hackrf_init)
@@ -407,7 +404,7 @@ bool	hackrfHandler::load_hackrfFunctions (void) {
 	return true;
 }
 
-void	hackrfHandler::report_dataAvailable (void) {
+void	hackrfHandler::report_dataAvailable () {
         emit dataAvailable (10);
 }
 

@@ -228,6 +228,8 @@ isEmpty(GITHASHSTRING) {
 
 DESTDIR		= ./linux-bin
 CONFIG		+= sdrplay
+CONFIG		+= rtlsdr
+CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
 #CONFIG		+= faad

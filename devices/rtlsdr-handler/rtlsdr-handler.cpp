@@ -67,6 +67,8 @@ std::complex<float> ibuf [READLEN_DEFAULT / 2];
 void	dll_driver::RTLSDRCallBack (unsigned char *buf,
 	                            uint32_t len, void *ctx) {
 rtlsdrHandler	*theStick = (rtlsdrHandler *)ctx;
+int cnt	= 0;
+std::complex<float> localBuf [READLEN_DEFAULT / 2];
 
 	if ((len != READLEN_DEFAULT) || (theStick == NULL))
 	   return;
@@ -75,14 +77,14 @@ rtlsdrHandler	*theStick = (rtlsdrHandler *)ctx;
 	   std::complex<float> tmp =
 	               std::complex<float> (convTable [buf [2 * i]],
 	                                    convTable [buf [2 * i + 1]]);
-	   ibuf [i] = tmp;
-	}
-	int cnt	= 0;
-	for (int i = 0; i < READLEN_DEFAULT / 2; i ++)
-	   if (theStick -> d_filter -> Pass (ibuf [i], &ibuf [cnt])) 
-	      cnt ++;
+	   std::complex<float> tmp2;
+	   if (theStick -> filter_1 -> Pass (tmp, &tmp2))
+	      if (theStick -> filter_2 -> Pass (tmp2, &localBuf [cnt]))
+                 if (localBuf [cnt] == localBuf [cnt])
+                    cnt ++;
 
-	theStick -> _I_Buffer -> putDataIntoBuffer (ibuf, cnt);
+	}
+	theStick -> _I_Buffer -> putDataIntoBuffer (localBuf, cnt);
 	if ((int)(theStick -> _I_Buffer -> GetRingBufferReadAvailable ()) >
 	   theStick -> outputRate / 10)
 	   theStick -> newdataAvailable (theStick -> outputRate / 10);
@@ -124,10 +126,8 @@ QString	temp;
 //
 	libraryLoaded	= false;
 	workerHandle	= nullptr;
-	d_filter	= nullptr;
 	workerHandle	= nullptr;
 	open		= false;
-	gains		= nullptr;
 
 	statusLabel	-> setText ("setting up");
 #ifdef	__MINGW32__
@@ -190,16 +190,16 @@ QString	temp;
 	}
 
 	gainsCount = rtlsdr_get_tuner_gains (device, NULL);
-	gains	= new int [gainsCount];
-	fprintf (stderr, "Supported gain values (%d): ", gainsCount);
-	gainsCount = rtlsdr_get_tuner_gains (device, gains);
-	for (i = gainsCount; i > 0; i++) {
-	   fprintf (stderr, "%.1f ", gains [i - 1] / 10.0);
-	   combo_gain -> addItem (QString::number (gains [i - 1]));
+	{  int gains [gainsCount];
+	   fprintf (stderr, "Supported gain values (%d): ", gainsCount);
+	   gainsCount = rtlsdr_get_tuner_gains (device, gains);
+	   for (i = gainsCount; i > 0; i++) {
+	      fprintf (stderr, "%.1f ", gains [i - 1] / 10.0);
+	      combo_gain -> addItem (QString::number (gains [i - 1]));
+	   }
+
+	   fprintf (stderr, "\n");
 	}
-
-	fprintf (stderr, "\n");
-
 	temp =
 	        rtlsdrSettings -> value ("externalGain", "10"). toString ();
         k       = combo_gain -> findText (temp);
@@ -215,11 +215,6 @@ QString	temp;
 	rtlsdr_set_tuner_gain_mode (device, 1);
 	rtlsdr_set_tuner_gain (device, theGain);
 	
-	d_filter	= new decimatingFIR (inputRate / outputRate * 5 - 1,
-	                                     - outputRate / 2,
-	                                     outputRate / 2,
-	                                     inputRate,
-	                                     inputRate / outputRate);
 	connect (combo_gain, SIGNAL (activated (const QString &)),
 	         this, SLOT (setExternalGain (const QString &)));
 	connect (f_correction, SIGNAL (valueChanged (int)),
@@ -238,6 +233,14 @@ QString	temp;
 	}
 
 	statusLabel	-> setText ("Loaded");
+	filter_1	= new decimatingFIR (2 * 4 + 1,
+                                             + outputRate / 2,
+                                             inputRate,
+                                             4);
+	filter_2        = new decimatingFIR (2 * 8 + 1,
+                                             outputRate / 2,
+                                             inputRate / 4, 8);
+
 	return;
 err:
 	if (open)
@@ -249,10 +252,6 @@ err:
 #endif
 	libraryLoaded	= false;
 	open		= false;
-	if (d_filter != NULL)
-	   delete d_filter;
-	if (gains != NULL)
-	   delete [] gains;
 	throw (22);
 }
 
@@ -266,24 +265,18 @@ err:
 	   rtlsdrSettings	-> endGroup ();
 	}
 
-	if (open && libraryLoaded) 
-	   stopReader ();
-	if (open) 
-	   rtlsdr_close (device);
+	stopReader ();
+	rtlsdr_close (device);
 
-	if (libraryLoaded)
+	delete	filter_1;
+	delete	filter_2;
 #ifdef __MINGW32__
-	   FreeLibrary (Handle);
+	FreeLibrary (Handle);
 #else
-	   dlclose (Handle);
+	dlclose (Handle);
 #endif
-	delete d_filter;
-	delete[] gains;
 }
 
-int32_t	rtlsdrHandler::getRate	(void) {
-	return outputRate;
-}
 //
 //
 int32_t	rtlsdrHandler::getVFOFrequency	(void) {
@@ -301,18 +294,10 @@ void	rtlsdrHandler::setVFOFrequency	(int32_t f) {
 	(void)rtlsdr_set_center_freq (device, f);
 }
 
-bool	rtlsdrHandler::legalFrequency	(int32_t f) {
-	(void)f;
-	return true;
-}
-
 //
 //
 bool	rtlsdrHandler::restartReader	(void) {
 int32_t	r;
-
-	if (!open ||!libraryLoaded)
-	   return false;
 
 	if (workerHandle != NULL)	// running already
 	   return true;
@@ -339,11 +324,14 @@ void	rtlsdrHandler::stopReader	(void) {
 	}
 	workerHandle	= NULL;
 }
+
+void	rtlsdrHandler::resetBuffer	() {
+	_I_Buffer	-> FlushRingBuffer ();
+}
+
 //
 //
 void	rtlsdrHandler::setExternalGain	(const QString &s) {
-	if (!open || !libraryLoaded)
-	   return;
         theGain         = s. toInt ();
         rtlsdr_set_tuner_gain (device, theGain);
 }
