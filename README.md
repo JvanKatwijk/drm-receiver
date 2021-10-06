@@ -141,19 +141,19 @@ and decoded signal.
 
  * the number 12:51 gives the time (UTC) derived from the transmission
 
- * 24000 stereo is the indiction of the rate of the audio output
+ * 24000 stereo is the indication of the rate of the audio output
 
- * it can be seen that there is one service being transmitted (the software is able to hanfle 2 audio transmissions), here Radio kuwait
+ * it can be seen that there is one service being transmitted (the software is able to handle 2 audio transmissions), here Radio kuwait
 
  * the numbers 544 -2 give an indication of the time offset, here it states that after 544 "words" (each 320 samples), a correction was needed with at most
- two samples
+ two samples, i.e. the next word should start 2 samples early
 
  * the number 0.986 tells that from the 1000 audio frames, 986 were correct
 
  * the labels time sync etc speak for themselves
 
 Below there is a row with 3, B, QAM64, AAC, which tells that the spectrum
-is of type 3 (which just means 1 10 KHz spectrum), the mode is Mode B, the
+is of type 3 (which just means a 10 KHz spectrum), the mode is Mode B, the
 bits carrying the audio are encoded as QAM 64, and the audio is encoded as AAC.
 The empty box then is available for text messages.
 
@@ -168,13 +168,13 @@ encoded is good (SDC data is encoded as QAM16);
  * the number 8.215 tells that the quality of the signal in which the audio data is encoded is fairly good (MSC data is encoded as QAM64);
 
 The scopes at the bottom give some visual information about the restored signal.
-The scope left tells the correction that is to be applied to the data
-in the frequency domain, the red line tells the correction on the amplitude,
-the blue line the correction on the phase. It shows that the signal here
+The scope shows the correction that is to be applied to the incoming data
+in the frequency domain: the red line tells the correction to the amplitude,
+the blue line the correction to8 the phase. It shows that the signal here
 is fairly reasonable.
 
 The scope right gives the constellation of the restored signal. Ideally
-there are 64 dots evenly distributed over the screen.
+for QAM64, there are 64 dots evenly distributed over the screen.
 
 
 ----------------------------------------------------------------------------
