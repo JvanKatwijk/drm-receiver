@@ -137,18 +137,19 @@ The decoder contains labels to show the correctness of these decoding.
 The picture of the decoder gives quite some information about the received
 and decoded signal.
 
- * at the top left, the measured frequency offset, two numbers, one for the so-called coarse offset, i.e. the number of carriers off (here -281 Hz), the second number telling the fine offset, i.e. the offset in the carrier (here -21.3 Hz)
+ * at the top left, the measured frequency offset, two numbers, one for the so-called coarse offset, i.e. the number of carriers off (here -281 Hz), the second number telling the fine offset, i.e. the offset in the carrier (here -18 Hz)
 
- * the number 12:51 gives the time (UTC) derived from the transmission
+ * the number 10:59 gives the time (UTC) derived from the transmission
 
  * 24000 stereo is the indication of the rate of the audio output
 
  * it can be seen that there is one service being transmitted (the software is able to handle 2 audio transmissions), here Radio kuwait
 
- * the numbers 544 -2 give an indication of the time offset, here it states that after 544 "words" (each 320 samples), a correction was needed with at most
+ * the numbers 1015 -2 give an indication of the time offset, here it states that after 1015 "words" (each 320 samples), a correction was needed with at most
  two samples, i.e. the next word should start 2 samples early
 
- * the number 0.986 tells that from the 1000 audio frames, 986 were correct
+ * the number 0.974 tells that from the last 1000 audio frames, 974
+cound be correctly trabnlated into sound
 
  * the labels time sync etc speak for themselves
 
@@ -160,18 +161,18 @@ The empty box then is available for text messages.
 Below this, there are 3 numbers, giving some information on the quality of
 the signal
 
- * the number 68.59 tells that the quality of the signal in which the FAC is encoded is very good (FAC data is encoded as QAM4);
+ * the number 32.2 tells that the quality of the signal in which the FAC is encoded is very good (FAC data is encoded as QAM4);
 
- * the number 17.52 tells that the quality of the signal in which the SDC is
+ * the number 12.72 tells that the quality of the signal in which the SDC is
 encoded is good (SDC data is encoded as QAM16);
 
- * the number 8.215 tells that the quality of the signal in which the audio data is encoded is fairly good (MSC data is encoded as QAM64);
+ * the number 4.375 tells that the quality of the signal in which the audio data is encoded is not very good (MSC data is encoded as QAM64);
 
 The scopes at the bottom give some visual information about the restored signal.
 The scope shows the correction that is to be applied to the incoming data
 in the frequency domain: the red line tells the correction to the amplitude,
 the blue line the correction to8 the phase. It shows that the signal here
-is fairly reasonable.
+is not all too best.
 
 The scope right gives the constellation of the restored signal. Ideally
 for QAM64, there are 64 dots evenly distributed over the screen.

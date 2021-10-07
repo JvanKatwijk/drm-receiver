@@ -228,13 +228,12 @@ ULONG APIkeyValue_length = 255;
 
         sdrplaySettings -> endGroup ();
 
-	filter_1	= new decimatingFIR (2 * 4 + 1,
-	                                     + outputRate / 2,
-	                                     inputRate,
-	                                     4);
-	filter_2	= new decimatingFIR (2 * 8 + 1,
-	                                     outputRate / 2,
-	                                     inputRate / 4, 8);
+	filter_1	= make_unique<decimatingFIR>(decimatingFIR (2 * 4 + 1,
+	                                             + outputRate / 2,
+	                                             inputRate, 4));
+	filter_2	= make_unique<decimatingFIR>(decimatingFIR (2 * 8 + 1,
+	                                             outputRate / 2,
+	                                             inputRate / 4, 8));
 	 
 	api_version	-> display (ver);
 	lastFrequency	= Khz (14070);
@@ -374,8 +373,6 @@ ULONG APIkeyValue_length = 255;
 	if (numofDevs > 0)
 	   my_mir_sdr_ReleaseDeviceIdx (deviceIndex);
 
-	delete filter_1;
-	delete filter_2;
 #ifdef __MINGW32__
         FreeLibrary (Handle);
 #else

@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of drm2
+ *    This file is part of drm-receiver
  *
- *    swradio-8 is free software; you can redistribute it and/or modify
+ *    drm-receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation version 2 of the License.
  *
- *    swradio-8 is distributed in the hope that it will be useful,
+ *    drm-receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with swradio-8 if not, write to the Free Software
+ *    along with drm-receiver, if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -142,13 +142,12 @@ int	i;
 	                setText (this -> hackrf_usb_board_id_name (board_id));
 	}
 
-	filter_1        = new decimatingFIR (2 * 4 + 1,
-                                             + outputRate / 2,
-                                             inputRate,
-                                             4);
-        filter_2        = new decimatingFIR (2 * 8 + 1,
-                                             outputRate / 2,
-                                             inputRate / 4, 8);
+	filter_1	= make_unique<decimatingFIR> (decimatingFIR (2 * 4 + 1,
+                                                     + outputRate / 2,
+                                                     inputRate, 4));
+        filter_2        = make_unique<decimatingFIR> (decimatingFIR (2 * 8 + 1,
+                                                      outputRate / 2,
+                                                      inputRate / 4, 8));
 	running. store (false);
 }
 
@@ -162,8 +161,6 @@ int	i;
 	hackrfSettings	-> endGroup ();
 	this	-> hackrf_close (theDevice);
 	this	-> hackrf_exit ();
-	delete	filter_1;
-	delete	filter_2;
 }
 //
 

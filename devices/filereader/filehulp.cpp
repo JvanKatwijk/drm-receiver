@@ -291,7 +291,7 @@ int64_t	nextStop;
 	      }
 	   }
 
-	   delete []	bi;
+//	   delete []	bi;
 	   src_delete (converter);
 	   delete src_data;
 	}

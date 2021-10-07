@@ -29,16 +29,16 @@
 
 	fileReader::fileReader	(RadioInterface *mr,
 	                         RingBuffer<std::complex<float>> *b,
-	                         QSettings *s) {
+	                         QSettings *s):
+	                           myFrame (nullptr) {
 	theRate		= 2000000 / 32;
-	this	-> myFrame	= new QFrame;
 	(void)s;
-	setupUi		(myFrame);
-	myFrame	-> show ();
+	setupUi		(&myFrame);
+	myFrame. show ();
 	myReader	= NULL;
 	QString	replayFile
 	              = QFileDialog::
-	                 getOpenFileName (myFrame,
+	                 getOpenFileName (nullptr,
 	                                  tr ("load file .."),
 	                                  QDir::homePath (),
 	                                  tr ("sound (*.wav)"));
@@ -62,8 +62,7 @@
 	if (myReader != NULL)
 	   delete myReader;
 	myReader	= NULL;
-	myFrame	-> hide ();
-	delete myFrame;
+	myFrame. hide ();
 }
 
 void	fileReader::handle_progressBar		(int f) {

@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the drm=rfeceiver
+ *    This file is part of the drm-receiver
  *
  *    drm-receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include	<QFrame>
 #include	<QSettings>
 #include	<atomic>
+#include	<utility>
 #include	"radio-constants.h"
 #include	"ringbuffer.h"
 #include	"fir-filters.h"
@@ -91,8 +92,8 @@ public:
         int32_t         inputRate;
         int32_t         outputRate;
         void            report_dataAvailable    ();
-        decimatingFIR   *filter_1;
-        decimatingFIR   *filter_2;
+        std::unique_ptr <decimatingFIR>   filter_1;
+        std::unique_ptr <decimatingFIR>   filter_2;
 	hackrf_device	*theDevice;
 private:
 	QFrame		myFrame;
