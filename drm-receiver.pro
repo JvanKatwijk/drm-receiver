@@ -227,7 +227,7 @@ isEmpty(GITHASHSTRING) {
 }
 
 DESTDIR		= ./linux-bin
-CONFIG		+= sdrplay
+CONFIG		+= sdrplay-v2
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
@@ -278,15 +278,25 @@ LIBS    += -lwinmm
 
 #       the SDRplay
 #
+sdrplay-v2 {
+        DEFINES         += HAVE_SDRPLAY
+        FORMS           += ./devices/sdrplay-handler-v2/sdrplay-widget.ui
+        DEPENDPATH      += ./devices/sdrplay-handler-v2
+        INCLUDEPATH     += ./devices/sdrplay-handler-v2
+        HEADERS         += ./devices/sdrplay-handler-v2/sdrplay-handler.h \
+                           ./devices/sdrplay-handler-v2/sdrplayselect.h
+        SOURCES         += ./devices/sdrplay-handler-v2/sdrplay-handler.cpp \
+                           ./devices/sdrplay-handler-v2/sdrplayselect.cpp
+}
+
 sdrplay {
         DEFINES         += HAVE_SDRPLAY
         FORMS           += ./devices/sdrplay-handler/sdrplay-widget.ui
         DEPENDPATH      += ./devices/sdrplay-handler
-        INCLUDEPATH     += ./devices/sdrplay-handler
-        HEADERS         += ./devices/sdrplay-handler/sdrplay-handler.h \
-                           ./devices/sdrplay-handler/sdrplayselect.h
-        SOURCES         += ./devices/sdrplay-handler/sdrplay-handler.cpp \
-                           ./devices/sdrplay-handler/sdrplayselect.cpp
+        INCLUDEPATH     += ./devices/sdrplay-handler \
+	                   ./devices/sdrplay-handler/includes
+        HEADERS         += ./devices/sdrplay-handler/sdrplay-handler.h 
+        SOURCES         += ./devices/sdrplay-handler/sdrplay-handler.cpp 
 }
 
 hackrf	{

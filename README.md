@@ -27,23 +27,27 @@ For DRM signals there are different Modes and Spectra, here is Western
 Europe transmissions can be received in Mode B, with a spectrum of 10 KHz.
 Other spectra are 4.5, 5, 9, 18 and 20 KHz.
 
-Different Modes have different measures against fading in the signal.
+Different Modes are defined such that they perform optimal with given fading patterns.
 
 Processing DRM requires sampling an analog input signal, usually with
 12000 (complex) samples per second. Each complex sample then tells
 aboaut the amplitude and the phase of the signal.
 
 The most common mode, mode B, is defined in terms of symbols or words,
-each of 320 samples. The first 64 samples of each word are a copy of the
-last 64 samples. This is very helpful in determining frequency
-offsets of the signal.
+each of 320 samples. The first 64 samples of each word, a prefix, are a copy of the
+last 64 samples. This is very helpful in determining the first sample of a word and
+computing the frequency offset of the signal.
 
-The 256 "useful" samples of a word are fed into an FFT processor, mapping
-the samples as they were in the time domain, to values in the frequency
-domain.
+The 256 "useful" samples of a word, i.e. the samples following the prefix,
+are fed into an FFT processor, mapping the samples as they were in the time domain,
+to values (carriers) in the frequency domain.
 
 These "words" with frequency domain values (carriers) are then the basis for
-further processing.
+further processing. As always, not all carriers carry useful information,
+for Mode B, 206 of the 256 carriers are the useful ones, the remaining ones, 25
+on each end of the spectrum, are (supposed to be) zeros.
+Given the bandwidth of 10 KHz, the frequency distance between successive carriers
+is then about 48 Hz.
 
 A group of these "words" forms a frame. For Mode B,
 a frame is built up from 15 such words.
@@ -84,15 +88,16 @@ Decoder issues
 A decoder gets as input a sample stream, in our case with a rate of 12000
 samples a second.
 Of course, the first question that needs to be solved is what mode
-and spectrum occupancy there are.
-The Mode can be determined by correlation, the length of the prefix,
+and spectrum occupancy the transmission has.
+
+The *Mode* can be determined by correlation, the length of the prefix,
 mentioned before, is different for each mode. Mode detection is simply by
 correlating the prefix with the supposed end of word. 
 In order to get a more reliable result, the process is done over a range
 of words, say 15 to 20. 
 
-Of course, by detecting the mode, the first sample of a word can be
-detected.
+Of course, by detecting the mode, the first sample of a word is
+detected simultaneously.
 A minor issue, though not unimportant is that there might be a clock offset
 in the decoder, compared to the clock in the transmitter.
 This might imply that after the transmitter has sent N * 320 samples, the
@@ -100,23 +105,27 @@ receiver may be one or two samples off.
 So, a continuous monitoring that the time synchonization is still OK is a
 must.
 
-The spectrum can be deduced from the words in the frequency domain, 
-after all, looking at the strength of the carriers in the FFT output,
+The width of the spectrum can be deduced from the words in the
+fft output.
+Looking at the strength of the carriers in the FFT output,
 and noticing a strength difference is the way to go.
+(Note that while the FFT was done over 256 elements (using mode B),
+the outermost elements have (should have) an almost zero amplitude,
+for mode B only the central 206 out of the 256 carriers contain
+useful information.)
 
-One of the issues with the spectrum is that a spectrum based on a
-frequency error may be worthless. If the frequency error is too large,
-the values in the spectrum are useless for further processing.
-
-Happily, some values in the spectrum are predefined in a way that the
-decoder can correct the frequency.
+Happily, some values at predefined locations in the spectrum
+have larger amplitudes and given phases.
+By comparing the spectrum as computed
+with the aspectrum as it should be, the
+decoder can detect the frequency offset,
 Furthermore, by comparing the phases of the values in the prefix
 and the corresponding values at theend of the time domain words.
 a more precise error can be computed and corrected.
 
-
-Of course, if the frequency error is too large, decoding is impossible,
-conversely, if decoding is possible, then obviously, the frequency correction
+Of course, if the frequency offset is larger than 48 Hz, the
+carriers in the spectrum contain the wrong values and decoding is impossible.
+Conversely, if decoding is possible, then obviously, the frequency correction
 is more or less OK.
 
 So, the decoder has to deal with
@@ -124,20 +133,30 @@ So, the decoder has to deal with
  * time synchronization to continuously detect the first sample of a word
 in the time domain;
 
- * the decoding of the FAC, since the FAC is encoded QAM4 it is easy is the frequency correction is OK;
+ * frequency synchronization, first of all to ensure that the frequency
+offset is less than (half of) the carrier distance (the "coarse" offset),
+secondly that small offsets within the carrier are also noted and dealt with.
 
- * the decoding of the SDC, slightly more complex that decoding the FAC;
+ * the decoding of the FAC, since the FAC is encoded QAM4 it is easy is the frequency correction is OK. Note that if time and or frequency correction are
+not done well, decoding of the FAC is impossible.
 
- * the decoding of the selected service in the MSC, usually AAC encoded audio.
+ * the decoding of the SDC, slightly more complex that decoding the FAC.
+In general, if FAC decoding is impossible, so is SDC decoding.
 
-The decoder contains labels to show the correctness of these decoding.
+ *  extracting the bits for the selected service, and decoding  these bits,
+usually AAC encoded audio.
+
+The decoder contains labels to show the correctness of the time, the FAC,
+the SDC and the AAC decoding.
 
 ![overview](/drm-decoder.png?raw=true)
 
 The picture of the decoder gives quite some information about the received
 and decoded signal.
 
- * at the top left, the measured frequency offset, two numbers, one for the so-called coarse offset, i.e. the number of carriers off (here -281 Hz), the second number telling the fine offset, i.e. the offset in the carrier (here -18 Hz)
+ * at the top left, the measured frequency offset, two numbers, one for the so-called coarse offset, i.e. the number of carriers off (here -281 Hz), the second number telling the fine offset, i.e. the offset in the carrier (here -18 Hz).
+Since the FAC decosing is possible, the coarse frequency offset is compnsated
+for, and the fine offset is sufficiently well handled.
 
  * the number 10:59 gives the time (UTC) derived from the transmission
 
@@ -149,22 +168,25 @@ and decoded signal.
  two samples, i.e. the next word should start 2 samples early
 
  * the number 0.974 tells that from the last 1000 audio frames, 974
-cound be correctly trabnlated into sound
+cound be correctly translated into sound
 
  * the labels time sync etc speak for themselves
 
 Below there is a row with 3, B, QAM64, AAC, which tells that the spectrum
 is of type 3 (which just means a 10 KHz spectrum), the mode is Mode B, the
-bits carrying the audio are encoded as QAM 64, and the audio is encoded as AAC.
+bits carrying the audio are encoded as QAM 64, and the audio itself is encoded as AAC.
 The empty box then is available for text messages.
 
 Below this, there are 3 numbers, giving some information on the quality of
 the signal
 
- * the number 32.2 tells that the quality of the signal in which the FAC is encoded is very good (FAC data is encoded as QAM4);
+ * the number 32.2 tells something about the quality of the signal elements
+in which the FAC is encoded. The spectrum cells assigned to FAC contain values
+encoded as QAM4, a value of 32 tells that the signal is reasonable.
 
- * the number 12.72 tells that the quality of the signal in which the SDC is
-encoded is good (SDC data is encoded as QAM16);
+ * the number 12.72 tells something about the quality of the signal elements
+in which the SDC is encoded. The spectrum cells assigned to SDC contain values
+encoded as QAM16, a values 12 tells that the signal is reasonable.
 
  * the number 4.375 tells that the quality of the signal in which the audio data is encoded is not very good (MSC data is encoded as QAM64);
 
@@ -183,14 +205,17 @@ for QAM64, there are 64 dots evenly distributed over the screen.
 
 A note on the implementation
 
-The implementation is derived from the implementation of the drm decoder
+The implementation is partially reimplenented from the implementation of the drm decoder
 at the sw radio. The software was restructured though and limited in functionality: this software is restricted to handling audio streams.
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-For windows an installer is available
-For Linux, one has to create an executable. Note that to keep things simple
+For Windows an installer is available, for Linux an AppImage.
+The AAC decoder for the Windows version is the fdk-aac library, for the Linux AppImage
+the faad_drm library is used.
+
+Of course, one may create an executable. Note that to keep things simple
 the only path is using qmake/make.
 
 By setting some parameters in the ".pro" file, one may choose between
@@ -198,4 +223,35 @@ aac decoding using the "faad_drm" library or the "fdk-aac" library.
 
 The latter has the (potential) advantage of being able to decode xHE-AAC
 as well
+
+-------------------------------------------------------------------------------
+Supported devices
+-------------------------------------------------------------------------------
+
+Since DRM is (mainly) transmitted on shortwave, there is support for
+devices with which shortwave reception is possible
+
+ * the SDRplay,  in the drm-receiver.pro file one may choose between using  the "old"
+2.13 interface library, or the 3.0X library;
+
+ * the Hackrf. 
+
+ * the DABsticks, for RT820 based sticcks with a driver that allows selecting frequencies
+as low as 13 MHz. Note that direct sampling gives real rather than complex samples and is not useable.
+
+-----------------------------------------------------------------------------------------
+Copyright
+----------------------------------------------------------------------------------------
+
+ Copyright
+
+        Copyright (C)  2019, 2020
+        Jan van Katwijk (J.vanKatwijk@gmail.com)
+        Lazy Chair Computing
+
+        The drm receiver software is made available under the GPL-2.0. and
+        is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
 
