@@ -14,6 +14,8 @@ Rumenia still has a regular DRM transmission.
 
 The drm receiver is an experimental tool, a heavily reduced swradio,
 with a single decoder, just for drm.
+Here, it shows with a slightly stretched main window, spectrum width is 62.500
+Hz.
 
 -----------------------------------------------------------------------
 A short note on DRM
@@ -31,14 +33,17 @@ Different Modes are defined such that they perform optimal with given fading pat
 
 Processing DRM requires sampling an analog input signal, usually with
 12000 (complex) samples per second. Each complex sample then tells
-aboaut the amplitude and the phase of the signal.
+about the amplitude and the phase of the signal at the sampling time.
 
-The most common mode, mode B, is defined in terms of symbols or words,
-each of 320 samples. The first 64 samples of each word, a prefix, are a copy of the
-last 64 samples. This is very helpful in determining the first sample of a word and
+Modes are defined in terms of symbols or words,
+The most common mode, mode B has words
+of 320 samples. For this mode, the first 64 samples of each word, a prefix, are a copy of the
+last 64 samples. With other modes, the prefix length may differ.
+Such a prefix, a copy of the last samples of the word, is very helpful in
+determining both the first sample of a word as well
 computing the frequency offset of the signal.
 
-The 256 "useful" samples of a word, i.e. the samples following the prefix,
+The 256 "useful" samples of the word, i.e. the samples following the prefix,
 are fed into an FFT processor, mapping the samples as they were in the time domain,
 to values (carriers) in the frequency domain.
 
@@ -52,15 +57,17 @@ is then about 48 Hz.
 A group of these "words" forms a frame. For Mode B,
 a frame is built up from 15 such words.
 Such as frame then has 3840 cells with complex
-values.
+values, with 3090 cells with useful values.
 Note that in the time domain  such a frame takes 4800 samples, and with
 a samplerate of 12000 samples a second, slightly less than 3 frames a second
 are input.
 
-In such a frame, predefined locations
-have predefined values. So, matching these predefined values
-with the values that are actually found help in reconstructing the signal
-as it was at the transmitter side.
+In the frequency domain frame, a number of predefined locations
+has predefined values. So, matching these predefined values
+with the values that are actually found are used to reconstruct the signal
+as it was at the transmitter side. The QAM4, QAM16 and QAM64 values require
+coherent decoding, i.e. the value should be as precise as possible the 
+value that was transmitted.
 
 Such a frame contains three types of values
 
@@ -85,22 +92,23 @@ of audio.
 Decoder issues
 -----------------------------------------------------------------------
 
-A decoder gets as input a sample stream, in our case with a rate of 12000
-samples a second.
+A decoder gets as input a sample stream, in our case the sample stream
+has a rate of 12000 samples a second.
 Of course, the first question that needs to be solved is what mode
-and spectrum occupancy the transmission has.
+and spectrum occupancy the transmission has and where do the "words" start.
 
 The *Mode* can be determined by correlation, the length of the prefix,
-mentioned before, is different for each mode. Mode detection is simply by
-correlating the prefix with the supposed end of word. 
+mentioned before, is different for each mode. Mode detection is then simply by
+correlating the prefix with the supposed end of word and finding the best
+match.
 In order to get a more reliable result, the process is done over a range
 of words, say 15 to 20. 
 
 Of course, by detecting the mode, the first sample of a word is
 detected simultaneously.
 A minor issue, though not unimportant is that there might be a clock offset
-in the decoder, compared to the clock in the transmitter.
-This might imply that after the transmitter has sent N * 320 samples, the
+in the decoder compared to the clock in the transmitter.
+This might imply that after the transmitter has sent a number samples, the
 receiver may be one or two samples off.
 So, a continuous monitoring that the time synchonization is still OK is a
 must.
