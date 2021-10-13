@@ -14,8 +14,9 @@ Rumenia still has a regular DRM transmission.
 
 The drm receiver is an experimental tool, a heavily reduced swradio,
 with a single decoder, just for drm.
-Here, it shows with a slightly stretched main window, spectrum width is 62.500
-Hz.
+Here, it shows a test with two occurrences running on the same
+frequency, just to test some loop antennas (ine running an RSP I,
+the other running an RSP II).
 
 -----------------------------------------------------------------------
 A short note on DRM
