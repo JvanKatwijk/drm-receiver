@@ -25,13 +25,14 @@
 #define	__AAC_PROCESSOR_FDK__
 
 #include	<QObject>
-#include	<fdk-aac/aacdecoder_lib.h>
+//#include	<fdk-aac/aacdecoder_lib.h>
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<cstring>
 #include	"radio-constants.h"
 #include	"up-filter.h"
 #include	"ringbuffer.h"
+#include	"aac-handler.h"
 
 class	drmDecoder;
 class	stateDescriptor;
@@ -47,6 +48,7 @@ Q_OBJECT
 public:
 		aacProcessor_fdk   (stateDescriptor *,
 	                            drmDecoder *,
+	                            aacHandler	*,
 	                            RingBuffer<std::complex<float>> *);
 	        ~aacProcessor_fdk  ();
 
@@ -60,6 +62,7 @@ private:
 	upFilter	upFilter_12000;
 	int16_t         numFrames;
 	int16_t         selectedAudioService;
+	aacHandler	*aacFunctions;
 
 	void		handle_uep_audio        (uint8_t *, int16_t,
 	                                 int16_t, int16_t, int16_t, int16_t);

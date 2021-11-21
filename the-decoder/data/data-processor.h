@@ -28,6 +28,7 @@
 #include	<cstring>
 #include	"ringbuffer.h"
 #ifdef  __WITH_FDK_AAC__
+#include	"aac-handler.h"
 #include        "aac-processor-fdk.h"
 #include        "xheaac-processor.h"
 #else
@@ -43,6 +44,9 @@ Q_OBJECT
 public:
 		dataProcessor	(stateDescriptor *,
 	                         drmDecoder *,
+#ifdef	__WITH_FDK_AAC__
+	                         aacHandler *,
+#endif
 	                         RingBuffer<std::complex<float>> *);
 		~dataProcessor	();
 	void	process		(uint8_t *, int16_t);

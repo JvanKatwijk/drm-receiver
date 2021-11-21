@@ -91,6 +91,7 @@ typedef mir_sdr_ErrT (*pfn_mir_sdr_RSPII_AntennaControl) (mir_sdr_RSPII_AntennaS
 typedef mir_sdr_ErrT (*pfn_mir_sdr_rspDuo_TunerSel) (mir_sdr_rspDuo_TunerSelT);
 typedef mir_sdr_ErrT (*pfn_mir_sdr_SetDeviceIdx) (unsigned int);
 typedef mir_sdr_ErrT (*pfn_mir_sdr_ReleaseDeviceIdx) (unsigned int);
+typedef mir_sdr_ErrT (*pfn_mir_sdr_AmPortSelect) (unsigned int);
 
 
 class	RadioInterface;
@@ -117,8 +118,10 @@ public:
 	uint32_t	inputRate;
 	int32_t		outputRate;
 	void		report_dataAvailable	(void);
-	std::unique_ptr<decimatingFIR>	filter_1;
-	std::unique_ptr<decimatingFIR>	filter_2;
+//	std::unique_ptr<decimatingFIR>	filter_1;
+//	std::unique_ptr<decimatingFIR>	filter_2;
+	decimatingFIR	*filter_1;
+	decimatingFIR	*filter_2;
 	int		denominator;
 private:
 	QFrame		myFrame;
@@ -151,6 +154,7 @@ private:
         pfn_mir_sdr_rspDuo_TunerSel my_mir_sdr_rspDuo_TunerSel;
 	pfn_mir_sdr_SetDeviceIdx my_mir_sdr_SetDeviceIdx;
 	pfn_mir_sdr_ReleaseDeviceIdx my_mir_sdr_ReleaseDeviceIdx;
+	pfn_mir_sdr_AmPortSelect my_mir_sdr_AmPortSelect;
 
 	QString		errorCodes      (mir_sdr_ErrT);
 	QSettings	*sdrplaySettings;

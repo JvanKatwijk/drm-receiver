@@ -44,7 +44,13 @@
 //	                                 localMixer (WORKING_RATE),
 	                                 my_Reader (&inputBuffer,
 	                                           2 * 16384, this),
+#ifdef	__WITH_FDK_AAC__
+	                                 aacFunctions (0),
+#endif
 	                                 my_backendController (this, 4,
+#ifdef	__WITH_FDK_AAC__
+	                                                       &aacFunctions,
+#endif
 	                                                       audioBuffer,
 	                                                       &iqBuffer),
 	                                theState (1, 3) {
@@ -199,7 +205,7 @@ float     sampleclockOffset       = 0;
 	      equalizer_1 my_Equalizer (this,
 	                                modeInf.Mode,
 	                                modeInf.Spectrum,
-	                                2,
+	                                1,
 	                                &eqBuffer);
 	      std::vector<std::complex<float>> displayVector;
 	      displayVector. resize (Kmax (modeInf. Mode, modeInf. Spectrum) -
@@ -258,11 +264,10 @@ float     sampleclockOffset       = 0;
 	      lc           = (lc + symbol_no) % symbol_no;
 	      symbol_no    = 0;
 	      frameReady   = false;
-
 	      while (running. load () && !frameReady) {
-		  my_wordCollector.getWord(inbank.element(lc),
+		  my_wordCollector.getWord (inbank.element(lc),
 				  modeInf.freqOffset_integer,
-				  false,        // no-op
+				  lc == 0,        // no-op
 				  modeInf.timeOffset_fractional,
 				  deltaFreqOffset,  // tracking value
 				  sampleclockOffset); // tracking value
@@ -337,7 +342,7 @@ float     sampleclockOffset       = 0;
 	            my_wordCollector.
 	               getWord (inbank. element ((lc + i) % nrSymbols),
 	                        modeInf. freqOffset_integer,	// initial value
-	                        firstTime,
+	                        (lc + i) % nrSymbols == 0,
 	                        modeInf. timeOffset_fractional,
 	                        deltaFreqOffset,	// tracking value
 	                        sampleclockOffset	// tracking value
@@ -653,6 +658,7 @@ void	drmDecoder::set_aacDataLabel	(const QString &s) {
 
 void	drmDecoder::set_channel_1	(const QString &s) {
 	channel_1	-> setText (s);
+	selectedService	-> setText (s);
 }
 
 void	drmDecoder::set_channel_2	(const QString &s) {

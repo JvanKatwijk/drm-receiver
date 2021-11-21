@@ -232,6 +232,8 @@ uint8_t	xxx			= 0;
 	xxx	|= theState -> streams [mscIndex]. SBR_flag << 5;
 	xxx	|= theState -> streams [mscIndex]. audioMode << 3;
 	xxx	|= theState -> streams [mscIndex]. audioSamplingRate;
+fprintf (stderr, "samplingrate %d\n", 
+	             theState -> streams [mscIndex]. audioSamplingRate);
 	audioDescriptor. push_back (xxx);
 
 	xxx	= theState -> streams [mscIndex]. textFlag << 7;
@@ -264,7 +266,7 @@ uint8_t	xxx			= 0;
 	     badFrames ++;
 	}
 
-	if (goodFrames + badFrames >= 200) {
+	if (goodFrames + badFrames >= 100) {
 	   float ratio = goodFrames * 100.0 / (goodFrames + badFrames);
 	   (void)ratio;
 //	   m_form -> set_channel_4 (std::to_string (ratio));

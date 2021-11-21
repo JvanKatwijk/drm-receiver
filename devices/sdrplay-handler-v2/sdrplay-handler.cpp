@@ -212,8 +212,6 @@ ULONG APIkeyValue_length = 255;
 	sdrplaySettings -> beginGroup ("sdrplaySettings");
 	GRdBSelector      -> setValue (
                     sdrplaySettings -> value ("sdrplay-ifgrdb", 40). toInt ());
-	lnaGainSetting          -> setValue (
-                   sdrplaySettings -> value ("sdrplay-lnastate", 0). toInt ());
 
         ppmControl      -> setValue (
                     sdrplaySettings -> value ("ppmOffset", 0). toInt ());
@@ -228,12 +226,18 @@ ULONG APIkeyValue_length = 255;
 
         sdrplaySettings -> endGroup ();
 
-	filter_1	= make_unique<decimatingFIR>(decimatingFIR (2 * 4 + 1,
-	                                             + outputRate / 2,
-	                                             inputRate, 4));
-	filter_2	= make_unique<decimatingFIR>(decimatingFIR (2 * 8 + 1,
-	                                             outputRate / 2,
-	                                             inputRate / 4, 8));
+//	filter_1	= make_unique<decimatingFIR>(decimatingFIR (2 * 4 + 1,
+//	                                             + outputRate / 2,
+//	                                             inputRate, 4));
+//	filter_2	= make_unique<decimatingFIR>(decimatingFIR (2 * 8 + 1,
+//	                                             outputRate / 2,
+//	                                             inputRate / 4, 8));
+	filter_1	= new decimatingFIR (2 * 4 + 1,
+	                                      + outputRate / 2,
+	                                      inputRate, 4);
+	filter_2	= new decimatingFIR (2 * 8 + 1,
+	                                     + outputRate / 2,
+	                                     inputRate / 4, 8);
 	 
 	api_version	-> display (ver);
 	lastFrequency	= Khz (14070);
@@ -278,6 +282,9 @@ ULONG APIkeyValue_length = 255;
 	else
 	   deviceIndex = 0;
 
+//	if (hwVersion == 2)
+//	   my_mir_sdr_AmPortSelect (1);
+
 	serialNumber -> setText (devDesc [deviceIndex]. SerNo);
 	hwVersion = devDesc [deviceIndex]. hwVer;
         fprintf (stderr, "hwVer = %d\n", hwVersion);
@@ -297,24 +304,28 @@ ULONG APIkeyValue_length = 255;
         switch (hwVersion) {
            case 1:              // old RSP
               lnaGainSetting    -> setRange (0, 3);
+	      lnaGainSetting	-> setValue (1);	// default
               deviceLabel       -> setText ("RSP-I");
 	      nrBits		= 12;
 	      denominator	= 2048;
               break;
            case 2:
               lnaGainSetting    -> setRange (0, 8);
+	      lnaGainSetting	-> setValue (3);	// default
               deviceLabel       -> setText ("RSP-II");
 	      nrBits		= 12;
 	      denominator	= 2048;
               antennaSelector -> show ();
-              err = my_mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_A);
-              if (err != mir_sdr_Success)
-                 fprintf (stderr, "error %d in setting antenna\n", err);
-              connect (antennaSelector, SIGNAL (activated (const QString &)),
-                       this, SLOT (set_antennaSelect (const QString &)));
+	      err = my_mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_A);
+	      if (err != mir_sdr_Success)
+	         fprintf (stderr, "error %d in setting antenna\n", err);
+	      connect (antennaSelector, SIGNAL (activated (const QString &)),
+	               this, SLOT (set_antennaSelect (const QString &)));
               break;
+
            case 3:
               lnaGainSetting    -> setRange (0, 8);
+	      lnaGainSetting	-> setValue (3);	// default
               deviceLabel       -> setText ("RSP-DUO");
 	      nrBits		= 14;
 	      denominator	= 8192;
@@ -327,12 +338,18 @@ ULONG APIkeyValue_length = 255;
               break;
            default:
               lnaGainSetting    -> setRange (0, 9);
+	      lnaGainSetting	-> setValue (3);	// default
               deviceLabel       -> setText ("RSP-1A");
 	      nrBits		= 14;
 	      denominator	= 8192;
               break;
         }
 
+	{  int lna =
+	         sdrplaySettings -> value ("sdrplay-lnastate", 0). toInt ();
+	   if ((lna >= 0) && (lna <= lnaGainSetting -> maximum ()))
+	      lnaGainSetting          -> setValue (lna);
+	}
 	lnaGRdBDisplay -> display (get_lnaGRdB (hwVersion,
 	                           lnaGainSetting -> value (),
 	                           bankFor_rsp (lastFrequency)));
@@ -364,7 +381,6 @@ ULONG APIkeyValue_length = 255;
                                             lnaGainSetting -> value ());
         sdrplaySettings -> setValue ("sdrplay-agcMode",
                                           agcControl -> isChecked () ? 1 : 0);
-
 	sdrplaySettings -> endGroup ();
 
 	if (!libraryLoaded)	// should not happen
@@ -373,11 +389,15 @@ ULONG APIkeyValue_length = 255;
 	if (numofDevs > 0)
 	   my_mir_sdr_ReleaseDeviceIdx (deviceIndex);
 
+//	delete filter_1;
+//	delete filter_2;
+	fprintf (stderr, "closing down the library\n");
 #ifdef __MINGW32__
         FreeLibrary (Handle);
 #else
         dlclose (Handle);
 #endif
+	fprintf (stderr, "aan het eind van sdrplay's kill\n");
 }
 
 static	inline
@@ -816,6 +836,13 @@ bool	sdrplayHandler::loadFunctions	(void) {
 	                GETPROCADDRESS (Handle, "mir_sdr_ReleaseDeviceIdx");
 	if (my_mir_sdr_ReleaseDeviceIdx == NULL) {
 	   fprintf (stderr, "Could not find mir_sdr_ReleaseDeviceIdx");
+	   return false;
+	}
+
+	my_mir_sdr_ReleaseDeviceIdx	= (pfn_mir_sdr_AmPortSelect)
+	                GETPROCADDRESS (Handle, "mir_sdr_AmPortSelect");
+	if (my_mir_sdr_AmPortSelect == NULL) {
+	   fprintf (stderr, "Could not find mir_sdr_AmPortSelect");
 	   return false;
 	}
 

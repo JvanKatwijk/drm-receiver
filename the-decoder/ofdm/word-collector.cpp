@@ -59,6 +59,7 @@
 		wordCollector::~wordCollector () {
 }
 
+static	int counter	= 0;
 static int amount	= 0;
 
 void	wordCollector::getWord (std::complex<float>	*out,
@@ -100,6 +101,8 @@ int	f	= buffer -> currentIndex;
 	}
 
 	amount	= 0;
+
+	counter	= 0;
 	fft_and_extract (&temp [Tg], out);
 }
 //
@@ -110,52 +113,63 @@ static int teller	= 0;
 void	wordCollector::getWord (std::complex<float>	*out,
 	                        int32_t		initialFreq,
 	                        bool		firstTime,
-	                        float	offsetFractional,
-	                        float	angle,
-	                        float	clockOffset) {
+	                        float		offsetFractional,
+	                        float		angle,
+	                        float		clockOffset) {
 std::complex<float>* temp =
 	(std::complex<float> *)alloca  (Ts * sizeof (std::complex<float>));
 int	f		= buffer -> currentIndex;
 
+float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
+	                                          offsetFractional;
 	buffer		-> waitfor (Ts + Ts / 2);
 	teller ++;
 	amount ++;
-	if (amount >= 5) {
-	   buffer		-> waitfor (18 * Ts + Ts);
-	   int intOffs	= get_intOffset (2 * Ts, 10, 10);
-	   int sub	= get_intOffset (6 * Ts, 10, 10);
-	   if (intOffs == sub)  {
+//	if (amount >= 5) {
+	if (firstTime && amount > 100) {
+	   buffer	-> waitfor (40 * Ts + Ts);
+	   int intOffs	= get_intOffset (0 * Ts, 30, 10);
+	   int sub	= get_intOffset (4 * Ts, 30, 10);
+	   int sub_2	= get_intOffset (8 * Ts, 30, 10);
+
+	   if ((intOffs == sub) && (sub == sub_2) && (sub != 0))  {
 	      if (intOffs < -1) {
 	         std::string str = std::to_string (teller);
 			 str = str + "  " + std::to_string(intOffs);
 	         set_channel_3 (QString::fromStdString (str));
+	         amount = 0;
 	         teller = 0;
-//	         fprintf (stderr, "offset %d\n", intOffs);
-	         f --;
+	         f += -1;
+	         counter --;
+	         fprintf (stderr, "counter %d\n", counter);
 	      }
+
 	      if (intOffs > 1 ) {
 	         std::string str = std::to_string(teller);
 	         str = str + "  " + std::to_string(intOffs);
 	         set_channel_3 (QString::fromStdString (str));
+	         amount = 0;
 	         teller = 0;
-//	         fprintf (stderr, "offset %d\n", intOffs);
-	         f ++;
+	         f +=  1;
+	         counter ++;
+	         fprintf (stderr, "counter %d\n", counter);
 	      }
-	      amount = 0;
 	   }
-	   else
-	      amount--;
+	   amount -= 10;
 	}
+
+	int realS = offsetFractional < 0 ? f - 1 : f;
+//	int realS = f;
 
 	for (int i = 0; i < Ts; i ++) {
 	   std::complex<float> one =
-	              buffer -> data [(f + i) % buffer ->  bufSize];
+	              buffer -> data [(realS + i) % buffer ->  bufSize];
 	   std::complex<float> two =
-	              buffer -> data [(f + i + 1) % buffer -> bufSize];
-//	   temp [i] = cmul (one, 1 - offsetFractional) +
-//	                       cmul (two, offsetFractional);
-	   temp [i] = one;
+	              buffer -> data [(realS + i + 1) % buffer -> bufSize];
+	   temp [i] = cmul (one , 1 - actOffset) + cmul (two, actOffset);
+//	   temp [i] = one;
 	}
+
 //	And we adjust the bufferpointer here
 	buffer -> currentIndex = (f + Ts) & buffer -> bufMask;
 //

@@ -32,6 +32,9 @@
 #include	"ringbuffer.h"
 #include	"data-processor.h"
 
+#ifdef	__WITH_FDK_AAC__
+#include	"aac-handler.h"
+#endif
 class	drmDecoder;
 class	stateDescriptor;
 class	deInterleaver;
@@ -44,6 +47,9 @@ public:
 		mscProcessor		(stateDescriptor *,
 	                                 drmDecoder *,
 	                                 int8_t,
+#ifdef	__WITH_FDK_AAC__
+	                                 aacHandler *,
+#endif
 	                                 RingBuffer<std::complex<float>> *);
 		~mscProcessor		();
 	void	addtoMux		(int16_t, int32_t, theSignal);

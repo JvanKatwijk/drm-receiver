@@ -32,10 +32,16 @@
 	backendController::
 	           backendController	(drmDecoder	*m_form,
 	                                 int8_t		qam64Roulette,
+#ifdef	__WITH_FDK_AAC__
+	                                 aacHandler	*aacFunctions,
+#endif
 	                                 RingBuffer<std::complex<float>> *b,
 	                                 RingBuffer<std::complex<float>> *iq) {
 	this	-> m_form		= m_form;
 	this	-> qam64Roulette	= qam64Roulette;
+#ifdef	__WITH_FDK_AAC__
+	this	-> aacFunctions		= aacFunctions;
+#endif
 	this	-> audioBuffer		= b;
 	this	-> iqBuffer		= iq;
 
@@ -55,18 +61,29 @@
 	if (theWorker != nullptr)
 	   delete theWorker;
 }
+
 //
 //	Reset is called whenever we have the start of a new stream of
 //	superframe data
 void	backendController::reset	(stateDescriptor *theState) {
 	if (theWorker != nullptr)
 	   delete theWorker;
-	theWorker	= new mscProcessor (theState, m_form, 4, audioBuffer);
+#ifdef  __WITH_FDK_AAC__
+	theWorker = new mscProcessor (theState, m_form, 4,
+                                                 aacFunctions, audioBuffer);
+#else
+	theWorker = new mscProcessor (theState, m_form, 4, audioBuffer);
+#endif
 }
 
 void	backendController::newFrame	(stateDescriptor *theState) {
 	if (theWorker == nullptr) 
+#ifdef	__WITH_FDK_AAC__
+	   theWorker = new mscProcessor (theState, m_form, 4,
+	                                           aacFunctions, audioBuffer);
+#else
 	   theWorker = new mscProcessor (theState, m_form, 6, audioBuffer);
+#endif
 	theWorker	-> newFrame (theState);
 }
 

@@ -32,13 +32,20 @@
 
 	dataProcessor::dataProcessor	(stateDescriptor *theState,
 	                                 drmDecoder *m_form,
+#ifdef	__WITH_FDK_AAC__
+	                                 aacHandler	*aacFunctions,
+#endif
 	                                 RingBuffer<std::complex<float>> *b):
 	                                      my_messageProcessor (m_form),
 #ifdef	__WITH_FDK_AAC__
 	                                      my_aacProcessor (theState,
-	                                                       m_form, b),
+	                                                       m_form,
+	                                                       aacFunctions,
+	                                                       b),
 	                                      my_xheaacProcessor (theState,
-	                                                          m_form, b)
+	                                                          m_form,
+	                                                          aacFunctions,
+	                                                          b)
 #else
 	                                      my_aacProcessor (theState,
 	                                                       m_form, b)

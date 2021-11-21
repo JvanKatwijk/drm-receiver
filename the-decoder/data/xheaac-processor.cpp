@@ -51,6 +51,7 @@ uint16_t        res     = 0;
 
 	xheaacProcessor::xheaacProcessor (stateDescriptor *theState,
 	                                  drmDecoder *drm,
+	                                  aacHandler	*aacFunctions,
 	                                  RingBuffer<std::complex<float>> *b):
 	                                    theCRC (8, crcPolynome),
 	                                    upFilter_24000 (5, 24000, 48000),
@@ -58,8 +59,9 @@ uint16_t        res     = 0;
 
 	this	-> theState	= theState;
 	this	-> parent	= drm;
+	this	-> aacFunctions	= aacFunctions;
 	this	-> audioOut	= b;
-	this	-> handle	= aacDecoder_Open (TT_DRM, 3);
+	this	-> handle	= aacFunctions -> aacDecoder_Open (TT_DRM, 3);
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (set_faadSyncLabel (bool)));
 	connect (this, SIGNAL (audioAvailable ()),
@@ -72,7 +74,7 @@ uint16_t        res     = 0;
 
 	xheaacProcessor::~xheaacProcessor	() {
 	if (handle == nullptr)
-	   aacDecoder_Close (handle);
+	   aacFunctions -> aacDecoder_Close (handle);
 }
 //
 //	actually, we know that lengthHigh == 0, and therefore
@@ -300,9 +302,11 @@ void	xheaacProcessor::init	() {
 	UCHAR *codecP		= &currentConfig [0];
 	uint32_t codecSize	= currentConfig. size ();
 	AAC_DECODER_ERROR err =
-	              aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
+	           aacFunctions -> aacDecoder_ConfigRaw (handle,
+	                                                 &codecP, &codecSize);
 	if (err == AAC_DEC_OK) {
-	   CStreamInfo *pInfo = aacDecoder_GetStreamInfo (handle);
+	   CStreamInfo *pInfo =
+	              aacFunctions -> aacDecoder_GetStreamInfo (handle);
 	   if (pInfo == nullptr) {
 	      fprintf (stderr, "No stream info\n");
 	   }
@@ -326,12 +330,14 @@ uint32_t	bytesValid	= 0;
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
 	errorStatus =
-	     aacDecoder_Fill (handle, &bb, &frameSize, &bytesValid);
+	     aacFunctions -> aacDecoder_Fill (handle, &bb,
+	                                          &frameSize, &bytesValid);
 
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
 	errorStatus =
-	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, 0);
+	     aacFunctions -> aacDecoder_DecodeFrame (handle,
+	                                             localBuffer, 16 * 980, 0);
 #if 0
 	fprintf (stderr, "fdk-aac errorstatus %x\n",
 	                       errorStatus);
@@ -347,7 +353,8 @@ uint32_t	bytesValid	= 0;
 	   return;
 	}
 
-	CStreamInfo *fdk_info = aacDecoder_GetStreamInfo (handle);
+	CStreamInfo *fdk_info =
+	                aacFunctions -> aacDecoder_GetStreamInfo (handle);
 	if (fdk_info -> numChannels == 1) {
 	   for (int i = 0; i < fdk_info -> frameSize; i ++) {
 	      buffer [2 * i] 	= localBuffer [i];

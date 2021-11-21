@@ -20,7 +20,10 @@
 #include	"state-descriptor.h"
 #include	"drm-shifter.h"
 #include	"my-array.h"
-
+//	for the fdk-aac functionw we have
+#ifdef	__WITH_FDK_AAC__
+#include	"aac-handler.h"
+#endif
 class	EQDisplay;
 class	IQDisplay;
 #include	"ui_drmdecoder.h"
@@ -55,6 +58,9 @@ private:
 	decimator_25	        theDecimator;
 //	drmShifter	        localMixer;
 	Reader			my_Reader;   // single instance during life
+#ifdef	__WITH_FDK_AAC__
+	aacHandler		aacFunctions;
+#endif
 	backendController	my_backendController;
 	stateDescriptor		theState;
 

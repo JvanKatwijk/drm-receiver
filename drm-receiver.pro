@@ -5,9 +5,9 @@ TEMPLATE = app
 QT	+= widgets xml
 CONFIG	-= console
 TARGET	= drm-receiver
-QMAKE_CFLAGS	+= -flto -ffast-math 
-QMAKE_CXXFLAGS	+= -flto -ffast-math 
-QMAKE_LFLAGS	+= -flto
+#QMAKE_CFLAGS	+= -flto -ffast-math 
+#QMAKE_CXXFLAGS	+= -flto -ffast-math 
+#QMAKE_LFLAGS	+= -flto
 QMAKE_CFLAGS	+= -g
 QMAKE_CXXFLAGS	+= -g
 QMAKE_LFLAGS	+= -g
@@ -227,7 +227,7 @@ isEmpty(GITHASHSTRING) {
 }
 
 DESTDIR		= ./linux-bin
-CONFIG		+= sdrplay-v2
+CONFIG		+= sdrplay
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
@@ -350,17 +350,19 @@ extio	{
 fdk-aac	{
 DEFINES		+= __WITH_FDK_AAC__
 unix {
-LIBS		+= -lfdk-aac
+#LIBS		+= -lfdk-aac
 }
 win32 {
-LIBS		+= -lfdk-aac-2
+#LIBS		+= -lfdk-aac-2
 }
 #LIBS		+= -lfdk-aac -larmadillo
 INCLUDEPATH	+= /usr/local/include/fdk-aac
 HEADERS		+= ./the-decoder/data/aac-processor-fdk.h \
-	           ./the-decoder/data/xheaac-processor.h 
+	           ./the-decoder/data/xheaac-processor.h \
+	           ./the-decoder/aac-handler.h
 SOURCES		+= ./the-decoder/data/aac-processor-fdk.cpp \
-	           ./the-decoder/data/xheaac-processor.cpp 
+	           ./the-decoder/data/xheaac-processor.cpp  \
+	           ./the-decoder/aac-handler.cpp
 }
 
 faad	{

@@ -39,9 +39,17 @@
 	mscProcessor::mscProcessor	(stateDescriptor *theState,
 		                         drmDecoder	*m_form,
 	                                 int8_t		qam64Roulette,
-	                                 RingBuffer<std::complex<float>> *b):
+#ifdef	__WITH_FDK_AAC__
+	                                 aacHandler *aacFunctions,
+#endif
+	                                 RingBuffer<std::complex<float>> *b
+	                                 ):
 	                                    my_dataProcessor (theState, 
-	                                                      m_form, b) {
+	                                                      m_form,
+#ifdef	__WITH_FDK_AAC__
+	                                                      aacFunctions,
+#endif
+	                                                      b) {
 	this	-> theState	= theState;
 	this	-> qam64Roulette	= qam64Roulette;
 	this	-> audioBuffer	= b;

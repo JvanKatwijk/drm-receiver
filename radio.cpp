@@ -190,6 +190,7 @@ void	RadioInterface::handle_quitButton	(void) {
 	   delete  theDevice;
 	}
 	sleep (1);
+	fprintf (stderr, "device is deleted\n");
 	myList          -> saveTable ();
 	myList		-> hide ();
 
