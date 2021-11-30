@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=drm-receiver
+Exec=drm-receiver
+Icon=drm
+Type=Application
+Categories=AudioVideo;
+Comment=A DRM decoder using Qt and C++

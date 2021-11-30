@@ -142,12 +142,12 @@ int	i;
 	                setText (this -> hackrf_usb_board_id_name (board_id));
 	}
 
-	filter_1	= make_unique<decimatingFIR> (decimatingFIR (2 * 4 + 1,
+	filter_1	= new decimatingFIR (2 * 4 + 1,
                                                      + outputRate / 2,
-                                                     inputRate, 4));
-        filter_2        = make_unique<decimatingFIR> (decimatingFIR (2 * 8 + 1,
+                                                     inputRate, 4);
+        filter_2	= new decimatingFIR (2 * 8 + 1,
                                                       outputRate / 2,
-                                                      inputRate / 4, 8));
+                                                      inputRate / 4, 8);
 	running. store (false);
 }
 
@@ -161,6 +161,8 @@ int	i;
 	hackrfSettings	-> endGroup ();
 	this	-> hackrf_close (theDevice);
 	this	-> hackrf_exit ();
+	delete	filter_1;
+	delete	filter_2;
 }
 //
 

@@ -126,12 +126,12 @@ int16_t	bankFor_rsp (int32_t freq) {
 
 	int inputRate	= 2000000;
 	int outputRate	= 2000000 / 32;
-	filter_1        = make_unique<decimatingFIR>(decimatingFIR (2 * 4 + 1,
+	filter_1	= new decimatingFIR (2 * 4 + 1,
                                                      + outputRate / 2,
-                                                     inputRate, 4));
-        filter_2        = make_unique<decimatingFIR>(decimatingFIR (2 * 8 + 1,
+                                                     inputRate, 4);
+        filter_2	= new decimatingFIR (2 * 8 + 1,
                                                      outputRate / 2,
-                                                     inputRate / 4, 8));
+                                                     inputRate / 4, 8);
 
 
 	if (agcMode) {
@@ -185,6 +185,8 @@ int16_t	bankFor_rsp (int32_t freq) {
 	                                  agcControl -> isChecked() ? 1 : 0);
 	sdrplaySettings	-> endGroup ();
 	sdrplaySettings	-> sync();
+	delete	filter_1;
+	delete	filter_2;
 }
 
 /////////////////////////////////////////////////////////////////////////

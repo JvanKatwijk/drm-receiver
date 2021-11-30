@@ -92,8 +92,8 @@ public:
         int32_t         inputRate;
         int32_t         outputRate;
         void            report_dataAvailable    ();
-        std::unique_ptr <decimatingFIR>   filter_1;
-        std::unique_ptr <decimatingFIR>   filter_2;
+        decimatingFIR	* filter_1;
+        decimatingFIR	* filter_2;
 	hackrf_device	*theDevice;
 private:
 	QFrame		myFrame;

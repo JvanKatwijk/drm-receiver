@@ -68,8 +68,8 @@ public:
 	int		theGain;
 	void		report_dataAvailable	();
 	float			denominator;
-	std::unique_ptr<decimatingFIR>  filter_1;
-        std::unique_ptr<decimatingFIR>  filter_2;
+	decimatingFIR	* filter_1;
+        decimatingFIR	* filter_2;
 
 private:
 	QFrame				myFrame;

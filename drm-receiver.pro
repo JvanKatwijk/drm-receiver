@@ -5,6 +5,7 @@ TEMPLATE = app
 QT	+= widgets xml
 CONFIG	-= console
 TARGET	= drm-receiver
+QMAKE_CXXFLAGS	+= -std=c++14 
 #QMAKE_CFLAGS	+= -flto -ffast-math 
 #QMAKE_CXXFLAGS	+= -flto -ffast-math 
 #QMAKE_LFLAGS	+= -flto
