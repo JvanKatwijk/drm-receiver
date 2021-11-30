@@ -53,7 +53,7 @@ further processing. As always, not all carriers carry useful information,
 for Mode B, 206 of the 256 carriers are the useful ones, the remaining ones, 25
 on each end of the spectrum, are (supposed to be) zeros.
 Given the bandwidth of 10 KHz, the frequency distance between successive carriers
-is then about 48 Hz.
+is then about 46 Hz.
 
 A group of these "words" forms a frame. For Mode B,
 a frame is built up from 15 such words.

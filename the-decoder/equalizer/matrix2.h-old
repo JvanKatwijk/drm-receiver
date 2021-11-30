@@ -14,23 +14,22 @@
    Numerical Recipes in C
    Chapter 2
 */
-#ifndef	__MATRIX_INVERSION_C
-#define	__MATRIX_INVERSION_C
+#ifndef	__MATRIX_INVERSION
+#define	__MATRIX_INVERSION
 
+#include	"basics.h"
 #include	<stdio.h>
 #include	<stdlib.h>
-#include	<complex>
 #include	<math.h>
+
 #define   TINY 1.0e-20
 
-void	inverse		(float**,int);
-int	gjinv		(float **aa, int n, float **bb);
-void	inverseOfMatrix (double** M, int order);
-void    multMC          (std::complex<double> **Left,
-                         std::complex<double> **Right,
-                         std::complex<double> ** Out, int order);
-
-void    C_inverse       (std::complex<double> **M, int order);
-
+void	inverse	(float**,int);
+void	ludcmp	(float**, int, int*, float*);
+void	lubksb	(float**, int, int*, float*);
+float**	matrix	(int,int,int,int);
+float*	vector	(int,int);
+void	free_matrix(float**,int,int,int,int);
+void	free_vector(float*,int,int);
 #endif
 

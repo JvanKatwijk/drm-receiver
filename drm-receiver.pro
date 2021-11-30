@@ -112,7 +112,8 @@ HEADERS += ./radio-constants.h \
 	   ./the-decoder/ofdm/word-collector.h \
 	   ./the-decoder/equalizer/equalizer-1.h \
 	   ./the-decoder/equalizer/equalizer-base.h \
-	   ./the-decoder/equalizer/estimator-1.h \
+	   ./the-decoder/equalizer/estimator-2.h \
+#	   ./the-decoder/equalizer/estimator-1.h \
 	   ./the-decoder/equalizer/matrix2.h \
 	   ./the-decoder/equalizer/referenceframe.h \
 	   ./the-decoder/parameters/msc-config.h \
@@ -193,7 +194,8 @@ SOURCES += ./main.cpp \
 	   ./the-decoder/ofdm/word-collector.cpp \
 	   ./the-decoder/equalizer/equalizer-1.cpp \
 	   ./the-decoder/equalizer/equalizer-base.cpp \
-	   ./the-decoder/equalizer/estimator-1.cpp \
+	   ./the-decoder/equalizer/estimator-2.cpp \
+#	   ./the-decoder/equalizer/estimator-1.cpp \
 	   ./the-decoder/equalizer/matrix2.cpp \
 	   ./the-decoder/equalizer/referenceframe.cpp \
 	   ./the-decoder/parameters/msc-config.cpp \
@@ -239,7 +241,9 @@ LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 LIBS            += -lfaad_drm
 INCLUDEPATH	+= /usr/include/qt5/qwt
+#INCLUDEPATH	+= /usr/include/eigen3
 LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
+#LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -larmadillo -ldl
 }
 
 win32 {

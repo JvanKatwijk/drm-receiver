@@ -125,12 +125,12 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	buffer		-> waitfor (Ts + Ts / 2);
 	teller ++;
 	amount ++;
-//	if (amount >= 5) {
-	if (firstTime && amount > 100) {
-	   buffer	-> waitfor (40 * Ts + Ts);
-	   int intOffs	= get_intOffset (0 * Ts, 30, 10);
-	   int sub	= get_intOffset (4 * Ts, 30, 10);
-	   int sub_2	= get_intOffset (8 * Ts, 30, 10);
+//      if (amount >= 5) {
+        if (firstTime && amount > 100) {
+	   buffer	-> waitfor (30 * Ts + Ts);
+	   int intOffs	= get_intOffset (0 * Ts, 20, 10);
+	   int sub	= get_intOffset (4 * Ts, 20, 10);
+	   int sub_2	= get_intOffset (8 * Ts, 20, 10);
 
 	   if ((intOffs == sub) && (sub == sub_2) && (sub != 0))  {
 	      if (intOffs < -1) {
@@ -143,7 +143,7 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	         counter --;
 	         fprintf (stderr, "counter %d\n", counter);
 	      }
-
+	      else
 	      if (intOffs > 1 ) {
 	         std::string str = std::to_string(teller);
 	         str = str + "  " + std::to_string(intOffs);
@@ -218,37 +218,10 @@ void	wordCollector::fft_and_extract (std::complex<float> *in,
 	           &in [K_min],
 	           (K_max - K_min + 1) * sizeof (std::complex<float>));
 }
-
-float	wordCollector::get_timeOffset	(int nSymbols,
-	                                 int range, int *offs) {
-int	*b = (int *)alloca (nSymbols * sizeof (int));
-
-	buffer -> waitfor (2 * nSymbols * Ts + Ts);
-	*offs	= get_intOffset (0, nSymbols, range);
-	for (int i = 0; i < nSymbols; i ++)
-	   b [i] = get_intOffset (i * Ts, nSymbols, range);
-
-	float   sumx    = 0.0;
-        float   sumy    = 0.0;
-        float   sumxx   = 0.0;
-        float   sumxy   = 0.0;
-
-        for (int i = 0; i < nSymbols; i++) {
-           sumx += (float) i;
-           sumy += (float) b [i];
-           sumxx += (float) i * (float) i;
-           sumxy += (float) i * (float) b [i];
-        }
-
-        float boffs;
-        boffs = (float) ((sumy * sumxx - sumx * sumxy) /
-                         ((nSymbols - 1) * sumxx - sumx * sumx));
-
-	return boffs;
-}
-
+//
 int	wordCollector::get_intOffset	(int base,
-	                                 int nSymbols, int range) {
+	                                 int nSymbols,
+	                                 int range) {
 int	bestIndex = -1;
 double	min_mmse = 10E20;
 
@@ -264,7 +237,8 @@ double	min_mmse = 10E20;
 	return bestIndex;
 }
 
-double	wordCollector::compute_mmse (int starter, int nSymbols) {
+double	wordCollector::compute_mmse (int starter,
+	                             int nSymbols) {
 std::complex<float> gamma = std::complex<float> (0, 0);
 double	squares = 0;
 int32_t		bufMask	= buffer -> bufSize - 1;

@@ -53,7 +53,7 @@
 #include	"referenceframe.h"
 #include	"basics.h"
 #include	"equalizer-1.h"
-#include	"estimator-1.h"
+#include	"estimator-2.h"
 #include	"matrix2.h"
 #include	"drm-decoder.h"
 
@@ -79,6 +79,7 @@ int16_t	i, window;
 float	sigmaq_noise_list [] = {16.0, 14.0, 14.0, 12.0};
 float	sigmaq_noise	= pow (10.0, - sigmaq_noise_list [Mode - Mode_A] / 10.0);
 float	**PHI;
+float	**PHI_2;
 float	*THETA;
 
 	this	-> eqBuffer	= b;
@@ -169,9 +170,11 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 	      W_symbol_blk [window][i] = new double [trainers_in_window];
 
 	   PHI		= new float *[trainers_in_window];
+	   PHI_2	= new float *[trainers_in_window];
 	   int cc;
 	   for (cc = 0; cc < trainers_in_window; cc ++) {
 	      PHI [cc] = new float [trainers_in_window];
+	      PHI_2 [cc] = new float [trainers_in_window];
 	   }
 	   THETA	= new float [trainers_in_window];
 //
@@ -188,7 +191,7 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
                    trainer_2 < trainers_in_window; trainer_2 ++) {
 	         int16_t sym_2	= currentTrainers [trainer_2]. symbol;
 	         int16_t car_2	= currentTrainers [trainer_2]. carrier;
-	         PHI [trainer_1][trainer_2] = sinc ((car_1 - car_2) * f_cut_k)
+	         PHI_2 [trainer_1][trainer_2] = sinc ((car_1 - car_2) * f_cut_k)
 	                                    * sinc ((sym_1 - sym_2) * f_cut_t);
               }
 	   }	// end of trainer_1 loop
@@ -200,10 +203,11 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 	      std::complex<float> v = getPilotValue (Mode, Spectrum,
 	                                             sym + window, car);
 	      float amp = real (v * conj (v));
-	      PHI [trainer_1][trainer_1] += sigmaq_noise * 2.0 / amp;
+	      PHI_2 [trainer_1][trainer_1] += sigmaq_noise * 2.0 / amp;
 	   }
 //
-	   inverse (PHI, trainers_in_window);
+//	   inverse (PHI, trainers_in_window);
+	   gjinv (PHI_2, trainers_in_window, PHI);
 //
 //	Note that from now on, PHI is actually PHI_INV. A "local"
 //	implementation of inverse is used to avoid linking libraries
@@ -235,18 +239,20 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //
 //	   done with the THETA and the PHI
 	   delete [] THETA;
-	   for (i = 0; i < trainers_in_window; i ++) 
+	   for (i = 0; i < trainers_in_window; i ++)  {
 	      delete [] PHI [i];
-
+	      delete [] PHI_2 [i];
+	   }
 	   delete [] PHI;
+	   delete [] PHI_2;
 	}
 //
 //	The W_symbol_blk filters are ready now
 //
 //	and finally, the estimators
-	Estimators	= new estimator_1 *[symbolsinFrame];
+	Estimators	= new estimator_2 *[symbolsinFrame];
 	for (i = 0; i < symbolsinFrame; i ++)
-	   Estimators [i] = new estimator_1 (refFrame, Mode, Spectrum, i);
+	   Estimators [i] = new estimator_2 (refFrame, Mode, Spectrum, i);
 }
 
 		equalizer_1::~equalizer_1 (void) {

@@ -75,8 +75,10 @@ private:
 	int16_t		K_min;
 	int16_t		K_max;
 	int16_t		displayCount;
-	float		get_timeOffset		(int, int, int *);
-	int		get_intOffset		(int base, int nrSymbols, int range);
+//	float		get_timeOffset		(int, int, int *);
+	int		get_intOffset		(int base,
+	                                         int nrSymbols,
+	                                         int range);
 	double		compute_mmse		(int, int);
 signals:
 	void		show_fineOffset		(float);
