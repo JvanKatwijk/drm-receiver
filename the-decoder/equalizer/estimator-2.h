@@ -20,12 +20,14 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__ESTIMATOR_2__
-#define	__ESTIMATOR_2__
+#ifndef	__ESTIMATOR_4__
+#define	__ESTIMATOR_4__
 
+#include	<Eigen/Dense>
 #include	<QString>
 #include	"radio-constants.h"
 #
+using namespace	Eigen;
 
 //	The processor for estimating the channel(s) of a single
 //	symbol
@@ -50,23 +52,12 @@ private:
 	int16_t		numberofTaps;
 	int16_t		currentSymbol;
 	int16_t		fftSize;
-	std::complex<double>	**F_p;
-	std::complex<double>	**A_p_inv;
+	typedef Matrix<std::complex<float>, Dynamic, Dynamic> MatrixXd;
+	typedef Matrix<std::complex<float>, Dynamic, 1> Vector;
+	MatrixXd	F_p;
+	MatrixXd	S_p;
+	MatrixXd	S_pxF_p;
 	std::complex<float>	*pilotVector;
-
-	std::complex<double>	**createMatrix (int, int);
-	void		deleteMatrix (std::complex<double> **, int, int);
-	void		multiply_d (std::complex<double> **, int, int,
-	                            std::complex<double> **, int, int,
-	                            std::complex<double> **);
-	void		transpose (std::complex<double> **, int, int,
-	                           std::complex<double> **);
-	void		multiply_e (std::complex<double> **, int, int,
-	                            std::complex<double> **, int, int,
-	                            std::complex<double> **);
-	void		multiply_f (std::complex<double> **, int, int,
-	                            std::complex<double> **, int, int,
-	                            std::complex<double> **);
 	int16_t		*pilotTable;
 };
 

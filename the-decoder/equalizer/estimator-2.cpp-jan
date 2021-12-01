@@ -94,7 +94,22 @@ std::complex<double> ** A_p;
 //	pilots, their carrier values (relative to 0) are relevant
 //	Basically the FFT transformer, with positions related to
 //	the positions of the taps
-
+//
+//	The approach for channel estimation is as follows:
+//	we call the channel in the time domain h_td,
+//	in the frequency domain that will then be f = F x h_td
+// 	we observe the values of the pilots at the recoever
+// 	side, X_p, It is known that they were transmittes as s_p
+// 	We know then that
+//	X_p = diag (s_p) * f, where f = F_p * h_td
+//	so, X_p = S_p * F_p * h_td
+//	with S_p is diag (s_p), and F_p is the FFT transform of the channel
+//	S_p en F_p can be computed, since they are known, regardless
+//	A_p = S_p * F_p
+//	the equation then is X_p = A_p * h_td
+//	we solve that as h_td = A_p ^ -1 x X_p
+//	recall that h_td is the chaannel in the time domain, so
+//	h_fd = F_p * h_td is the solution
 	for (pilotIndex = 0; pilotIndex < numberofPilots; pilotIndex ++) 
 	   for (tap = 0; tap < numberofTaps; tap ++) 
 	      F_p [pilotIndex][tap] = 

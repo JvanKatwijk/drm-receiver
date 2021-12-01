@@ -28,6 +28,11 @@
 #include	<stdint.h>
 #include	<complex>
 
+
+#ifndef M_PI
+# define M_PI           3.14159265358979323846  /* pi */
+#endif
+
 bool		isTimeCell	(uint8_t, int16_t, int16_t);
 bool		isPilotCell	(uint8_t, int16_t, int16_t);
 bool		isBoostCell	(uint8_t, uint8_t, int16_t);

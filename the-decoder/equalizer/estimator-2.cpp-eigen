@@ -91,8 +91,8 @@ int16_t	pilotIndex, tap;
 //	cx_fmat M_B		= M_AT * M_A;	// taps * taps
 //	M_B			= pinv (M_B);	// taps * taps;
 //	F_p_inv			= M_B * M_AT;	// taps * pilots
-	MatrixXd temp		= S_p * F_p;
-	F_p_inv			= temp. inverse ();
+	F_p_inv			= S_p * F_p;
+//	F_p_inv			= temp. inverse ();
 }
 
 	estimator_2::~estimator_2 (void) {
@@ -114,7 +114,7 @@ Vector  X_p  (numberofPilots);
 	   X_p (index) = testRow [indexFor (pilotTable [index])];
 //
 ////	Ok, the matrices are filled, now computing the channelvalues
-	h_td	= F_p_inv *  X_p;
+	h_td	= F_p_inv. solve (X_p);
 	H_fd	= F_p * h_td;
 //
 	for (index = 0; index < numberofPilots; index ++)

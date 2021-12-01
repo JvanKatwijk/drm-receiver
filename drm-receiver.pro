@@ -242,7 +242,7 @@ LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 LIBS            += -lfaad_drm
 INCLUDEPATH	+= /usr/include/qt5/qwt
-#INCLUDEPATH	+= /usr/include/eigen3
+INCLUDEPATH	+= /usr/include/eigen3
 LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
 #LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -larmadillo -ldl
 }
@@ -265,6 +265,7 @@ CONFIG		+= hackrf
 CONFIG		+= rtlsdr
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
+INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/eigen3
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
 INCLUDEPATH += /usr/local/include
 LIBS    += -L/usr/i686-w64-mingw32/sys-root/mingw/lib

@@ -26,6 +26,10 @@
 #include	<math.h>
 #include	"drm-bandfilter.h"
 
+#ifndef M_PI
+# define M_PI           3.14159265358979323846  /* pi */
+#endif
+
 	drmBandfilter::drmBandfilter (int16_t firSize,
 	                              int32_t Fc,
 	                              int32_t sampleRate):

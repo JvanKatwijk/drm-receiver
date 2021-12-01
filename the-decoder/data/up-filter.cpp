@@ -24,6 +24,9 @@
 #include	"up-filter.h"
 #define  _USE_MATH_DEFINES
 #include <math.h>
+#ifndef M_PI
+# define M_PI           3.14159265358979323846  /* pi */
+#endif
 
 static inline
 std::complex<float> cmul (std::complex<float> in, float y) {

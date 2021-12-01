@@ -127,13 +127,13 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	amount ++;
 //      if (amount >= 5) {
         if (firstTime && amount > 100) {
-	   buffer	-> waitfor (30 * Ts + Ts);
-	   int intOffs	= get_intOffset (0 * Ts, 20, 10);
-	   int sub	= get_intOffset (4 * Ts, 20, 10);
-	   int sub_2	= get_intOffset (8 * Ts, 20, 10);
+	   buffer	-> waitfor (40 * Ts + Ts);
+	   int intOffs	= get_intOffset (0 * Ts, 30, 10);
+	   int sub	= get_intOffset (4 * Ts, 30, 10);
+	   int sub_2	= get_intOffset (8 * Ts, 30, 10);
 
 	   if ((intOffs == sub) && (sub == sub_2) && (sub != 0))  {
-	      if (intOffs < -1) {
+	      if (intOffs < -2) {
 	         std::string str = std::to_string (teller);
 			 str = str + "  " + std::to_string(intOffs);
 	         set_channel_3 (QString::fromStdString (str));
@@ -144,7 +144,7 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	         fprintf (stderr, "counter %d\n", counter);
 	      }
 	      else
-	      if (intOffs > 1 ) {
+	      if (intOffs > 2 ) {
 	         std::string str = std::to_string(teller);
 	         str = str + "  " + std::to_string(intOffs);
 	         set_channel_3 (QString::fromStdString (str));
@@ -155,7 +155,7 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	         fprintf (stderr, "counter %d\n", counter);
 	      }
 	   }
-	   amount -= 10;
+	   amount -= 50;
 	}
 
 	int realS = offsetFractional < 0 ? f - 1 : f;

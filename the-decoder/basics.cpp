@@ -25,6 +25,10 @@
 #include	<math.h>
 #define	KK	1
 
+#ifndef M_PI
+# define M_PI           3.14159265358979323846  /* pi */
+#endif
+
 int16_t	Ts_of (uint8_t Mode) {
 	switch (Mode) {
 	   default:
