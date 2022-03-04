@@ -33,9 +33,11 @@
 #include	"up-filter.h"
 #include	"ringbuffer.h"
 #include	"aac-handler.h"
+#include	"message-processor.h"
 
 class	drmDecoder;
 class	stateDescriptor;
+class	upConverter;
 
 typedef	struct frame {
 	int16_t length, startPos;
@@ -58,10 +60,13 @@ private:
 	stateDescriptor *theState;
 	drmDecoder      *drmMaster;
 	RingBuffer<std::complex<float>> *audioOut;
-	upFilter	upFilter_24000;
-	upFilter	upFilter_12000;
+	messageProcessor	my_messageProcessor;
+//	upFilter	upFilter_24000;
+//	upFilter	upFilter_12000;
 	int16_t         numFrames;
 	int16_t         selectedAudioService;
+	upConverter	*theConverter;
+	int		currentRate;
 	aacHandler	*aacFunctions;
 
 	void		handle_uep_audio        (uint8_t *, int16_t,

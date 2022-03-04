@@ -31,7 +31,7 @@
 #include	<QFileDialog>
 #include	"radio.h"
 #include	"fft-scope.h"
-#include	"upconverter.h"
+#include	"up-converter.h"
 #include        "audiosink.h"
 #include        "popup-keypad.h"
 #include        "program-list.h"

@@ -58,7 +58,7 @@ INCLUDEPATH += .  \
 HEADERS += ./radio-constants.h \
 	   ./radio.h \
 	   ./bandplan.h \
-           ./output/upconverter.h \
+#	   ./output/upconverter.h \
 	   ./output/audiosink.h \
            ./various/ringbuffer.h \
            ./various/fft.h \
@@ -68,6 +68,8 @@ HEADERS += ./radio-constants.h \
 	   ./various/program-list.h \
 	   ./various/popup-keypad.h \
 	   ./various/downconverter.h \
+	   ./various/rate-converter.h \
+	   ./various/up-converter.h \
            ./filters/fft-filters.h \
            ./filters/fir-filters.h \
            ./filters/iir-filters.h \
@@ -113,8 +115,8 @@ HEADERS += ./radio-constants.h \
 	   ./the-decoder/ofdm/word-collector.h \
 	   ./the-decoder/equalizer/equalizer-1.h \
 	   ./the-decoder/equalizer/equalizer-base.h \
-	   ./the-decoder/equalizer/estimator-2.h \
-#	   ./the-decoder/equalizer/estimator-1.h \
+#	   ./the-decoder/equalizer/estimator-2.h \
+	   ./the-decoder/equalizer/estimator-1.h \
 	   ./the-decoder/equalizer/matrix2.h \
 	   ./the-decoder/equalizer/referenceframe.h \
 	   ./the-decoder/parameters/msc-config.h \
@@ -143,7 +145,7 @@ FORMS	+= ./the-decoder/drmdecoder.ui
 SOURCES += ./main.cpp \
 	   ./radio.cpp \
 	   ./bandplan.cpp \
-	   ./output/upconverter.cpp \
+#	   ./output/upconverter.cpp \
            ./output/audiosink.cpp \
            ./various/fft.cpp \
 	   ./various/popup-keypad.cpp \
@@ -152,6 +154,8 @@ SOURCES += ./main.cpp \
 	   ./various/slidingfft.cpp \
 	   ./various/program-list.cpp \
 	   ./various/downconverter.cpp \
+	   ./various/rate-converter.cpp \
+	   ./various/up-converter.cpp \
            ./filters/fft-filters.cpp \
            ./filters/fir-filters.cpp \
            ./filters/iir-filters.cpp \
@@ -195,8 +199,8 @@ SOURCES += ./main.cpp \
 	   ./the-decoder/ofdm/word-collector.cpp \
 	   ./the-decoder/equalizer/equalizer-1.cpp \
 	   ./the-decoder/equalizer/equalizer-base.cpp \
-	   ./the-decoder/equalizer/estimator-2.cpp \
-#	   ./the-decoder/equalizer/estimator-1.cpp \
+#	   ./the-decoder/equalizer/estimator-2.cpp \
+	   ./the-decoder/equalizer/estimator-1.cpp \
 	   ./the-decoder/equalizer/matrix2.cpp \
 	   ./the-decoder/equalizer/referenceframe.cpp \
 	   ./the-decoder/parameters/msc-config.cpp \
@@ -235,8 +239,8 @@ CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
-#CONFIG		+= faad
 CONFIG		+= fdk-aac
+#CONFIG		+= faad
 
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64

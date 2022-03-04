@@ -344,23 +344,30 @@ uint8_t	language [3], country [2];
 	          s. push_back (get_SDCBits (v, 4 + 8 * i, 8));
 	      s. push_back (char (0));
 	      if (lengthofBody > 1) {
-	         strcpy (theState -> streams [shortId]. serviceName, s. c_str ());
-	      }
-	
-	      switch (shortId) {
-	         case 0:
-	            set_channel_1 (QString::fromStdString (s));
-	            break;
-	         case 1:
-	            set_channel_2 (QString::fromStdString (s));
-	            break;
-	         case 2:
-	            set_channel_3 (QString::fromStdString (s));
-	            break;
-	         case 3:
-	            set_channel_4 (QString::fromStdString (s));
-	            break;
-	      }
+	         for (i = 0; i < theState -> numofStreams; i ++) 
+	            if ((theState -> streams [i]. inUse) &&
+	                (theState -> streams [i]. shortId == shortId)) {
+	               if (theState -> streams [i]. serviceName [0] != 0)
+	                  break;
+	               strcpy (theState -> streams [i]. serviceName,
+	                                          s. c_str ());
+	               switch (shortId) {
+	                  case 0:
+	                     set_channel_1 (QString::fromStdString (s));
+	                     break;
+	                  case 1:
+	                     set_channel_2 (QString::fromStdString (s));
+	                     break;
+	                  case 2:
+	                     set_channel_3 (QString::fromStdString (s));
+	                     break;
+	                  case 3:
+	                     set_channel_4 (QString::fromStdString (s));
+	                     break;
+	               }
+	               return;
+	            }
+	         }
 	      return;
 
 	   case 2:	// conditional access parameters
@@ -463,6 +470,16 @@ uint8_t	language [3], country [2];
 	                                      = get_SDCBits (v, 14, 5);
 	         theState -> streams [index]. rfa
 	                                      = get_SDCBits (v, 19, 1);
+//
+//      if xHE-AAC we need to collect the decoderspecific data
+	         if (theState -> streams [index]. audioCoding == 03) {
+	            int bytes = (index + 16 + 8 * lengthofBody - 20) / 8;
+	            theState -> streams [index]. xHE_AAC. resize (0);
+	            for (int i = 0; i < bytes; i ++) {
+	               uint8_t t = get_SDCBits (v, 20 + 8 * i, 8);
+	               theState -> streams [index]. xHE_AAC. push_back (t);
+	            }
+	         }
 	      }
 	      return;
 

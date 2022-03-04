@@ -94,8 +94,8 @@ int16_t	pilotIndex, tap;
 //	The approach for channel estimation is as follows:
 //      we call the channel in the time domain h_td,
 //      in the frequency domain that will then be f = F x h_td
-//      we observe the values of the pilots at the recoever
-//      side, X_p, It is known that they were transmittes as s_p
+//      we observe the values of the pilots at the receiver
+//      side, X_p, It is known that they were transmitted as s_p
 //      We know then that
 //      X_p = diag (s_p) * f, where f = F_p * h_td
 //      so, X_p = S_p * F_p * h_td

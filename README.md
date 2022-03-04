@@ -214,15 +214,15 @@ for QAM64, there are 64 dots evenly distributed over the screen.
 
 A note on the implementation
 
-The implementation is partially reimplenented from the implementation of the drm decoder
+The implementation is partially reimplemented from the implementation of the drm decoder
 at the sw radio. The software was restructured though and limited in functionality: this software is restricted to handling audio streams.
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
 For Windows an installer is available, for Linux an AppImage.
-The AAC decoder for the Windows version is the fdk-aac library, for the Linux AppImage
-the faad_drm library is used.
+The AAC decoder for the Windows version is the fdk-aac library,
+for the Linux one needs to install  the libfdk-aac library is used.
 
 Of course, one may create an executable. Note that to keep things simple
 the only path is using qmake/make.
@@ -232,6 +232,16 @@ aac decoding using the "faad_drm" library or the "fdk-aac" library.
 
 The latter has the (potential) advantage of being able to decode xHE-AAC
 as well
+
+-----------------------------------------------------------------------------
+Note on using the linfdk-aac library
+----------------------------------------------------------------------------
+
+The software is tested with the libfdk-aac library that was created from
+https://github.com/mstorsjo/fdk-aac
+
+Under Ubuntu the software did not work properly with the fdk-aac library
+as provided by the repository
 
 -------------------------------------------------------------------------------
 Supported devices

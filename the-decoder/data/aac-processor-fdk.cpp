@@ -28,6 +28,7 @@
 #include        "drm-decoder.h"
 #include        "state-descriptor.h"
 #include	"aac-processor-fdk.h"
+#include	"up-converter.h"
 
 static	inline
 uint16_t	get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
@@ -43,9 +44,8 @@ uint16_t	res	= 0;
 	aacProcessor_fdk::aacProcessor_fdk (stateDescriptor *theState,
 	                                    drmDecoder *drm,
 	                                    aacHandler	*aacFunctions,
-	                                    RingBuffer<std::complex<float>>* out):
-	                                    upFilter_24000 (5, 24000, 48000),
-	                                    upFilter_12000 (5, 12000, 48000) {
+	                                    RingBuffer<std::complex<float>>* out) :
+	                                   my_messageProcessor (drm) {
 
 	this	-> theState	= theState;
 	this	-> drmMaster	= drm;
@@ -58,6 +58,8 @@ uint16_t	res	= 0;
 	         drm, SLOT (set_aacDataLabel (const QString &)));
 	connect (this, SIGNAL (audioAvailable ()),
 	         drm, SLOT (audioAvailable ()));
+	currentRate	= 0;
+	theConverter	= nullptr;
 }
 
 	aacProcessor_fdk::~aacProcessor_fdk	() {
@@ -72,7 +74,7 @@ void	aacProcessor_fdk::process_aac (uint8_t *v, int16_t mscIndex,
 	   handle_uep_audio (v, mscIndex, startHigh, lengthHigh,
 	                            startLow, lengthLow - 4);
 	else 
-	   handle_eep_audio (v, mscIndex,  startLow, lengthLow - 4);
+	   handle_eep_audio (v, mscIndex,  startLow, lengthLow);
 }
 
 
@@ -131,6 +133,11 @@ int16_t	payloadLength;
 	         f [i]. audio [audioinHP + j] =
 	                    get_MSCBits (v, (entryinLP++) * 8, 8);
 	}
+	if (theState -> streams [i]. textFlag)
+	         my_messageProcessor.
+	                   processMessage (v, (startLow + lengthLow - 4) * 8);
+
+	
 	playOut (mscIndex);
 }
 
@@ -147,6 +154,12 @@ int16_t		payLoad_length = 0;
 	numFrames = theState -> streams [mscIndex]. audioSamplingRate == 1 ? 5 : 10;
 	headerLength = numFrames == 10 ? (9 * 12 + 4) / 8 : (4 * 12) / 8;
 
+	if (theState -> streams [mscIndex]. textFlag) {
+	   my_messageProcessor.
+	                   processMessage (v, (startLow + lengthLow - 4) * 8);
+	   lengthLow -= 4;
+	}
+//
 //	startLow in bytes!!
 	f [0]. startPos = 0;
 	for (i = 1; i < numFrames; i ++) {
@@ -185,6 +198,7 @@ int16_t		payLoad_length = 0;
 	      f [i]. audio [j] = get_MSCBits (v, in2 * 8, 8);
 	   }
 	}
+
 	playOut (mscIndex);
 }
 
@@ -237,7 +251,6 @@ QString text;
 }
 
 void	aacProcessor_fdk::toOutput (std::complex<float> *b, int16_t cnt) {
-int16_t	i;
 	if (cnt == 0)
 	   return;
 	
@@ -247,46 +260,31 @@ int16_t	i;
 }
 
 void	aacProcessor_fdk::writeOut (int16_t *buffer, int16_t cnt,
-	                             int32_t pcmRate) {
+	                                                 int32_t pcmRate) {
 int16_t	i;
-	if (pcmRate == 48000) {
-	   std::complex<float> *lbuffer =
-	                         (std::complex<float> *)alloca (cnt / 2 * sizeof (std::complex<float>));
+	if (theConverter == nullptr) {
+	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+           currentRate  = pcmRate;
+        }
 
-	   for (i = 0; i < cnt / 2; i ++) {
-	      lbuffer [i] = std::complex<float> (
+        if (pcmRate != currentRate) {
+           delete theConverter;
+           theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+           currentRate = pcmRate;
+        }
+
+	int	bufferSize	= theConverter -> getOutputSize ();
+	std::complex<float> *local =
+	          (std::complex<float> *)alloca (bufferSize * sizeof (std::complex<float>));
+	
+	for (i = 0; i < cnt / 2; i ++) {
+	   std::complex<float> tmp = std::complex<float> (
 	                                 buffer [2 * i] / 32767.0,
 	                                 buffer [2 * i + 1] / 32767.0);
-
-	   }
-	   toOutput (lbuffer, cnt / 2);
-	   return;
-	}
-
-	if (pcmRate == 12000) {
-	   std::complex<float> *lbuffer =
-	          (std::complex<float> *)alloca (2 * cnt * sizeof (std::complex<float>));
-
-	   for (i = 0; i < cnt / 2; i ++) {
-	      upFilter_12000. Filter (std::complex<float> (
-	                                    buffer [2 * i] / 32767.0,
-	                                    buffer [2 * i + 1] / 32767.0),
-	                              &lbuffer [4 * i]);
-	   }
-	   toOutput (lbuffer, 2 * cnt);
-	   return;
-	}
-	if (pcmRate == 24000) {
-	   std::complex<float> *lbuffer =
-	          (std::complex<float> *)alloca (2 * cnt * sizeof (std::complex<float>));
-	   for (int i = 0; i < cnt / 2; i ++) {
-	      upFilter_12000. Filter (std::complex<float> (
-	                                    buffer [2 * i] / 32767.0,
-	                                    buffer [2 * i + 1] / 32767.0),
-	                              &lbuffer [2 * i]);
-	   }
-	   toOutput (lbuffer, cnt);
-	   return;
+	   int amount;
+	   bool b = theConverter -> convert (tmp, local, &amount);
+	   if (b)
+	      toOutput (local, amount);
 	}
 }
 

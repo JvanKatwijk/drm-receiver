@@ -125,8 +125,8 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	buffer		-> waitfor (Ts + Ts / 2);
 	teller ++;
 	amount ++;
-//      if (amount >= 5) {
-        if (firstTime && amount > 100) {
+	if (amount >= 5) {
+//	if (firstTime && amount > 100) {
 	   buffer	-> waitfor (40 * Ts + Ts);
 	   int intOffs	= get_intOffset (0 * Ts, 30, 10);
 	   int sub	= get_intOffset (4 * Ts, 30, 10);
@@ -141,7 +141,7 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	         teller = 0;
 	         f += -1;
 	         counter --;
-	         fprintf (stderr, "counter %d\n", counter);
+//	         fprintf (stderr, "counter %d\n", counter);
 	      }
 	      else
 	      if (intOffs > 2 ) {
@@ -152,10 +152,11 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	         teller = 0;
 	         f +=  1;
 	         counter ++;
-	         fprintf (stderr, "counter %d\n", counter);
+//	         fprintf (stderr, "counter %d\n", counter);
 	      }
 	   }
-	   amount -= 50;
+	   else
+	      amount --;
 	}
 
 	int realS = offsetFractional < 0 ? f - 1 : f;
@@ -174,6 +175,10 @@ float	actOffset	= offsetFractional < 0 ? 1 + offsetFractional :
 	buffer -> currentIndex = (f + Ts) & buffer -> bufMask;
 //
 //	corrector
+	std::complex<float> ss = std::complex<float> (0, 0);
+	for (int i = 0; i < Tg; i ++)
+           ss += conj (temp [Tu + i]) * temp [i];
+//	theAngle	= 0.9 * theAngle + 0.1 * arg (ss);
 	theAngle	= theAngle - 0.2 * angle;
 	if (theAngle < -M_PI) {
 		theAngle += M_PI;

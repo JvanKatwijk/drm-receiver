@@ -25,17 +25,44 @@
 #include	"basics.h"
 #include	"drm-decoder.h"
 #include	"state-descriptor.h"
+//#include	"rate-converter.h"
+#include	"up-converter.h"
 #include	<deque>
 #include	<vector>
 #include	<complex>
-
-deque<uint8_t>  frameBuffer;
-vector<uint32_t> borders;
 
 static
 const uint16_t crcPolynome [] = {
         0, 0, 0, 1, 1, 1, 0     // MSB .. LSB x⁸ + x⁴ + x³ + x² + 1
 };
+
+//	the 16 bit CRC - computed over bytes - has 
+//	as polynome x^16 + x^12 + x^5 + 1
+static inline
+bool	check_crc_bytes (uint8_t *msg, int32_t len) {
+int i, j;
+uint16_t	accumulator	= 0xFFFF;
+uint16_t	crc;
+uint16_t	genpoly		= 0x1021;
+
+	for (i = 0; i < len; i ++) {
+	   int16_t data = msg [i] << 8;
+	   for (j = 8; j > 0; j --) {
+	      if ((data ^ accumulator) & 0x8000)
+	         accumulator = ((accumulator << 1) ^ genpoly) & 0xFFFF;
+	      else
+	         accumulator = (accumulator << 1) & 0xFFFF;
+	      data = (data << 1) & 0xFFFF;
+	   }
+	}
+//
+//	ok, now check with the crc that is contained
+//	in the au
+	crc	= ~((msg [len] << 8) | msg [len + 1]) & 0xFFFF;
+//	fprintf (stderr, "crc = %X, accu %X\n",
+//	           (msg [len] << 8) | msg [len + 1],  ~accumulator & 0xFFFF);
+	return (crc ^ accumulator) == 0;
+}
 
 
 static  inline
@@ -54,9 +81,7 @@ uint16_t        res     = 0;
 	                                  aacHandler	*aacFunctions,
 	                                  RingBuffer<std::complex<float>> *b):
 	                                    theCRC (8, crcPolynome),
-	                                    upFilter_24000 (5, 24000, 48000),
-                                            upFilter_12000 (5, 12000, 48000) {
-
+	                                    my_messageProcessor (drm) {
 	this	-> theState	= theState;
 	this	-> parent	= drm;
 	this	-> aacFunctions	= aacFunctions;
@@ -68,6 +93,7 @@ uint16_t        res     = 0;
                  drm, SLOT (audioAvailable ()));
 
 	currentRate			= 0;
+	theConverter			= nullptr;
 	frameBuffer. resize (0);
 	borders. resize (0);
 }
@@ -75,6 +101,8 @@ uint16_t        res     = 0;
 	xheaacProcessor::~xheaacProcessor	() {
 	if (handle == nullptr)
 	   aacFunctions -> aacDecoder_Close (handle);
+	if (theConverter != nullptr)
+	   delete theConverter;
 }
 //
 //	actually, we know that lengthHigh == 0, and therefore
@@ -84,149 +112,166 @@ void	xheaacProcessor::process_usac	(uint8_t *v, int16_t streamId,
                                          int16_t startLow, int16_t lengthLow) {
 uint16_t	frameBorderCount	= get_MSCBits (v, 0, 4);
 int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
-int	crc			= get_MSCBits (v, 8, 8);
-int	length			= lengthHigh + lengthLow - 4;
+int	length			= lengthHigh + lengthLow;
 int	numChannels		=
 	         theState -> streams [streamId]. audioMode == 0 ? 1 : 2;
-uint32_t elementsUsed		= 0;
+int	textFlag		=
+	         theState -> streams [streamId]. textFlag;
+int	elementsUsed	= 0;
+int	success		= 0;
+int	failure		= 0;
 
 	(void)startHigh; (void)startLow;
 	(void)bitReservoirLevel;
-	(void)crc;
 	(void)numChannels;
 	if (!theCRC. doCRC (v, 16)) {
-	   fprintf (stderr, "oei\n");
+//	   fprintf (stderr, "oei\n");
+	   faadSuccess (false);
+	   return;
 	}
-//
-//	uint32_t bitResLevel	= (bitReservoirLevel + 1) * 384 *
-//	                                               numChannels;
-	uint32_t directoryOffset = length - 2 * frameBorderCount;
 
-	if (frameBorderCount > 0) {
-	   borders. 	resize	(frameBorderCount);
-	   std::vector<uint8_t> audioDescriptor =
+	if (frameBorderCount < 0)
+	   return;
+	if (textFlag != 0) {
+	   my_messageProcessor.
+	                   processMessage (v, (startLow + lengthLow - 4) * 8);
+	   length -= 4;
+	}
+	borders. resize	(frameBorderCount);
+	std::vector<uint8_t> audioDescriptor =
 	                         getAudioInformation (theState, streamId);
-	   reinit (audioDescriptor, streamId);
-
-	   for (int i = 0; i < frameBorderCount; i++) {
-	      uint32_t frameBorderIndex =
+	reinit (audioDescriptor, streamId);
+	for (int i = 0; i < frameBorderCount; i++) {
+	   uint32_t frameBorderIndex =
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i, 12);
-	      uint32_t frameBorderCountRepeat = 
+	   uint32_t frameBorderCountRepeat = 
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i + 12, 4);
-	      if (frameBorderCountRepeat != frameBorderCount) {
-	         resetBuffers ();
-	         return;
-	      }
-#if 0
-	      fprintf (stderr, "frameBorderIndex %d, check %d\n",
-	                        frameBorderIndex, frameBorderCountRepeat);
-#endif
-	      borders [i] = frameBorderIndex;
-	      if (i == 0) {
+
+	   if (frameBorderCountRepeat != frameBorderCount) {
+//	      fprintf (stderr, "fout?\n");
+	      faadSuccess (false);
+	      return;
+	   }
+	   borders [i] = frameBorderIndex;
+	}
+
+	for (int i = 0; i < frameBorderCount - 1; i ++)
+	   if (borders [i] >= borders [i + 1]) {
+	      faadSuccess (false);
+	      return;
+	   }
 //
+//	we do notlook at the usac crc
+	uint32_t directoryOffset = length - 2 * frameBorderCount - 2;
+	if (borders [frameBorderCount - 1] >= directoryOffset) {
+	   faadSuccess (false);
+	   return;
+	}
+
 //	The first frameBorderIndex might point to the last one or
 //	two bytes of the previous afs.
-	         switch (borders [0]) {
-	            case 0xffe: // delayed from previous afs
+	switch (borders [0]) {
+	   case 0xffe: // delayed from previous afs
 //	first frame has two bytes in previous afs
-	               if (frameBuffer. size () < 2) {
-	                  resetBuffers ();
-	                  return;
-	               }
+	      if (frameBuffer. size () < 2) {
+	         return;
+	      }
 //
 //	if the "frameBuffer" contains more than 2 bytes, there was
 //	a non-empty last part in the previous afs
-	               if (frameBuffer. size () > 2)
-	                  processFrame (frameBuffer. size () - 2);
-	               elementsUsed = 0;
-	               break;
+	      if (frameBuffer. size () > 2) {
+	         playOut (frameBuffer, frameBuffer. size (), -2);
+	      }
+	      elementsUsed = 0;
+	      break;
 
-	            case 0xfff:
+	   case 0xfff:
 //	first frame has one byte in previous afs
-	               if (frameBuffer. size () < 1) {
-	                  resetBuffers ();
-	                  return;
-	               }
-	               if (frameBuffer. size () > 1)
-	                  processFrame (frameBuffer. size () - 1);
-	               elementsUsed = 0;
-	               break;
+	      if (frameBuffer. size () < 1) {
+	         return;
+	      }
+	      if (frameBuffer. size () > 1) {
+	         playOut (frameBuffer, frameBuffer. size (), -1);
+	      }
+	      elementsUsed = 0;
+	      break;
 
-	            default: // boundary in this afs
+	   default: // boundary in this afs
 //	boundary in this afs, process the last part of the previous afs
 //	together with what is here as audioFrame
-	               if (borders [0] < 2) {
-	                  resetBuffers ();
-	                  return;
-	               }
+	      if (borders [0] < 2) {
+	         return;
+	      }
 //
-//	elementsUsed will be used to keep track on the progress
-//	in handling the elements of this afs
-	               for (elementsUsed = 0; 
-	                    elementsUsed < borders [0]; elementsUsed ++)
-	                  frameBuffer.
+	      for (; elementsUsed < borders [0]; elementsUsed ++)
+	            frameBuffer.
 	                  push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
-	               processFrame (frameBuffer. size ());
-	               break;
-	         }
-	      }
+	      if (check_crc_bytes (frameBuffer. data (),
+                                      frameBuffer. size () - 2))
+	         success ++;
 	      else
-	      if (i < frameBorderCount - 1) {
-//	just read in the data and process the frame
-	         for (; elementsUsed < borders [i]; elementsUsed ++) 
-	            frameBuffer. push_back
-	                        (get_MSCBits (v, 16 + elementsUsed * 8, 8));
-	         processFrame (frameBuffer. size ());
-	      }
-	      else	// at the end, save for the next afs
-	      for ( ; elementsUsed < directoryOffset; elementsUsed ++)
-	         frameBuffer.
-		       push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
-	   }
+	         failure ++;
+	      playOut (frameBuffer, frameBuffer. size (), 0);
+	      break;
 	}
-	else {
-	   for (uint16_t i = 0; i < directoryOffset; i ++)
-	      frameBuffer. push_back (get_MSCBits (v, 16 + 8 * i, 8));
+
+	for (int i = 1; i < frameBorderCount; i ++) {
+	   frameBuffer. resize (0);
+	   for (;elementsUsed < borders [i]; elementsUsed ++)
+	      frameBuffer.
+	            push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
+	   if (check_crc_bytes (frameBuffer. data (), frameBuffer. size () - 2))
+	      success ++;
+	   else
+	      failure ++;
+	   playOut (frameBuffer, frameBuffer. size (), i);
 	}
+
+//	at the end, save for the next afs
+	frameBuffer. resize (0);
+	for (int j = borders [frameBorderCount - 1];
+	                             j < directoryOffset; j ++)
+	   frameBuffer.  push_back (get_MSCBits (v, 16 + j * 8, 8));
+//	fprintf (stderr, "%d out of %d OK\n", success, success + failure);
 }
 //
-//	In some cases we do not use the full content
-//	of the data gathered in the frameBuffer, so we pass on the size
-void	xheaacProcessor::processFrame	(int size) {
-std::vector<uint8_t> audioFrame;
-#if 0
-	fprintf (stderr, "process frame %d\n", size);
-#endif
-	while (size > 0) {
-	   size --;
-	   audioFrame. push_back (frameBuffer. front());
-	   frameBuffer. pop_front ();
-	}
-	playOut (audioFrame);
-}
-
 void	xheaacProcessor::resetBuffers	() {
 	frameBuffer. resize (0);
 }
 
+static int good	= 0;
+static int fout = 0;
+
 static
 int16_t outBuffer [16 * 960];
-void	xheaacProcessor::playOut (std::vector<uint8_t> f) {
-bool		convOK;
+void	xheaacProcessor::playOut (std::vector<uint8_t> &f,
+	                          int size, int index) {
+static
+bool		convOK = false;
 int16_t	cnt;
 int32_t	rate;
-	decodeFrame (f. data (), f. size (), &convOK,
-	                   outBuffer, &cnt, &rate);
+	decodeFrame (f. data (),
+	             f. size (),
+//	             f. size () - 2,
+	             &convOK,
+	             outBuffer, &cnt, &rate);
 	if (convOK) {
 	   faadSuccess (true);
+	   good ++;
 	   if (cnt > 0)
 	      writeOut (outBuffer, cnt, rate);
 	}
 	else {
 	   faadSuccess (false);
+	   fout ++;
+	}
+
+	if (good + fout >= 50) {
+//	   fprintf (stderr, "%d out of %d were good\n", good, good + fout);
+	   good = 0; fout = 0;
 	}
 }
-//
+
 void	xheaacProcessor::toOutput (std::complex<float> *b, int16_t cnt) {
         if (cnt == 0)
            return;
@@ -234,48 +279,36 @@ void	xheaacProcessor::toOutput (std::complex<float> *b, int16_t cnt) {
         if (audioOut -> GetRingBufferReadAvailable () > 4800)
            audioAvailable ();
 }
-
+//
+//	valid samplerates for xHE-AAC are
+//	9.6, 12, 16, 19,2 24, 32, 38,4 and 48 KHz
+//	translation factors are
+//	5, 4, 3, 5 / 2, 2, 3 / 2, 5/4
 void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                           int32_t pcmRate) {
-int16_t	i;
-	if (pcmRate == 48000) {
-	   std::complex<float> *lbuffer =
-	                         (std::complex<float> *)alloca (cnt / 2 * sizeof (std::complex<float>));
-
-	   for (i = 0; i < cnt / 2; i ++) {
-	      lbuffer [i] = std::complex<float> (
-	                                 buffer [2 * i] / 32767.0,
-	                                 buffer [2 * i + 1] / 32767.0);
-
-	   }
-	   toOutput (lbuffer, cnt / 2);
-	   return;
+	if (theConverter == nullptr) {
+	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+	   currentRate	= pcmRate;
 	}
 
-	if (pcmRate == 12000) {
-	   std::complex<float> *lbuffer =
-	          (std::complex<float> *)alloca (2 * cnt * sizeof (std::complex<float>));
-
-	   for (i = 0; i < cnt / 2; i ++) {
-	      upFilter_12000. Filter (std::complex<float> (
-	                                    buffer [2 * i] / 32767.0,
-	                                    buffer [2 * i + 1] / 32767.0),
-	                              &lbuffer [4 * i]);
-	   }
-	   toOutput (lbuffer, 2 * cnt);
-	   return;
+	if (pcmRate != currentRate) {
+	   delete theConverter;
+	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+	   currentRate = pcmRate;
 	}
-	if (pcmRate == 24000) {
-	   std::complex<float> *lbuffer =
-	          (std::complex<float> *)alloca (2 * cnt * sizeof (std::complex<float>));
-	   for (int i = 0; i < cnt / 2; i ++) {
-	      upFilter_12000. Filter (std::complex<float> (
-	                                    buffer [2 * i] / 32767.0,
-	                                    buffer [2 * i + 1] / 32767.0),
-	                              &lbuffer [2 * i]);
-	   }
-	   toOutput (lbuffer, cnt);
-	   return;
+#if 0
+	fprintf (stderr, "processing %d samples (rate %d)\n",
+	                  cnt, pcmRate);
+#endif
+	std::complex<float> local [theConverter -> getOutputSize ()];
+	for (int i = 0; i < cnt; i ++) {
+	   std::complex<float> tmp = 
+	                    std::complex<float> (buffer [2 * i] / 8192.0,
+	                                         buffer [2 * i + 1] / 8192.0);
+	   int amount;
+	   bool b = theConverter -> convert (tmp, local, &amount);
+	   if (b)
+	      toOutput (local, amount);
 	}
 }
 
@@ -326,6 +359,7 @@ void	xheaacProcessor::decodeFrame (uint8_t	*audioFrame,
 	                              int32_t	*pcmRate) {
 int	errorStatus;
 uint32_t	bytesValid	= 0;
+int	flags		= 0;
 
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
@@ -335,26 +369,36 @@ uint32_t	bytesValid	= 0;
 
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
+
+	if (!*conversionOK)
+           flags = AACDEC_INTR;
 	errorStatus =
 	     aacFunctions -> aacDecoder_DecodeFrame (handle,
-	                                             localBuffer, 16 * 980, 0);
+	                                             localBuffer,
+	                                             2048, flags);
 #if 0
-	fprintf (stderr, "fdk-aac errorstatus %x\n",
-	                       errorStatus);
+	if (errorStatus != 0)
+	   fprintf (stderr, "fdk-aac errorstatus %x\n",
+	                                errorStatus);
 #endif
 	if (errorStatus == AAC_DEC_NOT_ENOUGH_BITS) {
 	   *conversionOK	= false;
 	   *samples		= 0;
+	   faadSuccess (false);
 	   return;
 	}
-	if (errorStatus != AAC_DEC_OK) {
+
+//	if (errorStatus != AAC_DEC_OK) {
+	if ((errorStatus != AAC_DEC_OK) && (errorStatus & 0x4000 == 0)) {
 	   *conversionOK	= false;
 	   *samples		= 0;
+	   faadSuccess (false);
 	   return;
 	}
 
 	CStreamInfo *fdk_info =
 	                aacFunctions -> aacDecoder_GetStreamInfo (handle);
+
 	if (fdk_info -> numChannels == 1) {
 	   for (int i = 0; i < fdk_info -> frameSize; i ++) {
 	      buffer [2 * i] 	= localBuffer [i];
@@ -371,13 +415,14 @@ uint32_t	bytesValid	= 0;
 #if 0
 	fprintf (stderr, "frameSize %d, samplerate %d\n",
 	               fdk_info -> frameSize, fdk_info -> sampleRate);
+	fprintf (stderr, "channel config %d (rate %d)\n",
+	           fdk_info -> channelConfig, fdk_info -> sampleRate);
 #endif
-//	fprintf (stderr, "channel config %d (rate %d)\n",
-//	           fdk_info -> channelConfig, fdk_info -> sampleRate);
-	*samples	= fdk_info	-> frameSize * 2;
+	*samples	= fdk_info	-> frameSize;
 	*pcmRate	= fdk_info	-> sampleRate;
 	*conversionOK	= true;
 }
+
 std::vector<uint8_t>
 	xheaacProcessor::getAudioInformation (stateDescriptor *theState,
 	                                                int streamId) {
@@ -393,8 +438,9 @@ uint8_t	xxx	= 0;
 	xxx	|= theState -> streams [streamId]. enhancementFlag << 6;
 	xxx	|= theState -> streams [streamId]. coderField << 1;
 	temp. push_back (xxx);
-//	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
-//	   temp. push_back (sp -> xHE_AAC. at (i));
+	for (int i = 0;
+	     i < theState -> streams [streamId]. xHE_AAC. size (); i ++)
+	   temp. push_back (theState -> streams [streamId]. xHE_AAC. at (i));
 	return temp;
 }
 

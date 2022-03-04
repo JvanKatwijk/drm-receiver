@@ -53,7 +53,7 @@
 #include	"referenceframe.h"
 #include	"basics.h"
 #include	"equalizer-1.h"
-#include	"estimator-2.h"
+#include	"estimator-1.h"
 #include	"matrix2.h"
 #include	"drm-decoder.h"
 
@@ -250,9 +250,9 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //	The W_symbol_blk filters are ready now
 //
 //	and finally, the estimators
-	Estimators	= new estimator_2 *[symbolsinFrame];
+	Estimators	= new estimator_1 *[symbolsinFrame];
 	for (i = 0; i < symbolsinFrame; i ++)
-	   Estimators [i] = new estimator_2 (refFrame, Mode, Spectrum, i);
+	   Estimators [i] = new estimator_1 (refFrame, Mode, Spectrum, i);
 }
 
 		equalizer_1::~equalizer_1 (void) {
@@ -388,7 +388,7 @@ int16_t	i;
 //	offs7 means using all pilots over two near symbols with the same
 //	pilot layout
 	*delta_freq_offset	=  arg (offs1) / (3 * (symbolsinFrame - 1));
-//	*delta_freq_offset	=  arg (offs7) / periodforSymbols;
+	*delta_freq_offset	=  arg (offs7) / periodforSymbols;
 //	*delta_freq_offset	= (arg (offs1) + arg (offs7) / periodforSymbols) / 2;
 //	fprintf (stderr, "freq error: freq pilots = %f, all pilots  = %f\n",
 //	                 arg (offs1) / (3 * (symbolsinFrame - 1)),

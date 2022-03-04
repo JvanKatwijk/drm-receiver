@@ -52,9 +52,9 @@ private:
 	void	handle_uep_audio	(uint8_t *, int16_t,
 	                         int16_t, int16_t, int16_t, int16_t);
 	void	handle_eep_audio	(uint8_t *, int16_t, int16_t, int16_t);
-	void    writeOut        (int16_t *, int16_t, int32_t);
-        void    toOutput	(std::complex<float> *, int16_t);
-        void    playOut         (int16_t);
+	void		writeOut        (int16_t *, int16_t, int32_t);
+        void		toOutput	(std::complex<float> *, int16_t);
+        void		playOut         (int16_t);
 	bool    checkfor        (uint8_t, bool, uint8_t);
         bool    initDecoder     (int16_t, bool, uint8_t);
         void    decodeFrame     (uint8_t *,

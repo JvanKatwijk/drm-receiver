@@ -32,14 +32,15 @@
 #include	<deque>
 #include	<complex>
 #include	"radio-constants.h"
-#include	"up-filter.h"
 #include	"basics.h"
 #include	"checkcrc.h"
 #include	"ringbuffer.h"
 #include	"aac-handler.h"
+#include	"message-processor.h"
 
 class	drmDecoder;
-class	rateConverter;
+class	upConverter;
+//class	rateConverter;
 class	stateDescriptor;
 
 class	xheaacProcessor: public QObject {
@@ -58,20 +59,20 @@ private:
 	drmDecoder	*parent;
 	RingBuffer<std::complex<float>> *audioOut;
 	checkCRC	theCRC;
-	upFilter	upFilter_24000;
-        upFilter	upFilter_12000;
+	messageProcessor	my_messageProcessor;
 	void		resetBuffers	();
-	void		processFrame	(int);
 	int		currentRate;
 	std::vector<uint8_t>
         		getAudioInformation (stateDescriptor *drm,
                                                         int streamId);
-//	deque<uint8_t>	frameBuffer;
-//	vector<uint32_t> borders;
+	std::vector<uint8_t>	frameBuffer;
+	std::vector<uint32_t> borders;
+//	rateConverter	*theConverter;
+	upConverter	*theConverter;
 	int		numFrames;
 	void		writeOut	(int16_t *, int16_t, int32_t);
 	void		toOutput	(std::complex<float> *, int16_t);
-	void		playOut		(std::vector<uint8_t>);
+	void		playOut		(std::vector<uint8_t> &, int, int);
 	aacHandler	*aacFunctions;
 
 //	added to support inclusion of the last phase

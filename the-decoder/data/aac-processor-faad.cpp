@@ -30,6 +30,7 @@
 #include	"basics.h"
 #include	"drm-decoder.h"
 #include	"state-descriptor.h"
+#include	"up-converter.h"
 
 static	inline
 uint16_t	get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
@@ -45,21 +46,20 @@ uint16_t	res	= 0;
 	aacProcessor_faad::aacProcessor_faad	(stateDescriptor *theState,
 		                                 drmDecoder *m_form,
 	                                         RingBuffer<std::complex<float>> *out):
-	                                      upFilter_24000 (5, 24000, 48000),
-	                                      upFilter_12000 (5, 12000, 48000) {
-	
+	                                            upFilter_12000 (5, 12000, 48000),
+	                                            upFilter_24000 (5, 24000, 48000) {
 	this	-> theState		= theState;
 	this	-> m_form		= m_form;
 	this	-> audioOut		= out;
 	this	-> theDecoder		= nullptr;
 //
 //	these are "previous values"
-	SBR_flag        = false;
-	audioMode       = 0x77;
-        audioRate       = 0x77;
+	SBR_flag			= false;
+	audioMode			= 0x77;
+        audioRate			= 0x77;
 
-	goodFrames	= 0;
-	badFrames	= 0;
+	goodFrames			= 0;
+	badFrames			= 0;
 	connect (this, SIGNAL (set_faadSyncLabel (bool)),
 	         m_form, SLOT (set_faadSyncLabel (bool)));
 	connect (this, SIGNAL (set_aacDataLabel (const QString &)),
@@ -232,8 +232,8 @@ uint8_t	xxx			= 0;
 	xxx	|= theState -> streams [mscIndex]. SBR_flag << 5;
 	xxx	|= theState -> streams [mscIndex]. audioMode << 3;
 	xxx	|= theState -> streams [mscIndex]. audioSamplingRate;
-fprintf (stderr, "samplingrate %d\n", 
-	             theState -> streams [mscIndex]. audioSamplingRate);
+//fprintf (stderr, "samplingrate %d\n", 
+//	             theState -> streams [mscIndex]. audioSamplingRate);
 	audioDescriptor. push_back (xxx);
 
 	xxx	= theState -> streams [mscIndex]. textFlag << 7;
@@ -275,7 +275,8 @@ fprintf (stderr, "samplingrate %d\n",
 	}
 }
 //
-void	aacProcessor_faad::toOutput (std::complex<float> *b, int16_t cnt) {
+void	aacProcessor_faad::
+	           toOutput (std::complex<float> *b, int16_t cnt) {
 	if (cnt == 0)
 	   return;
 	audioOut	-> putDataIntoBuffer (b, cnt);
@@ -285,7 +286,6 @@ void	aacProcessor_faad::toOutput (std::complex<float> *b, int16_t cnt) {
 
 void	aacProcessor_faad::writeOut (int16_t *buffer,
 	                             int16_t cnt, int32_t pcmRate) {
-
 	if (pcmRate == 48000) {
 	   std::complex<float> *lbuffer =
 	             (std::complex<float> *)alloca (cnt / 2 * sizeof (std::complex<float>));

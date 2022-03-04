@@ -266,7 +266,7 @@ float     sampleclockOffset       = 0;
 	      frameReady   = false;
 	      while (running. load () && !frameReady) {
 		  my_wordCollector.getWord (inbank.element(lc),
-				  modeInf.freqOffset_integer,
+				   modeInf.freqOffset_integer,
 				  lc == 0,        // no-op
 				  modeInf.timeOffset_fractional,
 				  deltaFreqOffset,  // tracking value
@@ -284,6 +284,7 @@ float     sampleclockOffset       = 0;
 	         lc = (lc + 1) % nrSymbols;
 	         symbol_no = (symbol_no + 1) % nrSymbols;
 	      }
+
 	      if (!running.load())
 	         throw (37);
 
@@ -294,7 +295,7 @@ float     sampleclockOffset       = 0;
 	  //	one test:
 	      if (!inSync)
 	         throw (33);
-	      if (modeInf.Spectrum != getSpectrum(&theState))
+	      if (modeInf. Spectrum != getSpectrum (&theState))
 	         throw (34);
 	      emit setFACSync (true);
 		

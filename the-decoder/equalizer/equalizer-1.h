@@ -30,7 +30,7 @@
 #include	"ringbuffer.h"
 #include	<vector>
 #include	"my-array.h"
-class		estimator_2;
+class		estimator_1;
 class		drmDecoder;
 typedef	struct {
 	int16_t	symbol;
@@ -62,7 +62,7 @@ private:
 	void		getRelAddress	(int16_t, int16_t *, int16_t *);
 	int16_t		buildTrainers	(int16_t);
 	int16_t		rndcnt;
-	estimator_2	**Estimators;
+	estimator_1	**Estimators;
 	int16_t		windowsinFrame;
 	int16_t		periodforPilots;
 	int16_t		periodforSymbols;

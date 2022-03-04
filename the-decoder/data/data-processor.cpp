@@ -83,8 +83,6 @@ int16_t	startPosB	= 0;
 	                         (theState -> getAudioChannel () == i)) {
 	      process_audio (v, i, startPosA, lengthA,
 	                           startPosB, lengthB);
-	      my_messageProcessor. processMessage (v,
-	                                  8 * (startPosB + lengthB - 4));
 	      break;
 	   }
 	   startPosA	+= lengthA;
@@ -100,6 +98,8 @@ void	dataProcessor::process_audio (uint8_t *v, int16_t mscIndex,
 	                              int16_t startLow,  int16_t lengthLow) {
 	
 uint8_t	audioCoding		= theState -> streams [mscIndex]. audioCoding;
+
+//	fprintf (stderr, "mscIndex %d, startHigh %d, startLow %d, lengthH %d, length Low %d\n", mscIndex, startHigh, startLow, lengthHigh, lengthLow);
 	switch (audioCoding) { 
 	   case 0:		// AAC
 	      set_audioModeLabel ("AAC");

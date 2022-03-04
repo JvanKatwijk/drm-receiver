@@ -42,7 +42,8 @@
 }
 
 int	stateDescriptor::getAudioChannel	() {
-	return audio_channel_1 ? 0 : 1;
+	return audio_channel_1 ? 0 :
+	       audio_channel_2 ? 1 : 0;
 }
 
 void	stateDescriptor::cleanUp	() {
