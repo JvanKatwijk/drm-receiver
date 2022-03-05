@@ -39,8 +39,8 @@
 #include	"message-processor.h"
 
 class	drmDecoder;
-class	upConverter;
-//class	rateConverter;
+//class	upConverter;
+class	rateConverter;
 class	stateDescriptor;
 
 class	xheaacProcessor: public QObject {
@@ -67,8 +67,8 @@ private:
                                                         int streamId);
 	std::vector<uint8_t>	frameBuffer;
 	std::vector<uint32_t> borders;
-//	rateConverter	*theConverter;
-	upConverter	*theConverter;
+	rateConverter	*theConverter;
+//	upConverter	*theConverter;
 	int		numFrames;
 	void		writeOut	(int16_t *, int16_t, int32_t);
 	void		toOutput	(std::complex<float> *, int16_t);

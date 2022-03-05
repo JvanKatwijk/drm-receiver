@@ -15,7 +15,7 @@
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
- *
+ * 
  *    You should have received a copy of the GNU General Public License
  *    along with DRMbackend ; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -25,8 +25,8 @@
 #include	"basics.h"
 #include	"drm-decoder.h"
 #include	"state-descriptor.h"
-//#include	"rate-converter.h"
-#include	"up-converter.h"
+#include	"rate-converter.h"
+//#include	"up-converter.h"
 #include	<deque>
 #include	<vector>
 #include	<complex>
@@ -152,6 +152,8 @@ int	failure		= 0;
 	      faadSuccess (false);
 	      return;
 	   }
+//	   fprintf (stderr, "border [%d] = %d\n",
+//	                           i, frameBorderIndex);
 	   borders [i] = frameBorderIndex;
 	}
 
@@ -161,7 +163,7 @@ int	failure		= 0;
 	      return;
 	   }
 //
-//	we do notlook at the usac crc
+//	we do not look at the usac crc
 	uint32_t directoryOffset = length - 2 * frameBorderCount - 2;
 	if (borders [frameBorderCount - 1] >= directoryOffset) {
 	   faadSuccess (false);
@@ -233,6 +235,7 @@ int	failure		= 0;
 	                             j < directoryOffset; j ++)
 	   frameBuffer.  push_back (get_MSCBits (v, 16 + j * 8, 8));
 //	fprintf (stderr, "%d out of %d OK\n", success, success + failure);
+	success = 0; failure = 0;
 }
 //
 void	xheaacProcessor::resetBuffers	() {
@@ -256,17 +259,15 @@ int32_t	rate;
 	             &convOK,
 	             outBuffer, &cnt, &rate);
 	if (convOK) {
-	   faadSuccess (true);
 	   good ++;
-	   if (cnt > 0)
-	      writeOut (outBuffer, cnt, rate);
+	   writeOut (outBuffer, cnt, rate);
 	}
 	else {
-	   faadSuccess (false);
 	   fout ++;
 	}
 
-	if (good + fout >= 50) {
+	if (good + fout >= 10) {
+	   faadSuccess (good > fout);
 //	   fprintf (stderr, "%d out of %d were good\n", good, good + fout);
 	   good = 0; fout = 0;
 	}
@@ -287,20 +288,20 @@ void	xheaacProcessor::toOutput (std::complex<float> *b, int16_t cnt) {
 void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                           int32_t pcmRate) {
 	if (theConverter == nullptr) {
-	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+	   theConverter = new rateConverter (pcmRate, 48000, pcmRate / 10);
 	   currentRate	= pcmRate;
 	}
 
 	if (pcmRate != currentRate) {
 	   delete theConverter;
-	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+	   theConverter = new rateConverter (pcmRate, 48000, pcmRate / 10);
 	   currentRate = pcmRate;
 	}
 #if 0
 	fprintf (stderr, "processing %d samples (rate %d)\n",
 	                  cnt, pcmRate);
 #endif
-	std::complex<float> local [theConverter -> getOutputSize ()];
+	std::complex<float> local [theConverter -> getOutputsize ()];
 	for (int i = 0; i < cnt; i ++) {
 	   std::complex<float> tmp = 
 	                    std::complex<float> (buffer [2 * i] / 8192.0,
@@ -388,8 +389,8 @@ int	flags		= 0;
 	   return;
 	}
 
-//	if (errorStatus != AAC_DEC_OK) {
-	if ((errorStatus != AAC_DEC_OK) && (errorStatus & 0x4000 == 0)) {
+	if (errorStatus != AAC_DEC_OK) {
+//	if ((errorStatus != AAC_DEC_OK) && (errorStatus & 0x4000 == 0)) {
 	   *conversionOK	= false;
 	   *samples		= 0;
 	   faadSuccess (false);
