@@ -98,7 +98,8 @@ private:
 signals:
 	void		audioAvailable	();;
 	void            faadSuccess     (bool);
-	void		aacData		(QString);
+	void		set_aacDataLabel	(const QString &);
+
 };
 
 #endif

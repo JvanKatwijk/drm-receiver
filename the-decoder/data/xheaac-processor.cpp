@@ -91,6 +91,9 @@ uint16_t        res     = 0;
 	         parent, SLOT (set_faadSyncLabel (bool)));
 	connect (this, SIGNAL (audioAvailable ()),
                  drm, SLOT (audioAvailable ()));
+	connect (this, SIGNAL (set_aacDataLabel (const QString &)),
+                 drm, SLOT (set_aacDataLabel (const QString &)));
+
 
 	currentRate			= 0;
 	theConverter			= nullptr;
@@ -137,6 +140,7 @@ int	failure		= 0;
 	                   processMessage (v, (startLow + lengthLow - 4) * 8);
 	   length -= 4;
 	}
+
 	borders. resize	(frameBorderCount);
 	std::vector<uint8_t> audioDescriptor =
 	                         getAudioInformation (theState, streamId);
@@ -413,6 +417,11 @@ int	flags		= 0;
 	      buffer [2 * i + 1] = localBuffer [2 * i + i];
 	   }
 	}
+
+	QString text = QString::number (fdk_info -> sampleRate);
+	text += fdk_info -> numChannels == 2 ? " stereo" : " mono";
+	set_aacDataLabel (text);
+	
 #if 0
 	fprintf (stderr, "frameSize %d, samplerate %d\n",
 	               fdk_info -> frameSize, fdk_info -> sampleRate);
