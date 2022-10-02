@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of drm-2
+ *    This file is part of drm receiver
  *
- *    drm-2 is free software; you can redistribute it and/or modify
+ *    drm-receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation version 2 of the License.
  *
- *    drm-2 is distributed in the hope that it will be useful,
+ *    drm-receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm-2 if not, write to the Free Software
+ *    along with drm-receiver if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -119,13 +119,13 @@ float	ver;
 mir_sdr_DeviceT devDesc [4];
 sdrplaySelect	*sdrplaySelector;
 
-	this	-> outputRate	= 2000000 / 32;
+	this	-> outputRate	= 96000;
+	this	-> inputRate	= 24 * outputRate;
 	this	-> sdrplaySettings	= s;
 	setupUi (&myFrame);
 	myFrame. show ();
 	antennaSelector		-> hide ();
 	tunerSelector		-> hide ();
-	this	-> inputRate	= kHz (2000);
 	_I_Buffer		= r;
 	libraryLoaded		= false;
 
@@ -237,7 +237,7 @@ ULONG APIkeyValue_length = 255;
 	                                      inputRate, 4);
 	filter_2	= new decimatingFIR (2 * 8 + 1,
 	                                     + outputRate / 2,
-	                                     inputRate / 4, 8);
+	                                     inputRate / 4, 6);
 	 
 	api_version	-> display (ver);
 	lastFrequency	= Khz (14070);

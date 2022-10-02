@@ -112,8 +112,8 @@ int	inputRate;
 int	k;
 QString	temp;
 
-	outputRate		= 2000000 / 32;
-	inputRate		= 2000000;
+	outputRate		= 96000;
+	inputRate		= 24 * outputRate;
 	setupUi (&myFrame);
         myFrame. show ();
         this    -> _I_Buffer   = r;
@@ -235,11 +235,10 @@ QString	temp;
 	statusLabel	-> setText ("Loaded");
 	filter_1	= new decimatingFIR (2 * 4 + 1,
                                              + outputRate / 2,
-                                             inputRate,
-                                             4);
+                                             inputRate, 4);
 	filter_2        = new decimatingFIR (2 * 8 + 1,
                                              outputRate / 2,
-                                             inputRate / 4, 8);
+                                             inputRate / 4, 6);
 
 	return;
 err:

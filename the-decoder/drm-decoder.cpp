@@ -40,7 +40,7 @@
 	                                 passbandFilter (25,
 	                                                 5000,
 	                                                 INRATE),
-	                                 theDecimator (SIZE_OUT / SIZE_END),
+	                                 theDecimator (INRATE / WORKING_RATE),
 //	                                 localMixer (WORKING_RATE),
 	                                 my_Reader (&inputBuffer,
 	                                           2 * 16384, this),
@@ -62,19 +62,9 @@
 	myFrame. show ();
 	running. store (false);
 
-//      interpolate for the rest
-	for (int i = 0; i < SIZE_OUT; i ++) {
-	   float inVal	= float (SIZE_IN);
-	   mapTable_int [i]     = int (floor (i * (inVal / (SIZE_OUT))));
-	   mapTable_float [i]   = i * (inVal / (SIZE_OUT)) - mapTable_int [i];
-	}
-	convIndex       = 0;
-	convBuffer. resize (SIZE_IN + 1);
-	
 	selectedFrequency
 	                = theRadio -> get_selectedFrequency ();
 	centerFrequency = theRadio -> get_centerFrequency ();
-	Raw_Rate        = 2000000 / 32;
 	passbandFilter.
 		     modulate (selectedFrequency - centerFrequency);
 
@@ -132,22 +122,8 @@ void	drmDecoder::
 	   sample   = passbandFilter. Pass (sample);
 	   sample   = theMixer. do_shift (sample, theOffset);
 //
-//	interpolating 62500 -> 72000
-	   convBuffer [convIndex ++] = sample;
-	   if (convIndex >= (int)(convBuffer. size ())) {
-//	      std::complex<float> out [SIZE_OUT];
-	      for (int j = 0; j < SIZE_OUT; j ++) {
-	         int16_t  inpBase	= mapTable_int [j];
-	         float inpRatio		= mapTable_float [j];
-	         std::complex<float> res  =
-	                 cmul (convBuffer [inpBase + 1], 2 * inpRatio) +
-	                        cmul (convBuffer [inpBase], 2 * (1 - inpRatio));
-	         if (theDecimator. Pass (res, &res))
-	            inputBuffer. putDataIntoBuffer (&res, 1);
-	      }
-	      convBuffer [0]  = convBuffer [convBuffer. size () - 1];
-	      convIndex    = 1;
-	   }
+	   if (theDecimator. Pass (sample, &sample))
+	      inputBuffer. putDataIntoBuffer (&sample, 1);
 	}
 }
 //

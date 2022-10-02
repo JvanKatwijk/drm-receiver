@@ -101,7 +101,8 @@ private:
 	bool			messageHandler		(generalCommand *);
 
 	QString			recorderVersion;
-	
+
+	int			inputRate;
 	int32_t			vfoFrequency;
 	int16_t			hwVersion;
 	QSettings		*sdrplaySettings;

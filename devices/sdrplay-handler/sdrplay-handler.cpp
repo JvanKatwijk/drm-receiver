@@ -124,14 +124,14 @@ int16_t	bankFor_rsp (int32_t freq) {
 	       sdrplaySettings -> value ("sdrplay-agcMode", 0). toInt() != 0;
 	sdrplaySettings	-> endGroup	();
 
-	int inputRate	= 2000000;
-	int outputRate	= 2000000 / 32;
+	int outputRate	= 96000;
+	inputRate	= 24 * outputRate;
 	filter_1	= new decimatingFIR (2 * 4 + 1,
                                                      + outputRate / 2,
                                                      inputRate, 4);
         filter_2	= new decimatingFIR (2 * 8 + 1,
                                                      outputRate / 2,
-                                                     inputRate / 4, 8);
+                                                     inputRate / 4, 6);
 
 
 	if (agcMode) {
@@ -394,7 +394,7 @@ static int	sampleCnt	= 0;
 
         p -> _I_Buffer -> putDataIntoBuffer (localBuf, cnt);
 	sampleCnt += cnt;
-	if (sampleCnt > 2000000 / 32 / 8) {
+	if (sampleCnt > 96000 / 8) {
 	   p -> report_dataAvailable ();
            sampleCnt = 0;
         }
@@ -563,7 +563,7 @@ uint32_t                ndev;
 	vfoFrequency	= Khz (14070);		// default
 //	set the parameter values
 	chParams	= deviceParams -> rxChannelA;
-	deviceParams	-> devParams -> fsFreq. fsHz	= 2000000;
+	deviceParams	-> devParams -> fsFreq. fsHz	= inputRate;
 	chParams	-> tunerParams. bwType = sdrplay_api_BW_0_200;
 	chParams	-> tunerParams. ifType = sdrplay_api_IF_Zero;
 //

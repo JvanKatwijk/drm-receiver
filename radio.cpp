@@ -75,7 +75,7 @@ QString	FrequencytoString (int32_t freq) {
 
 	this	-> settings	= sI;
 	this	-> my_bandPlan	= my_bandPlan;
-	this	-> inputRate	= 2000000 / 32;
+	this	-> inputRate	= 96000;
 	setupUi (this);
 //      and some buffers
 //	in comes:
@@ -267,8 +267,9 @@ void	RadioInterface::adjustFrequency_khz (int32_t n) {
 }
 
 void	RadioInterface::adjustFrequency_hz (int32_t n) {
-	if ((selectedFrequency + n >= centerFrequency + KHz (27)) ||
-	    (selectedFrequency + n <= centerFrequency - KHz (27))) {
+int h = inputRate / 2 - KHz (5);
+	if ((selectedFrequency + n >= centerFrequency + h) ||
+	    (selectedFrequency + n <= centerFrequency - h)) {
 	   setFrequency (centerFrequency + n);	
 	   centerFrequency = theDevice -> getVFOFrequency ();
 	   selectedFrequency = centerFrequency;

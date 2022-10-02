@@ -28,15 +28,10 @@ class	EQDisplay;
 class	IQDisplay;
 #include	"ui_drmdecoder.h"
 
-#define         DECIMATOR       5
-#define         INRATE          (2000000 / 32)
-#define         INTERM_RATE     (INRATE / DECIMATOR)
+#define         DECIMATOR       8
+#define         INRATE          96000
 #define         WORKING_RATE    12000
 #define         FILTER_DEFAULT  21
-
-#define		SIZE_IN		625
-#define		SIZE_OUT	720
-#define		SIZE_END	120
 
 class drmDecoder: public QObject, private Ui_drmdecoder {
 Q_OBJECT
@@ -79,11 +74,6 @@ private:
 	                                                 smodeInfo *m);
 
 
-        std::vector<std::complex<float>> convBuffer;
-        int		convIndex;
-        int16_t		mapTable_int   [SIZE_OUT];
-        float		mapTable_float [SIZE_OUT];
-//
 //
         std::atomic<bool>       running;
 

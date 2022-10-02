@@ -31,7 +31,7 @@
 	                         RingBuffer<std::complex<float>> *b,
 	                         QSettings *s):
 	                           myFrame (nullptr) {
-	theRate		= 2000000 / 32;
+	theRate		= 96000;
 	(void)s;
 	setupUi		(&myFrame);
 	myFrame. show ();

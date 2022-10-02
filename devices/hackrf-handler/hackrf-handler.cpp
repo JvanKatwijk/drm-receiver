@@ -36,8 +36,8 @@ int	err;
 int	res;
 int	i;
 
-	this    -> outputRate		= 2000000 / 32;
-	this    -> inputRate		= 2000000;
+	this    -> outputRate		= 96000;
+	this    -> inputRate		= 24 * outputRate;
 	this	-> hackrfSettings	= s;
 	setupUi (&myFrame);
 	myFrame. show ();
@@ -147,7 +147,7 @@ int	i;
                                                      inputRate, 4);
         filter_2	= new decimatingFIR (2 * 8 + 1,
                                                       outputRate / 2,
-                                                      inputRate / 4, 8);
+                                                      inputRate / 4, 6);
 	running. store (false);
 }
 
