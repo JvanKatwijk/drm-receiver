@@ -53,7 +53,17 @@
 #include	"referenceframe.h"
 #include	"basics.h"
 #include	"equalizer-1.h"
+#ifdef ESTIMATOR_2
+#include	"estimator-2.h"
+#elif defined (ESTIMATOR_ARMA)
+#include	"estimator-arma-2.h"
+#elif defined (ESTIMATOR_EIGEN)
+#include	"estimator-eigen-2.h"
+#elif	defined (ESTIMATOR_JAN)
+#include	"estimator-jan-2.h"
+#elif	defined (ESTIMATOR_1)
 #include	"estimator-1.h"
+#endif
 #include	"matrix2.h"
 #include	"drm-decoder.h"
 
@@ -86,11 +96,13 @@ float	*THETA;
 	connect (this, SIGNAL (show_eqsymbol (int)),
                  parent, SLOT (show_eqsymbol (int)));
 
-	
+
+	strength	= 3;
 //	Based on table 92 ETSI ES 201980
 
 //	Just for experimentation, we added some alternatives
-int16_t		symbols_per_window_list_0 []	= {6, 4, 4, 6};
+int16_t		symbols_per_window_list_0 []	= {4, 2, 2, 6};
+//int16_t		symbols_per_window_list_0 []	= {6, 4, 4, 6};
 int16_t		symbols_per_window_list_1 []	= {10, 6, 8, 6};
 int16_t		symbols_per_window_list_2 []	= {12, 8, 8, 6};
 int16_t		symbols_per_window_list_3 []	= {14, 10, 8, 6};

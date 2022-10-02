@@ -20,22 +20,20 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__ESTIMATOR_3__
-#define	__ESTIMATOR_3__
+#ifndef	__ESTIMATOR_X__
+#define	__ESTIMATOR_X__
 
-#include	<armadillo>
 #include	<QString>
 #include	"radio-constants.h"
 #
-using namespace	arma;
 
 //	The processor for estimating the channel(s) of a single
 //	symbol
-class	estimator_2 {
+class	estimator_1 {
 public:
-		estimator_2	(std::complex<float> **,
+		estimator_1	(std::complex<float> **,
 	                         uint8_t, uint8_t, int16_t);
-		~estimator_2	();
+		~estimator_1	();
 	void	estimate	(std::complex<float> *, std::complex<float> *);
 private:
 	std::complex<float>     **refFrame;
@@ -52,10 +50,23 @@ private:
 	int16_t		numberofTaps;
 	int16_t		currentSymbol;
 	int16_t		fftSize;
-	cx_fmat		F_p;
-	cx_fmat		S_p;
-	cx_fmat		F_p_inv;
+	std::complex<double>	**F_p;
+	std::complex<double>	**A_p_inv;
 	std::complex<float>	*pilotVector;
+
+	std::complex<double>	**createMatrix (int, int);
+	void		deleteMatrix (std::complex<double> **, int, int);
+	void		multiply_d (std::complex<double> **, int, int,
+	                            std::complex<double> **, int, int,
+	                            std::complex<double> **);
+	void		transpose (std::complex<double> **, int, int,
+	                           std::complex<double> **);
+	void		multiply_e (std::complex<double> **, int, int,
+	                            std::complex<double> **, int, int,
+	                            std::complex<double> **);
+	void		multiply_f (std::complex<double> **, int, int,
+	                            std::complex<double> **, int, int,
+	                            std::complex<double> **);
 	int16_t		*pilotTable;
 };
 

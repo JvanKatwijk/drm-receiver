@@ -201,6 +201,9 @@ float     sampleclockOffset       = 0;
 
 	      myArray<std::complex<float>> inbank (nrSymbols, nrCarriers);
 	      myArray<theSignal> outbank (nrSymbols, nrCarriers);
+	      myArray<bool> frame_0 (nrSymbols, nrCarriers);
+              myArray<bool> frame_12 (nrSymbols, nrCarriers);
+
 	      correlator myCorrelator (&modeInf);
 	      equalizer_1 my_Equalizer (this,
 	                                modeInf.Mode,
@@ -305,6 +308,21 @@ float     sampleclockOffset       = 0;
 //	on FAC and other data cells, we better create the table here.
 	      sdcTable. resize (sdcCells (&modeInf));
 	      set_sdcCells (&modeInf);
+//      To speed up checking for data elements, we create
+//      a matrix with truth values for the data elements
+              int16_t      K_min   = Kmin (modeInf. Mode, modeInf. Spectrum);
+              int16_t      K_max   = Kmax (modeInf. Mode, modeInf. Spectrum);
+              for (int nsymbol = 0;
+                   nsymbol < symbolsperFrame (modeInf. Mode); nsymbol ++) {
+                 for (int ncarrier = K_min; ncarrier <= K_max; ncarrier ++) {
+                      frame_0. setElement (nsymbol, ncarrier - K_min,
+                                 isDatacell (&modeInf, nsymbol, ncarrier, 0));
+                      frame_12. setElement (nsymbol, ncarrier - K_min,
+                                 isDatacell (&modeInf, nsymbol, ncarrier, 1));
+                 }
+              }
+
+//      Having set the matrices and tables, it is time for sdc processing
 	      sdcProcessor my_sdcProcessor (this, &modeInf,
 	                                    sdcTable, &theState);
 
@@ -331,11 +349,62 @@ float     sampleclockOffset       = 0;
 	               my_backendController. reset (&theState);
 	            superframer	= sdcOK;
 	         }
+	         float nominator = 0;
+	         float denominator = 0;
+	         for (int s = 0; s < nrSymbols; s ++) {
+	            for (int c = K_min; c <= K_max; c ++) {
+	               if (isPilotCell (modeInf. Mode, s, c)) {
+	                  std::complex<float> ss =
+	                            getPilotValue (modeInf. Mode,
+	                                            modeInf. Spectrum, s, c);
+	                  std::complex<float> rr =
+	                         outbank. elementValue (s, c - K_min). signalValue;
+	                  nominator += real (ss) * real (ss) +
+	                                         imag (ss) * imag (ss);	
+	                  float dI = real (ss) - real (rr);
+	                  float dQ = imag (ss) - imag (rr);
+	                  denominator += dI * dI + dQ * dQ;
+	               }
+	            }
+	         }
+	         fprintf (stderr, "error %f\n", 10 * log10 (nominator / denominator));
 //
 //	when here, add the current frame to the superframe.
 //	Obviously, we cannot garantee that all data is in order
-	         if (superframer)
-	            addtoSuperFrame (&modeInf, blockCount ++, &outbank);
+//	         if (superframer)
+//	            addtoSuperFrame (&modeInf, blockCount ++, &outbank);
+	         if (superframer) {
+	            static int teller = 0;
+	            int blockno = blockCount;
+	            blockCount ++;
+
+	            myArray<bool> *hetFrame;
+	            if (isFirstFrame (&theState)) {
+	               my_backendController. newFrame (&theState);
+	               hetFrame = &frame_0;
+	            }
+	            else
+	               hetFrame = &frame_12;
+	               
+	            for (int symbol = 0;
+	                    symbol < symbolsperFrame (modeInf. Mode);
+	                                                     symbol ++) {
+	               for (int carrier = K_min; carrier <= K_max; carrier ++) {
+//	                  if (isDatacell (&modeInf, symbol,
+//	                                             carrier, blockno)) {
+	                  if (hetFrame -> elementValue (symbol, carrier - K_min)) {
+	                     my_backendController.
+	                             addtoMux (blockno, teller ++,
+                                     outbank. element (symbol)[carrier - K_min]);
+	                  }
+	               }
+	            }
+
+	            if (isLastFrame (&theState)) {
+	               my_backendController. endofFrame ();
+	               teller = 0;
+	            }
+	         }
 
 //	when we are here, it is time to build the next frame
 	         frameReady	= false;

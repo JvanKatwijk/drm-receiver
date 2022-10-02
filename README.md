@@ -209,6 +209,56 @@ The scope right gives the constellation of the restored signal. Ideally
 for QAM64, there are 64 dots evenly distributed over the screen.
 
 
+--------------------------------------------------------------------------
+A note on building an executable and equalization
+--------------------------------------------------------------------------
+
+For building an executable the - more or less - standard libraries
+are supposed to be installed.
+Qt, Qwt, fftw3, libsamplerate and libsndfile and of course, the
+support libraries for the devices one chooses.
+
+There is one thing that might be slightly more complex, it has to do
+with preparation for the equalisation.
+Input to the equalizer is an estimate of the channel,  in the implementation
+there are some choices, represented by different versions of 
+the "estimator"s in the equalizer directory.
+
+The estimator computes the difference between the pilot values as
+seen in the data and the pilot values as they should be.
+
+	
+	F_p is initialized with the precomputed values and is
+	matrix filled with the (pilot, tap) combinations, where for the
+	pilots, their carrier values (relative to 0) are relevant
+	Basically the FFT transformer, with positions related to
+	the positions of the taps
+
+	The approach for channel estimation is as follows:
+	we call the channel in the time domain h_td,
+	in the frequency domain that will then be h_fd = F x h_td
+ 	we observe the values of the pilots at the recoever
+ 	side, X_p, It is known that they were transmittes as s_p
+ 	We know then that
+	X_p = diag (s_p) * f, where f = F_p * h_td
+	so, X_p = S_p * F_p * h_td
+	with S_p is diag (s_p), and F_p is the FFT transform of the channel
+	S_p en F_p can be computed, since they are known, regardless
+	A_p = S_p * F_p
+	the equation then is X_p = A_p * h_td
+	we solve that as h_td = A_p ^ -1 x X_p
+	recall that h_td is the chaannel in the time domain, so
+	h_fd = F_p * h_td is the solution
+
+estimator_1 is the simplest one, it works though.
+
+estimator_2 has three different versions, the simplest one
+is estimator_jan_2.cpp, is limited in the computations, not all "taps" are
+taken into account.
+
+estimator_arma_2 uses the armadillo library for the matrix computations,
+estimator_eigen_2 uses the "eigen" template library .
+
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 

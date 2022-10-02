@@ -59,6 +59,9 @@ elementtype elementValue (int row, int column) {
 	return table [row][column];
 }
 
+void	setElement (int row, int column, bool value) {
+	table [row][column] = value;
+}
 
 private:
 elementtype	**table;

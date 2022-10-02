@@ -116,8 +116,6 @@ HEADERS += ./radio-constants.h \
 	   ./the-decoder/ofdm/word-collector.h \
 	   ./the-decoder/equalizer/equalizer-1.h \
 	   ./the-decoder/equalizer/equalizer-base.h \
-#	   ./the-decoder/equalizer/estimator-2.h \
-	   ./the-decoder/equalizer/estimator-1.h \
 	   ./the-decoder/equalizer/matrix2.h \
 	   ./the-decoder/equalizer/referenceframe.h \
 	   ./the-decoder/parameters/msc-config.h \
@@ -200,8 +198,6 @@ SOURCES += ./main.cpp \
 	   ./the-decoder/ofdm/word-collector.cpp \
 	   ./the-decoder/equalizer/equalizer-1.cpp \
 	   ./the-decoder/equalizer/equalizer-base.cpp \
-#	   ./the-decoder/equalizer/estimator-2.cpp \
-	   ./the-decoder/equalizer/estimator-1.cpp \
 	   ./the-decoder/equalizer/matrix2.cpp \
 	   ./the-decoder/equalizer/referenceframe.cpp \
 	   ./the-decoder/parameters/msc-config.cpp \
@@ -242,14 +238,19 @@ DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
 CONFIG		+= fdk-aac
 #CONFIG		+= faad
+# choose one of the estimators
+# CONFIG	+= estimator_1
+# CONFIG	+= estimator_2	does not work yet
+# CONFIG	+= estimator_jan
+# CONFIG	+= estimator_eigen
+CONFIG		+= estimator_arma
 
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 LIBS            += -lfaad_drm
 INCLUDEPATH	+= /usr/include/qt5/qwt
-INCLUDEPATH	+= /usr/include/eigen3
 LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
-#LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -larmadillo -ldl
+LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
 }
 
 win32 {
@@ -268,6 +269,12 @@ DESTDIR		= /usr/shared/w32-programs/windows-drm2
 CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
+# choose one of the estimators
+# CONFIG	+= estimator_1
+# CONFIG	+= estimator_2	does not work yet
+# CONFIG	+= estimator_jan
+ CONFIG	+= estimator_eigen
+#CONFIG		+= estimator_arma
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/eigen3
@@ -386,3 +393,40 @@ SOURCES		+= ./the-decoder/data/aac-processor-faad.cpp
 LIBS		+= -lfaad_drm
 #LIBS		+= -lfaad_drm -larmadillo
 }
+
+estimator_1 {
+DEFINES		+= ESTIMATOR_1
+HEADERS		+= ./the-decoder/equalizer/estimator-1.h
+SOURCES		+= ./the-decoder/equalizer/estimator-1.cpp
+}
+
+estimator_2 {
+DEFINES		+= ESTIMATOR_2
+INCLUDEPATH	+= /usr/include/eigen3
+HEADERS		+= ./the-decoder/equalizer/estimator-2.h
+SOURCES		+= ./the-decoder/equalizer/estimator-2.cpp
+}
+
+# 
+estimator_jan {
+DEFINES		+= ESTIMATOR_JAN
+HEADERS		+= ./the-decoder/equalizer/estimator-jan-2.h
+SOURCES		+= ./the-decoder/equalizer/estimator-jan-2.cpp
+}
+
+# you have the eigen template library installed?
+estimator_eigen {
+DEFINES		+= ESTIMATOR_EIGEN
+INCLUDEPATH	+= /usr/include/eigen3
+HEADERS		+= ./the-decoder/equalizer/estimator-eigen-2.h
+SOURCES		+= ./the-decoder/equalizer/estimator-eigen-2.cpp
+}
+
+# you have armadillo installed ?
+estimator_arma {
+DEFINES		+= ESTIMATOR_ARMA
+HEADERS		+= ./the-decoder/equalizer/estimator-arma-2.h
+SOURCES		+= ./the-decoder/equalizer/estimator-arma-2.cpp
+LIBS		+= -larmadillo
+}
+

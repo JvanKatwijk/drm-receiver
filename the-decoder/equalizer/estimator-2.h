@@ -20,8 +20,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__ESTIMATOR_4__
-#define	__ESTIMATOR_4__
+#ifndef	__ESTIMATOR_EIGEN__
+#define	__ESTIMATOR_EIGEN__
 
 #include	<Eigen/Dense>
 #include	<QString>
@@ -31,11 +31,11 @@ using namespace	Eigen;
 
 //	The processor for estimating the channel(s) of a single
 //	symbol
-class	estimator_2 {
+class	estimator_1 {
 public:
-		estimator_2	(std::complex<float> **,
+		estimator_1	(std::complex<float> **,
 	                         uint8_t, uint8_t, int16_t);
-		~estimator_2	();
+		~estimator_1	();
 	void	estimate	(std::complex<float> *, std::complex<float> *);
 private:
 	std::complex<float>     **refFrame;
