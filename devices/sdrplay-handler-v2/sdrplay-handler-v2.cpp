@@ -24,7 +24,7 @@
 #include	<QSettings>
 #include	<QHBoxLayout>
 #include	<QLabel>
-#include	"sdrplay-handler.h"
+#include	"sdrplay-handler-v2.h"
 #include	"sdrplayselect.h"
 #include	"radio.h"
 
@@ -110,9 +110,10 @@ int16_t	bank_rsp1 (int32_t freq) {
         return -1;
 }
 
-	sdrplayHandler::sdrplayHandler  (RadioInterface *mr,
-	                                 RingBuffer<std::complex<float>> *r,
-	                                 QSettings	*s):
+	sdrplayHandler_v2::
+	              sdrplayHandler_v2  (RadioInterface *mr,
+	                                  QSettings	*s,
+	                                  RingBuffer<std::complex<float>> *r):
 	                                      myFrame (nullptr) {
 mir_sdr_ErrT err;
 float	ver;
@@ -370,7 +371,7 @@ ULONG APIkeyValue_length = 255;
 	sampleCnt	= 0;
 }
 
-	sdrplayHandler::~sdrplayHandler	(void) {
+	sdrplayHandler_v2::~sdrplayHandler_v2	() {
 	stopReader ();
 	sdrplaySettings -> beginGroup ("sdrplaySettings");
 	sdrplaySettings -> setValue   ("ppmOffset",
@@ -389,8 +390,6 @@ ULONG APIkeyValue_length = 255;
 	if (numofDevs > 0)
 	   my_mir_sdr_ReleaseDeviceIdx (deviceIndex);
 
-//	delete filter_1;
-//	delete filter_2;
 	fprintf (stderr, "closing down the library\n");
 #ifdef __MINGW32__
         FreeLibrary (Handle);
@@ -447,7 +446,7 @@ int	lnaStates (int hwVersion, int band) {
 	}
 }
 
-void	sdrplayHandler::setVFOFrequency		(int32_t newFrequency) {
+void	sdrplayHandler_v2::setVFOFrequency	(int32_t newFrequency) {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
@@ -499,11 +498,11 @@ int     lnaState        = lnaGainSetting        -> value ();
 	lnaGRdBDisplay -> display (get_lnaGRdB (hwVersion, lnaState, bank));
 }
 
-int32_t	sdrplayHandler::getVFOFrequency	(void) {
+int32_t	sdrplayHandler_v2::getVFOFrequency	() {
 	return lastFrequency;
 }
 
-void	sdrplayHandler::set_ifgainReduction (int newGain) {
+void	sdrplayHandler_v2::set_ifgainReduction (int newGain) {
 	(void)newGain;
 int	GRdB		= GRdBSelector	-> value ();
 int	lnaState	= lnaGainSetting -> value ();
@@ -521,7 +520,7 @@ int	bank		= bankFor_rsp (getVFOFrequency ());
 	}
 }
 
-void    sdrplayHandler::set_lnagainReduction (int dummy) {
+void    sdrplayHandler_v2::set_lnagainReduction (int dummy) {
 mir_sdr_ErrT err;
 int	bank	= bankFor_rsp (getVFOFrequency ());
 int	lnaState	= lnaGainSetting -> value ();
@@ -555,7 +554,7 @@ void myStreamCallback (int16_t		*xi,
 	               uint32_t		hwRemoved,
 	               void		*cbContext) {
 int16_t	i;
-sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
+sdrplayHandler_v2	*p	= static_cast<sdrplayHandler_v2 *> (cbContext);
 std::complex<float> localBuf [numSamples];
 float	denominator	= (float)(p -> denominator);
 int	cnt	= 0;
@@ -592,12 +591,12 @@ int	cnt	= 0;
 void	myGainChangeCallback (uint32_t	GRdB,
 	                      uint32_t	lnaGRdB,
 	                      void	*cbContext) {
-sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
+sdrplayHandler_v2 *p	= static_cast<sdrplayHandler_v2 *> (cbContext);
 	(void)lnaGRdB;
 //	p -> lnaGRdBDisplay	-> display ((int)lnaGRdB);
 }
 
-bool	sdrplayHandler::restartReader	(void) {
+bool	sdrplayHandler_v2::restartReader	() {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
@@ -643,7 +642,7 @@ int	lnaState	= lnaGainSetting	-> value ();
 	return true;
 }
 
-void	sdrplayHandler::stopReader	(void) {
+void	sdrplayHandler_v2::stopReader	() {
 	if (!running. load ())
 	   return;
 
@@ -651,15 +650,15 @@ void	sdrplayHandler::stopReader	(void) {
 	running. store (false);
 }
 
-void	sdrplayHandler::resetBuffer	(void) {
+void	sdrplayHandler_v2::resetBuffer	() {
 	_I_Buffer	-> FlushRingBuffer ();
 }
 
-int16_t	sdrplayHandler::bitDepth	(void) {
+int16_t	sdrplayHandler_v2::bitDepth	() {
 	return 12;
 }
 
-bool	sdrplayHandler::loadFunctions	(void) {
+bool	sdrplayHandler_v2::loadFunctions	() {
 	my_mir_sdr_StreamInit	= (pfn_mir_sdr_StreamInit)
 	                    GETPROCADDRESS (this -> Handle,
 	                                    "mir_sdr_StreamInit");
@@ -849,7 +848,7 @@ bool	sdrplayHandler::loadFunctions	(void) {
 	return true;
 }
 
-void	sdrplayHandler::agcControl_toggled (int agcMode) {
+void	sdrplayHandler_v2::agcControl_toggled (int agcMode) {
 	this	-> agcMode	= agcControl -> isChecked ();
 	my_mir_sdr_AgcControl (this -> agcMode,
 	                -30, 0, 0, 0, 0, lnaGainSetting -> value ());
@@ -864,23 +863,23 @@ void	sdrplayHandler::agcControl_toggled (int agcMode) {
 	}
 }
 
-void    sdrplayHandler::debugControl_toggled (int debugMode) {
+void    sdrplayHandler_v2::debugControl_toggled (int debugMode) {
 	(void)debugMode;
         my_mir_sdr_DebugEnable (debugControl -> isChecked () ? 1 : 0);
 }
 
-void	sdrplayHandler::set_ppmControl (int ppm) {
+void	sdrplayHandler_v2::set_ppmControl (int ppm) {
 	if (running. load ()) {
 	   my_mir_sdr_SetPpm	((float)ppm);
 	   my_mir_sdr_SetRf	((float)lastFrequency, 1, 0);
 	}
 }
 
-void	sdrplayHandler::report_dataAvailable (void) {
+void	sdrplayHandler_v2::report_dataAvailable () {
 	emit dataAvailable (10);
 }
 
-void	sdrplayHandler::set_antennaSelect (const QString &s) {
+void	sdrplayHandler_v2::set_antennaSelect (const QString &s) {
 mir_sdr_ErrT err;
 
 	if (hwVersion < 2)	// should not happen
@@ -893,7 +892,7 @@ mir_sdr_ErrT err;
 	(void)err;
 }
 
-void	sdrplayHandler::set_tunerSelect (const QString &s) {
+void	sdrplayHandler_v2::set_tunerSelect (const QString &s) {
 mir_sdr_ErrT err;
 
 	if (hwVersion != 3)	// should not happen
@@ -907,7 +906,7 @@ mir_sdr_ErrT err;
 	   fprintf (stderr, "error %d in selecting  rspDuo\n", err);
 }
 
-QString	sdrplayHandler::errorCodes (mir_sdr_ErrT err) {
+QString	sdrplayHandler_v2::errorCodes (mir_sdr_ErrT err) {
 	switch (err) {
 	   case mir_sdr_Success:
 	      return "success";

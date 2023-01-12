@@ -54,11 +54,13 @@ public:
 	                        QString		stationList,
 	                        bandPlan	*my_bandPlan,
 	                        QWidget		*parent = NULL);
-		~RadioInterface	(void);
+		~RadioInterface	();
 
-	int32_t	get_selectedFrequency	();
-	int32_t	get_centerFrequency	();
+	int32_t		get_selectedFrequency	();
+	int32_t		get_centerFrequency	();
 private:
+        RingBuffer<std::complex<float> > inputData;
+        RingBuffer<std::complex<float> > audioData;
 	int32_t		centerFrequency;
 	int32_t		selectedFrequency;
 	QSettings       *settings;
@@ -75,8 +77,6 @@ private:
         int16_t         *outTable;
         deviceHandler	*theDevice;
 	drmDecoder	*theDecoder;
-        RingBuffer<std::complex<float> > *inputData;
-        RingBuffer<std::complex<float> > *audioData;
         fftScope        *hfScope;
 //	fftFilter	hfFilter;
 	int16_t		mouseIncrement;
@@ -95,7 +95,10 @@ private:
         void            adjust          (int32_t);
 	
 private slots:
-        deviceHandler	*setDevice		(
+        deviceHandler	*getDevice		(const QString &,
+	                                         QSettings *,
+	                                      RingBuffer<std::complex<float>> *);
+        deviceHandler	*setDevice		(QSettings *,
 	                                      RingBuffer<std::complex<float>> *);
         void            adjustFrequency_hz	(int);
         void            adjustFrequency_khz	(int);
@@ -113,6 +116,7 @@ private slots:
 	void		set_dumpButton		(void);
 	void		closeEvent		(QCloseEvent *event);
 public slots:
+	void		quickStart		();
 	void		sampleHandler		(int amount);
         void            processAudio		(int, int);
 };

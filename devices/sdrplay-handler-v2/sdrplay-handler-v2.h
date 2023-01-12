@@ -21,8 +21,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __SDRPLAY_HANDLER__
-#define	__SDRPLAY_HANDLER__
+#ifndef __SDRPLAY_HANDLER_V2
+#define	__SDRPLAY_HANDLER_V2
 
 #include	<QObject>
 #include	<QFrame>
@@ -34,7 +34,7 @@
 #include	"ringbuffer.h"
 #include	"fir-filters.h"
 #include	"device-handler.h"
-#include	"ui_sdrplay-widget.h"
+#include	"ui_sdrplay-widget-v2.h"
 #include	"mirsdrapi-rsp.h"
 
 class	QSettings;
@@ -96,13 +96,14 @@ typedef mir_sdr_ErrT (*pfn_mir_sdr_AmPortSelect) (unsigned int);
 
 class	RadioInterface;
 ///////////////////////////////////////////////////////////////////////////
-class	sdrplayHandler: public deviceHandler, public Ui_sdrplayWidget {
+class	sdrplayHandler_v2: public deviceHandler,
+	                           public Ui_sdrplayWidget_v2 {
 Q_OBJECT
 public:
-		sdrplayHandler		(RadioInterface *,
-	                                 RingBuffer<std::complex<float>> *,
-	                                 QSettings	*);
-		~sdrplayHandler		();
+		sdrplayHandler_v2	(RadioInterface *,
+	                                 QSettings	*,
+	                                 RingBuffer<std::complex<float>> *);
+		~sdrplayHandler_v2	();
 	void	setVFOFrequency		(int32_t);
 	int32_t	getVFOFrequency		();
 
@@ -118,8 +119,6 @@ public:
 	uint32_t	inputRate;
 	int32_t		outputRate;
 	void		report_dataAvailable	(void);
-//	std::unique_ptr<decimatingFIR>	filter_1;
-//	std::unique_ptr<decimatingFIR>	filter_2;
 	decimatingFIR	*filter_1;
 	decimatingFIR	*filter_2;
 	int		denominator;

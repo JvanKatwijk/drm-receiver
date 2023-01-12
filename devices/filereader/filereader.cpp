@@ -28,8 +28,8 @@
 #include	"filereader.h"
 
 	fileReader::fileReader	(RadioInterface *mr,
-	                         RingBuffer<std::complex<float>> *b,
-	                         QSettings *s):
+	                         QSettings *s,
+	                         RingBuffer<std::complex<float>> *b):
 	                           myFrame (nullptr) {
 	theRate		= 96000;
 	(void)s;

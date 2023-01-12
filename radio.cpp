@@ -2,7 +2,7 @@
 /*
  *    Copyright (C)  2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of drm2
  *
@@ -40,8 +40,11 @@
 //      devices
 #include        "device-handler.h"
 #include        "filereader.h"
-#ifdef	HAVE_SDRPLAY
-#include        "sdrplay-handler.h"
+#ifdef	HAVE_SDRPLAY_V2
+#include        "sdrplay-handler-v2.h"
+#endif
+#ifdef	HAVE_SDRPLAY_V3
+#include        "sdrplay-handler-v3.h"
 #endif
 #ifdef	HAVE_HACKRF
 #include	"hackrf-handler.h"
@@ -50,7 +53,36 @@
 #include	"rtlsdr-handler.h"
 #endif
 //
+#include	"deviceselect.h"
 #include	"drm-decoder.h"
+
+#define	D_SDRPLAY_V2	"sdrplay_v2"
+#define	D_SDRPLAY_V3	"sdrplay"
+#define	D_RTL_TCP	"rtl_tcp"
+#define	D_HACKRF	"hackrf"
+#define	D_RTLSDR	"dabstick"
+static 
+const char *deviceTable [] = {
+#ifdef	HAVE_SDRPLAY_V2
+	D_SDRPLAY_V2,
+#endif
+#ifdef	HAVE_SDRPLAY_V3
+	D_SDRPLAY_V3,
+#endif
+#ifdef	HAVE_HACKRF
+	D_HACKRF,
+#endif
+#ifdef	HAVE_RTLSDR
+	D_RTLSDR,
+#endif
+#ifdef	HAVE_RTL_TCP
+	D_RTL_TCP,
+#endif
+	nullptr
+};
+
+static int startKnop;
+static	QTimer	*starter;
 
 static inline
 int twoPower (int a) {
@@ -71,19 +103,16 @@ QString	FrequencytoString (int32_t freq) {
 	                                QString		stationList,
 	                                bandPlan	*my_bandPlan,
 	                                QWidget		*parent):
-	                                    QMainWindow (parent) {
+	                                    QMainWindow (parent),
+	                                    inputData	(1024 * 1024),
+	                                    audioData	(48000) {
 
 	this	-> settings	= sI;
 	this	-> my_bandPlan	= my_bandPlan;
 	this	-> inputRate	= 96000;
 	setupUi (this);
 //      and some buffers
-//	in comes:
-        inputData       = new RingBuffer<std::complex<float> > (1024 * 1024);
-//
-//	out goes:
 	audioRate		= 48000;
-        audioData		= new RingBuffer<std::complex<float>> (audioRate);
 
 //	and the decoders
 	displaySize		= 1024;
@@ -159,22 +188,58 @@ QString	FrequencytoString (int32_t freq) {
                  this, SLOT (updateTime (void)));
         secondsTimer. start (1000);
 
-	theDevice	= setDevice (inputData);
-	if (theDevice == NULL) {
-	   QMessageBox::warning (this, tr ("sdr"),
-	                               tr ("No Device\n"));
-	   exit (22);
-	}
-
-	hfScope		-> set_bitDepth (theDevice -> bitDepth ());
-	connect (theDevice, SIGNAL (dataAvailable (int)),
-	         this, SLOT (sampleHandler (int)));
 //	and off we go
-	theDecoder	= new drmDecoder (this, audioData);
+	theDecoder	= new drmDecoder (this, &audioData);
 //	bind the signals in the decoder to some slots
 	connect (theDecoder, SIGNAL (audioAvailable (int, int)),
 	         this, SLOT (processAudio (int, int)));
-	theDevice	-> restartReader ();
+//
+//	and now for the device
+	QString device =
+	            settings -> value ("device", "no device").toString ();
+	int k = -1;
+	for (int i = 0; deviceTable [i] != nullptr; i ++)
+	   if (deviceTable [i] == device) {
+	      k = i;
+	      break;
+	}
+	if (k != -1) {
+	   starter	= new QTimer;
+	   startKnop	= k;
+	   starter -> setSingleShot (true);
+	   starter -> setInterval (500);
+	   connect (starter, SIGNAL (timeout ()), 
+	            this, SLOT (quickStart ()));
+	   starter -> start (500);
+	}
+	else {
+	   startKnop	= 0;
+	   theDevice 	= setDevice (settings, &inputData);
+	   if (theDevice != nullptr) {
+	      hfScope	 -> set_bitDepth (theDevice -> bitDepth ());
+	      connect (theDevice, SIGNAL (dataAvailable (int)),
+	               this, SLOT (sampleHandler (int)));
+	      theDevice	-> restartReader ();
+	   }
+	   else
+	      throw (24);
+	}
+}
+
+void    RadioInterface::quickStart () {
+        disconnect (starter, SIGNAL (timeout ()),
+                    this, SLOT (quickStart ()));
+        fprintf (stderr, "going for quickStart\n");
+        delete starter;
+        if (getDevice (deviceTable [startKnop], settings, &inputData) == nullptr)
+           if (setDevice (settings, &inputData) == nullptr) {
+	      hfScope	 -> set_bitDepth (theDevice -> bitDepth ());
+	      connect (theDevice, SIGNAL (dataAvailable (int)),
+	               this, SLOT (sampleHandler (int)));
+	      theDevice	-> restartReader ();
+	   }
+	   else
+	      throw (31);
 }
 
 //      The end of all
@@ -189,7 +254,7 @@ void	RadioInterface::handle_quitButton	(void) {
 	               this, SLOT (sampleHandler (int)));
 	   delete  theDevice;
 	}
-	sleep (1);
+	fprintf (stderr, "device is gone, go\n");
 	fprintf (stderr, "device is deleted\n");
 	myList          -> saveTable ();
 	myList		-> hide ();
@@ -199,45 +264,86 @@ void	RadioInterface::handle_quitButton	(void) {
 	secondsTimer. stop ();
         delete		myList;
 	delete []	outTable;
-	delete		audioData;
-        delete		inputData;
 	delete		hfScope;
         delete		mykeyPad;
 }
 
 deviceHandler	*RadioInterface::
-	            setDevice (RingBuffer<std::complex<float>> *hfBuffer) {
-deviceHandler *res	= NULL;
-#ifdef	HAVE_SDRPLAY
-	try {
-	   fprintf (stderr, "Testing for sdrplay\n");
-	   res  = new sdrplayHandler (this, hfBuffer, settings);
-	} catch (int e) {
-	}
-#endif
-#ifdef	HAVE_HACKRF
-	if (res == NULL) {
-	   try {
-	      res  = new hackrfHandler (this, hfBuffer, settings);
-	   } catch (int e) {}
-	}
-#endif
-#ifdef	HAVE_RTLSDR
-	if (res == NULL) {
-	   try {
-	      res  = new rtlsdrHandler (this, hfBuffer, settings);
-	   } catch (int e) {}
-	}
-#endif
-	
-	if (res == NULL) {
-	   try {
-	      res	= new fileReader (this, hfBuffer, settings);
-	      bandLabel	-> hide ();
-	   } catch (int e) {}
-	}
+	            setDevice (QSettings *s,
+	                       RingBuffer<std::complex<float>> *hfBuffer) {
+deviceSelect	deviceSelect;
+deviceHandler	*theDevice	= nullptr;
+QStringList devices;
 
-	return res;
+	for (int i = 0; deviceTable [i] != nullptr; i ++)
+	   devices += deviceTable [i];
+	devices	+= "filereader";
+	devices	+= "quit";
+	deviceSelect. addList (devices);
+	int theIndex = -1;
+	while (theDevice == nullptr) {
+	   theIndex = deviceSelect. QDialog::exec ();
+	   if (theIndex < 0)
+	      continue;
+	   QString s = devices. at (theIndex);
+	   if (s == "quit")
+	      return nullptr;
+	   theDevice	= getDevice (s, settings, hfBuffer);
+	}
+	return theDevice;
+}
+
+deviceHandler	*RadioInterface::
+	                      getDevice (const QString &s,
+	                                 QSettings *settings,
+	                                 RingBuffer<std::complex<float>> *b) {
+#ifdef HAVE_SDRPLAY_V2
+	if (s == D_SDRPLAY_V2) {
+	   try {
+	      return  new sdrplayHandler_v2 (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+#endif
+#ifdef HAVE_SDRPLAY_V3
+	if (s == D_SDRPLAY_V3) {
+	   try {
+	      return new sdrplayHandler_v3 (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+#endif
+#ifdef HAVE_HACKRF
+	if (s == D_HACKRF) {
+	   try {
+	      return  new hackrfHandler (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+#endif
+#ifdef HAVE_RTLSDR
+	if (s == D_RTLSDR) {
+	   fprintf (stderr, "going for the stick\n");
+	   try {
+	      return new rtlsdrHandler (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+#endif
+	if (s == "filereader") {
+	   try {
+	      return new fileReader (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+	QMessageBox::warning (this, tr ("sdr"),
+	                               tr ("loading device failed"));
+	return nullptr;
 }
 //
 //	
@@ -324,8 +430,8 @@ float dumpBuffer [2 * 512];
 int	i, j;
 
 	(void)amount;
-	while (inputData -> GetRingBufferReadAvailable () > 512) {
-	   inputData	-> getDataFromBuffer (buffer, 512);
+	while (inputData. GetRingBufferReadAvailable () > 512) {
+	   inputData. getDataFromBuffer (buffer, 512);
 	   hfScope	-> addElements (buffer, 512);
 	   if (dumpfilePointer != NULL) {
 	      for (i = 0; i < 512; i ++) {
@@ -395,9 +501,9 @@ DSPCOMPLEX buffer [rate / 10];
 
         (void)amount;
 	usleep (1000);
-        while (audioData -> GetRingBufferReadAvailable () >
+        while (audioData. GetRingBufferReadAvailable () >
                                                  (uint32_t)rate / 10) {
-           audioData	-> getDataFromBuffer (buffer, rate / 10);
+           audioData. getDataFromBuffer (buffer, rate / 10);
 	   audioHandler      -> putSamples (buffer, rate / 10);
         }
 }

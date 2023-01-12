@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>sdrplayWidget</class>
- <widget class="QWidget" name="sdrplayWidget">
+ <class>sdrplayWidget_v2</class>
+ <widget class="QWidget" name="sdrplayWidget_v2">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -10,9 +10,9 @@ QMAKE_CXXFLAGS	+= -std=c++14
 QMAKE_CFLAGS	+= -flto -ffast-math 
 QMAKE_CXXFLAGS	+= -flto -ffast-math 
 QMAKE_LFLAGS	+= -flto
-QMAKE_CFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -g
-QMAKE_LFLAGS	+= -g
+#QMAKE_CFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -g
+#QMAKE_LFLAGS	+= -g
 #QMAKE_CXXFLAGS	+= -fsanitize=address
 #QMAKE_CFLAGS	+= -fsanitize=address
 #QMAKE_LFLAGS	+= -fsanitize=address
@@ -75,6 +75,7 @@ HEADERS += ./radio-constants.h \
            ./filters/fir-filters.h \
            ./filters/iir-filters.h \
 	   ./filters/decimating_filter.h \
+	   ./filters/hilbertfilter.h \
 	   ./scopes-qwt6/virtual-scope.h \
 	   ./scopes-qwt6/spectrogramdata.h \
 	   ./scopes-qwt6/waterfall-scope.h \
@@ -82,6 +83,7 @@ HEADERS += ./radio-constants.h \
            ./scopes-qwt6/scope.h \
            ./scopes-qwt6/fft-scope.h \
 	   ./devices/device-handler.h \
+	   ./devices/deviceselect.h \
            ./devices/filereader/filereader.h \
            ./devices/filereader/filehulp.h \
 	   ./the-decoder/drm-decoder.h \
@@ -159,12 +161,14 @@ SOURCES += ./main.cpp \
            ./filters/fir-filters.cpp \
            ./filters/iir-filters.cpp \
 	   ./filters/decimating_filter.cpp \
+	   ./filters/hilbertfilter.cpp \
 	   ./scopes-qwt6/virtual-scope.cpp \
 	   ./scopes-qwt6/waterfall-scope.cpp \
 	   ./scopes-qwt6/spectrum-scope.cpp \
            ./scopes-qwt6/scope.cpp \
            ./scopes-qwt6/fft-scope.cpp \
 	   ./devices/device-handler.cpp \
+	   ./devices/deviceselect.cpp \
            ./devices/filereader/filereader.cpp \
            ./devices/filereader/filehulp.cpp \
 	   ./the-decoder/drm-decoder.cpp \
@@ -231,6 +235,7 @@ isEmpty(GITHASHSTRING) {
 }
 
 DESTDIR		= ./linux-bin
+CONFIG		+= sdrplay-v2
 CONFIG		+= sdrplay
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
@@ -266,6 +271,7 @@ isEmpty(GITHASHSTRING) {
 }
 
 DESTDIR		= /usr/shared/w32-programs/windows-drm2
+CONFIG		+= sdrplay-v2
 CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
@@ -297,24 +303,35 @@ LIBS    += -lwinmm
 #       the SDRplay
 #
 sdrplay-v2 {
-        DEFINES         += HAVE_SDRPLAY
-        FORMS           += ./devices/sdrplay-handler-v2/sdrplay-widget.ui
+        DEFINES         += HAVE_SDRPLAY_V2
+        FORMS           += ./devices/sdrplay-handler-v2/sdrplay-widget-v2.ui
         DEPENDPATH      += ./devices/sdrplay-handler-v2
         INCLUDEPATH     += ./devices/sdrplay-handler-v2
-        HEADERS         += ./devices/sdrplay-handler-v2/sdrplay-handler.h \
+        HEADERS         += ./devices/sdrplay-handler-v2/sdrplay-handler-v2.h \
                            ./devices/sdrplay-handler-v2/sdrplayselect.h
-        SOURCES         += ./devices/sdrplay-handler-v2/sdrplay-handler.cpp \
+        SOURCES         += ./devices/sdrplay-handler-v2/sdrplay-handler-v2.cpp \
                            ./devices/sdrplay-handler-v2/sdrplayselect.cpp
 }
 
 sdrplay {
-        DEFINES         += HAVE_SDRPLAY
-        FORMS           += ./devices/sdrplay-handler/sdrplay-widget.ui
-        DEPENDPATH      += ./devices/sdrplay-handler
-        INCLUDEPATH     += ./devices/sdrplay-handler \
-	                   ./devices/sdrplay-handler/includes
-        HEADERS         += ./devices/sdrplay-handler/sdrplay-handler.h 
-        SOURCES         += ./devices/sdrplay-handler/sdrplay-handler.cpp 
+        DEFINES         += HAVE_SDRPLAY_V3
+        FORMS           += ./devices/sdrplay-handler-v3/sdrplay-widget-v3.ui
+        DEPENDPATH	+= ./devices/sdrplay-handler-v3
+        INCLUDEPATH     += ./devices/sdrplay-handler-v3
+        INCLUDEPATH     += ./devices/sdrplay-handler-v3/include-v3
+        HEADERS         += ./devices/sdrplay-handler-v3/sdrplay-handler-v3.h \
+                           ./devices/sdrplay-handler-v3/sdrplay-commands.h \
+	                   ./devices/sdrplay-handler-v3/Rsp-device.h \
+	                   ./devices/sdrplay-handler-v3/Rsp1A-handler.h \
+	                   ./devices/sdrplay-handler-v3/RspII-handler.h \
+	                   ./devices/sdrplay-handler-v3/RspDuo-handler.h \
+	                   ./devices/sdrplay-handler-v3/RspDx-handler.h
+        SOURCES         += ./devices/sdrplay-handler-v3/Rsp-device.cpp \
+	                   ./devices/sdrplay-handler-v3/sdrplay-handler-v3.cpp \
+	                   ./devices/sdrplay-handler-v3/Rsp1A-handler.cpp \
+	                   ./devices/sdrplay-handler-v3/RspII-handler.cpp \
+	                   ./devices/sdrplay-handler-v3/RspDuo-handler.cpp \
+	                   ./devices/sdrplay-handler-v3/RspDx-handler.cpp 
 }
 
 hackrf	{
@@ -351,17 +368,6 @@ pmsdr	{
 			   ./devices/pmsdr-handler/pmsdr_comm.cpp \
 	                   ./devices/pmsdr-handler/pmsdr_usb.cpp \
 	                   ./devices/pmsdr-handler/si570-handler.cpp 
-	CONFIG		+= cardreader
-}
-
-extio	{
-	DEFINES		+= HAVE_EXTIO
-	TARGET		= swradio-extio
-	FORMS		+= ./devices/extio-handler/extio-widget.ui
-	DEPENDPATH	+= ./devices/extio-handler
-        INCLUDEPATH     += ./devices/extio-handler
-        HEADERS         += ./devices/extio-handler/extio-handler.h 
-        SOURCES         += ./devices/extio-handler/extio-handler.cpp 
 	CONFIG		+= cardreader
 }
 

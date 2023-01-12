@@ -29,8 +29,8 @@
 static float convTable [256];
 
 	hackrfHandler::hackrfHandler	(RadioInterface *mr,
-                                         RingBuffer<std::complex<float>> *r,
-                                         QSettings      *s):
+                                         QSettings      *s,
+                                         RingBuffer<std::complex<float>> *r):
                                                       myFrame (nullptr) {
 int	err;
 int	res;

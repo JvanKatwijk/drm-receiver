@@ -31,6 +31,7 @@
 #include	"device-handler.h"
 #include	"ringbuffer.h"
 #include	"fir-filters.h"
+#include	"hilbertfilter.h"
 #include	"dongleselect.h"
 
 class		QSettings;
@@ -61,9 +62,9 @@ typedef RTLSDR_API 	int (*  pfnrtlsdr_read_async) (rtlsdr_dev_t *,
 	                               void *,
 	                               uint32_t,
 	                               uint32_t);
-typedef RTLSDR_API  int (*  pfnrtlsdr_cancel_async) (rtlsdr_dev_t *);
-typedef RTLSDR_API  int (*  pfnrtlsdr_set_direct_sampling) (rtlsdr_dev_t *, int);
-typedef RTLSDR_API  uint32_t (*  pfnrtlsdr_get_device_count) (void);
+typedef RTLSDR_API	int (*  pfnrtlsdr_cancel_async) (rtlsdr_dev_t *);
+typedef RTLSDR_API	int (*  pfnrtlsdr_set_direct_sampling) (rtlsdr_dev_t *, int);
+typedef RTLSDR_API	uint32_t (*  pfnrtlsdr_get_device_count) (void);
 typedef RTLSDR_API 	int (* pfnrtlsdr_set_freq_correction)(rtlsdr_dev_t *, int);
 
 
@@ -79,7 +80,7 @@ static
 void	RTLSDRCallBack (unsigned char *buf, uint32_t len, void *ctx);
 
 private:
-virtual void	run (void);
+virtual void	run ();
 	rtlsdrHandler	*theStick;
 };
 
@@ -87,8 +88,8 @@ class	rtlsdrHandler: public deviceHandler, public Ui_rtlsdrWidget {
 Q_OBJECT
 public:
 		rtlsdrHandler		(RadioInterface *mr,
-                                         RingBuffer<std::complex<float>> *r,
-                                         QSettings      *s);
+                                         QSettings      *s,
+                                         RingBuffer<std::complex<float>> *r);
 
 		~rtlsdrHandler		();
 	void	setVFOFrequency		(int32_t);
@@ -103,7 +104,9 @@ public:
 	pfnrtlsdr_read_async rtlsdr_read_async;
 	struct rtlsdr_dev	*device;
 	int32_t		outputRate;
-	void	newdataAvailable	(int);
+	void		newdataAvailable	(int);
+	bool		directSamplingMode;
+	hilbertFilter	theFilter;
 	decimatingFIR   *filter_1;
         decimatingFIR   *filter_2;
 
@@ -111,6 +114,7 @@ private slots:
 	void		setExternalGain	(const QString &);
 	void		setCorrection	(int);
 	void		setAgc		(int);
+	void		handle_directSamplingSwitch	(int);
 
 private:
 	QFrame		myFrame;
@@ -120,14 +124,12 @@ private:
 	HINSTANCE	Handle;
 	int32_t		deviceCount;
 	dll_driver	*workerHandle;
-	bool		libraryLoaded;
 	int32_t		vfoFrequency;
-	bool		open;
 	int16_t		gainsCount;
 	int		theGain;
 //
 //	here we need to load functions from the dll
-	bool		load_rtlFunctions	(void);
+	bool		load_rtlFunctions	();
 	pfnrtlsdr_open	rtlsdr_open;
 	pfnrtlsdr_close	rtlsdr_close;
 	pfnrtlsdr_get_device_name rtlsdr_get_device_name;

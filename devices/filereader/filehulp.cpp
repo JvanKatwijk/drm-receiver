@@ -213,7 +213,8 @@ int64_t	nextStop;
 	             bi [i] = 0;
 	         t = bufferSize;
 	      }
-	       _I_Buffer -> putDataIntoBuffer ((std::complex<float> *)bi, t / 2);
+
+	      _I_Buffer -> putDataIntoBuffer ((std::complex<float> *)bi, t / 2);
 	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10) {
 //	         fprintf (stderr, "signal sent\n");
 	         emit dataAvailable (theRate / 10);

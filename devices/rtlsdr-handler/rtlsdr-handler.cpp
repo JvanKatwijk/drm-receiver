@@ -79,18 +79,21 @@ std::complex<float> localBuf [READLEN_DEFAULT / 2];
 	                                    convTable [buf [2 * i + 1]]);
 	   std::complex<float> tmp2;
 	   if (theStick -> filter_1 -> Pass (tmp, &tmp2))
-	      if (theStick -> filter_2 -> Pass (tmp2, &localBuf [cnt]))
-                 if (localBuf [cnt] == localBuf [cnt])
+	      if (theStick -> filter_2 -> Pass (tmp2, &tmp2)) {
+	         if (theStick -> directSamplingMode)
+	            localBuf [cnt] = theStick -> theFilter. Pass (5 *real (tmp2));
+	         else
+	            localBuf [cnt] = tmp2;
                     cnt ++;
-
+	      }
 	}
-	theStick -> _I_Buffer -> putDataIntoBuffer (localBuf, cnt);
+	theStick -> _I_Buffer ->  putDataIntoBuffer (localBuf, cnt);
 	if ((int)(theStick -> _I_Buffer -> GetRingBufferReadAvailable ()) >
-	   theStick -> outputRate / 10)
+	                                           theStick -> outputRate / 10)
 	   theStick -> newdataAvailable (theStick -> outputRate / 10);
 }
 
-void	dll_driver::run (void) {
+void	dll_driver::run () {
 	(theStick -> rtlsdr_read_async) (theStick -> device,
 	                          (rtlsdr_read_async_cb_t)&RTLSDRCallBack,
 	                          (void *)theStick,
@@ -102,9 +105,10 @@ void	dll_driver::run (void) {
 //	to keep things simple, we just load the osmocom function
 //	dynamically
 	rtlsdrHandler::rtlsdrHandler (RadioInterface *mr,
-                                      RingBuffer<std::complex<float>> *r,
-                                      QSettings      *s):
-                                               myFrame (nullptr) {
+                                      QSettings      *s,
+                                      RingBuffer<std::complex<float>> *r):
+                                               myFrame (nullptr),
+	                                       theFilter (2 * 8192) {
 int	res;
 int16_t	deviceIndex;
 int16_t	i;
@@ -124,10 +128,7 @@ QString	temp;
 	for (i = 0; i < 256; i ++)
 	   convTable [i] = (i - 128.0) / 128.0;
 //
-	libraryLoaded	= false;
 	workerHandle	= nullptr;
-	workerHandle	= nullptr;
-	open		= false;
 
 	statusLabel	-> setText ("setting up");
 #ifdef	__MINGW32__
@@ -143,7 +144,6 @@ QString	temp;
 //
 //	library is loaded
 //	and widget is visible
-	libraryLoaded	= true;
 	fprintf (stderr, "rtlsdr is loaded\n");
 
 	if (!load_rtlFunctions	()) {
@@ -152,7 +152,7 @@ QString	temp;
 	}
 
 //	vfoFrequency is the VFO frequency
-	vfoFrequency		= KHz (22000);	// just a dummy
+	vfoFrequency		= KHz (220);	// just a dummy
 	deviceCount 		= (this -> rtlsdr_get_device_count) ();
 	if (deviceCount == 0) {
 	   statusLabel	-> setText ("no device");
@@ -181,7 +181,6 @@ QString	temp;
 
 	deviceName	-> setText (rtlsdr_get_device_name (deviceIndex));
 
-	open	= true;
 	res	= (this -> rtlsdr_set_sample_rate) (device, inputRate);
 	if (res < 0) {
 	   fprintf (stderr, "Setting samplerate failed\n");
@@ -193,15 +192,15 @@ QString	temp;
 	{  int gains [gainsCount];
 	   fprintf (stderr, "Supported gain values (%d): ", gainsCount);
 	   gainsCount = rtlsdr_get_tuner_gains (device, gains);
-	   for (i = gainsCount; i > 0; i++) {
+	   for (i = gainsCount; i > 0; i--) {
 	      fprintf (stderr, "%.1f ", gains [i - 1] / 10.0);
 	      combo_gain -> addItem (QString::number (gains [i - 1]));
 	   }
 
 	   fprintf (stderr, "\n");
 	}
-	temp =
-	        rtlsdrSettings -> value ("externalGain", "10"). toString ();
+
+	temp = rtlsdrSettings -> value ("externalGain", "10"). toString ();
         k       = combo_gain -> findText (temp);
         if (k != -1) {
            combo_gain   -> setCurrentIndex (k);
@@ -221,6 +220,8 @@ QString	temp;
 	         this, SLOT (setCorrection (int)));
 	connect (checkAgc, SIGNAL (stateChanged (int)),
 	         this, SLOT (setAgc (int)));
+	connect (directSamplingSwitch, SIGNAL (stateChanged (int)),
+	         this, SLOT (handle_directSamplingSwitch (int)));
 //
 //	since the connections are made, the settings will trigger
 //	the functions associated with the control
@@ -240,29 +241,25 @@ QString	temp;
                                              outputRate / 2,
                                              inputRate / 4, 6);
 
+	directSamplingMode	= false;
 	return;
 err:
-	if (open)
-	   rtlsdr_close (device);
+	rtlsdr_close (device);
 #ifdef __MINGW32__
 	FreeLibrary (Handle);
 #else
 	dlclose (Handle);
 #endif
-	libraryLoaded	= false;
-	open		= false;
 	throw (22);
 }
 
-	rtlsdrHandler::~rtlsdrHandler	(void) {
-	if (open && libraryLoaded && rtlsdrSettings != NULL) {
-	   rtlsdrSettings	-> beginGroup ("Stick");
-	   rtlsdrSettings	-> setValue ("rtlsdr_externalGain",
-	                                             combo_gain -> currentText ());
-	   rtlsdrSettings	-> setValue ("rtlsdr_correction",
-	                                             f_correction -> value ());
-	   rtlsdrSettings	-> endGroup ();
-	}
+	rtlsdrHandler::~rtlsdrHandler	() {
+	rtlsdrSettings	-> beginGroup ("Stick");
+	rtlsdrSettings	-> setValue ("rtlsdr_externalGain",
+	                                          combo_gain -> currentText ());
+	rtlsdrSettings	-> setValue ("rtlsdr_correction",
+	                                          f_correction -> value ());
+	rtlsdrSettings	-> endGroup ();
 
 	stopReader ();
 	rtlsdr_close (device);
@@ -279,20 +276,14 @@ err:
 //
 //
 int32_t	rtlsdrHandler::getVFOFrequency	(void) {
-	if (!open || !libraryLoaded)
-	   return KHz (14070);
 	return (int32_t)rtlsdr_get_center_freq (device);
 }
 //
 //
 void	rtlsdrHandler::setVFOFrequency	(int32_t f) {
-	if (!open || !libraryLoaded)
-	   return;
-
 	vfoFrequency	= f;
 	(void)rtlsdr_set_center_freq (device, f);
 }
-
 //
 //
 bool	rtlsdrHandler::restartReader	(void) {
@@ -332,14 +323,12 @@ void	rtlsdrHandler::resetBuffer	() {
 //
 void	rtlsdrHandler::setExternalGain	(const QString &s) {
         theGain         = s. toInt ();
-        rtlsdr_set_tuner_gain (device, theGain);
+	int xxx = rtlsdr_set_tuner_gain (device, theGain);
+	fprintf (stderr, "setting the gain to %d gave %d\n", theGain, xxx);
 }
 //
 
 void	rtlsdrHandler::setCorrection	(int ppm) {
-	if (!open || !libraryLoaded)
-	   return;
-
 	rtlsdr_set_freq_correction (device, ppm);
 }
 //
@@ -491,3 +480,11 @@ void	rtlsdrHandler::setAgc	(int s) {
 	   (void)rtlsdr_set_agc_mode (device, 0);
 }
 
+void	rtlsdrHandler::handle_directSamplingSwitch	(int d) {
+bool checked	= directSamplingSwitch -> isChecked ();
+	(void)d;
+int xxx = rtlsdr_set_direct_sampling (device, (int)checked);
+	fprintf (stderr, "setting direct sampling to %d gave %d\n", 
+	                        (int)checked, xxx);
+	directSamplingMode	= directSamplingSwitch	-> isChecked ();
+}

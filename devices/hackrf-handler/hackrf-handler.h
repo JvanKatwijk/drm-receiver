@@ -46,10 +46,10 @@ typedef int (*hackrf_sample_block_cd_fn)(hackrf_transfer *transfer);
 //
 //	Dll and ".so" function prototypes
 
-typedef	int	(*pfn_hackrf_init)	(void);
+typedef	int	(*pfn_hackrf_init)	();
 typedef	int	(*pfn_hackrf_open)	(hackrf_device ** device);
 typedef	int	(*pfn_hackrf_close)	(hackrf_device *device);
-typedef	int	(*pfn_hackrf_exit)	(void);
+typedef	int	(*pfn_hackrf_exit)	();
 typedef	int	(*pfn_hackrf_start_rx)	(hackrf_device *,
 	                                 hackrf_sample_block_cd_fn, void *);
 typedef	int	(*pfn_hackrf_stop_rx)	(hackrf_device *);
@@ -71,8 +71,8 @@ class	hackrfHandler: public deviceHandler, public Ui_hackrfWidget {
 Q_OBJECT
 public:
 			hackrfHandler	(RadioInterface *mr,
-                                         RingBuffer<std::complex<float>> *r,
-                                         QSettings      *s);
+                                         QSettings      *s,
+                                         RingBuffer<std::complex<float>> *r);
 			~hackrfHandler		();
 	int32_t		getRate			();
 	void		setVFOFrequency		(int32_t);

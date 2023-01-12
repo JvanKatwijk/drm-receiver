@@ -97,7 +97,7 @@ float	*THETA;
                  parent, SLOT (show_eqsymbol (int)));
 
 
-	strength	= 3;
+	strength	= 2;
 //	Based on table 92 ETSI ES 201980
 
 //	Just for experimentation, we added some alternatives
@@ -154,7 +154,6 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //	values taken from diorama
 	f_cut_t = 0.0675 / symbols_to_delay;
 	f_cut_k = 1.75 * (float) Tg / (float) Tu;
-	f_cut_k = 2 * (float) Tg / (float) Tu;
 	f_cut_k = 1 * (float) Tg / (float) Tu;
 //
 //	This code is based on the diorama Matlab code, and a

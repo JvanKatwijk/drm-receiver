@@ -41,8 +41,8 @@ class	fileReader: public deviceHandler, public Ui_filereader {
 Q_OBJECT
 public:
 		fileReader		(RadioInterface *,
-	                                 RingBuffer<std::complex<float>> *,
-	                                 QSettings *);
+	                                 QSettings *,
+	                                 RingBuffer<std::complex<float>> *);
 		~fileReader		();
 	int32_t	getRate			();
 

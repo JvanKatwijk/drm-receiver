@@ -5,7 +5,6 @@
 #include	<chrono>
 
 #include	"drm-decoder.h"
-
 //
 //	drm specifics
 
@@ -30,7 +29,7 @@
 #include	<math.h>
 
 	drmDecoder::drmDecoder (RadioInterface *theRadio,
-	                        RingBuffer<std::complex<float>> *audioBuffer) :
+	                        RingBuffer<std::complex<float>> *audioBuffer):
 	                                 myFrame (nullptr),
 	                                 m_worker (nullptr),
 	                                 inputBuffer  (16 * 32768),
@@ -55,6 +54,7 @@
 	                                                       &iqBuffer),
 	                                theState (1, 3) {
 	this	-> theRadio	= theRadio;
+
 	setupUi (&myFrame);
 	my_eqDisplay            = new EQDisplay (equalizerDisplay);
 	my_iqDisplay            = new IQDisplay (iqPlotter, 512);
@@ -118,11 +118,13 @@ void	drmDecoder::
 	}
 
 	for (int i = 0; i < length; i ++) {
-	   std::complex<float> sample = buffer [i];
-	   sample   = passbandFilter. Pass (sample);
-	   sample   = theMixer. do_shift (sample, theOffset);
+	   std::complex<float> sample =
+	                       std::complex<float> (real (buffer [i]),
+	                                            real (buffer [i]));
+	   sample	= passbandFilter. Pass (sample);
+	   sample	= theMixer. do_shift (sample, theOffset);
 //
-	   if (theDecimator. Pass (sample, &sample))
+	   if (theDecimator. Pass (sample, &sample)) 
 	      inputBuffer. putDataIntoBuffer (&sample, 1);
 	}
 }
@@ -343,7 +345,7 @@ float     sampleclockOffset       = 0;
 	               }
 	            }
 	         }
-	         fprintf (stderr, "error %f\n", 10 * log10 (nominator / denominator));
+//	         fprintf (stderr, "error %f\n", 10 * log10 (nominator / denominator));
 //
 //	when here, add the current frame to the superframe.
 //	Obviously, we cannot garantee that all data is in order
