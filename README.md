@@ -19,6 +19,31 @@ frequency, just to test some loop antennas (ine running an RSP I,
 the other running an RSP II).
 
 -----------------------------------------------------------------------
+New: rtlsdr and low frequencies
+-----------------------------------------------------------------------
+
+As is well known, using "dabsticks" for shortwave listening is asking
+from trouble.
+It is known that the current libraries for rtlsdr devices support
+direct sampling for low frequencies.
+The new rtlsdr interface shows a checkbox for selecting
+direct sampling (or not).
+Of course there is a price,
+rather than IQ samples, samples with solely the I component
+of samples are emitted. Since drm decoding needs the full IQ samples,
+the rtlsdr interface is equipped with a filter transforming the
+single I stream to an IQ stream. 
+The IQ stream represents the so-called analytical frequencies, i.e.
+the positive frequencies.
+
+Two comments:
+Currently I do not own a decent rtlsdr stick, the one I had was
+mechanically very weak, and broke into two pieces, so the software
+is NOT tested
+Secondly, the direct sampling software requires a minor modification
+to the older dabsticks, see a site as "rtlsdr.com"  for details
+
+-----------------------------------------------------------------------
 A short note on DRM
 -------------------------------------------------------------------------
 
