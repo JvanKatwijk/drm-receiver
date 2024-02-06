@@ -23,7 +23,7 @@ The decoder uses the FDK_AAC library for AAC decoding, meaning that
 The decoder
 -----------------------------------------------------------------------
 
-![overview](/drm-decoder-good.png?raw=true)
+![overview](/drm-decoder-goed.png?raw=true)
 
 The decoder (see the picture above) takes a samplerate of 12000
 Samples/second as input. 
@@ -82,7 +82,7 @@ as the correction on the phase, while not shown here, in time both curves
 behave kind of wild. The effect is that even SDC decoding fails, and
 so does the aac decoding.
 
-![overview](/drm-decoder-good.png?raw=true)
+![overview](/drm-decoder-wild.png?raw=true)
 
 It holds in general, decoding will be successfull when
 the  "equalizer" curves are reasonably smooth, both
