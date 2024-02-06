@@ -33,7 +33,9 @@
 #include	"data-processor.h"
 
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 #include	"aac-handler.h"
+#endif
 #endif
 class	drmDecoder;
 class	stateDescriptor;
@@ -48,7 +50,9 @@ public:
 	                                 drmDecoder *,
 	                                 int8_t,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                 aacHandler *,
+#endif
 #endif
 	                                 RingBuffer<std::complex<float>> *);
 		~mscProcessor		();

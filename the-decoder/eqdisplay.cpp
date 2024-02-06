@@ -1,6 +1,6 @@
 
 #include	"eqdisplay.h"
-
+#include	<QPen>
 
 	EQDisplay::EQDisplay	(QwtPlot *plotgrid) {
 	this	-> plotgrid	= plotgrid;
@@ -21,12 +21,12 @@
         grid    -> attach (plotgrid);
 
 	spectrumCurve   = new QwtPlotCurve ("");
-        spectrumCurve   -> setPen (QPen(Qt::red));
+        spectrumCurve   -> setPen (QPen(Qt::yellow));
         spectrumCurve   -> setOrientation (Qt::Horizontal);
         spectrumCurve   -> setBaseline  (0);
         spectrumCurve   -> attach (plotgrid);
 	phaseCurve	= new QwtPlotCurve ("");
-        phaseCurve	-> setPen (QPen(Qt::blue));
+        phaseCurve	-> setPen (QPen(Qt::red));
         phaseCurve	-> setOrientation (Qt::Horizontal);
         phaseCurve	-> setBaseline  (0);
         phaseCurve	-> attach (plotgrid);

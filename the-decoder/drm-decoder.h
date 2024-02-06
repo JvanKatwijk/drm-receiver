@@ -22,7 +22,9 @@
 #include	"my-array.h"
 //	for the fdk-aac functionw we have
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 #include	"aac-handler.h"
+#endif
 #endif
 class	EQDisplay;
 class	IQDisplay;
@@ -54,7 +56,9 @@ private:
 //	drmShifter	        localMixer;
 	Reader			my_Reader;   // single instance during life
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	aacHandler		aacFunctions;
+#endif
 #endif
 	backendController	my_backendController;
 	stateDescriptor		theState;

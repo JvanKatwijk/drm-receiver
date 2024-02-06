@@ -22,7 +22,8 @@
  */
 #include	"spectrum-scope.h"
 #include	<qwt_picker_machine.h>
-
+#include	<QPen>
+#include	<QwtText>
 	spectrumScope::spectrumScope (QwtPlot *plot, int16_t displaySize):
 	                                      virtualScope (plot, displaySize) {
 

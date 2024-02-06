@@ -3,5 +3,8 @@
 	<file>drm.ico</file>
         <file>AUTHORS</file>
         <file>COPYING</file>
+	<file>drm.ico</file>
+        <file>res/Adaptic.qss</file>
+        <file>res/Combinear.qss</file>
     </qresource>
 </RCC>

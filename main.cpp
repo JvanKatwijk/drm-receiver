@@ -101,6 +101,12 @@ QString	bandplanFile	= QDir::homePath ();
 #endif
 	QApplication a (argc, argv);
 
+        QFile file (":res/Combinear.qss");
+        if (file .open (QFile::ReadOnly | QFile::Text)) {
+           a. setStyleSheet (file.readAll ());
+           file.close ();
+        }
+
 	QSettings ISettings (iniFile, QSettings::IniFormat);
 /*
  *	Before we connect control to the gui, we have to

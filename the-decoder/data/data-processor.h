@@ -28,7 +28,9 @@
 #include	<cstring>
 #include	"ringbuffer.h"
 #ifdef  __WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 #include	"aac-handler.h"
+#endif
 #include        "aac-processor-fdk.h"
 #include        "xheaac-processor.h"
 #else
@@ -45,7 +47,9 @@ public:
 		dataProcessor	(stateDescriptor *,
 	                         drmDecoder *,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                         aacHandler *,
+#endif
 #endif
 	                         RingBuffer<std::complex<float>> *);
 		~dataProcessor	();

@@ -36,7 +36,9 @@ class	drmDecoder;
 class	mscProcessor;
 
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 #include	"aac-handler.h"
+#endif
 #endif
 
 class	backendController: public QObject {
@@ -45,7 +47,9 @@ public:
 		backendController	(drmDecoder *,
 	                                 int8_t,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                 aacHandler	*,
+#endif
 #endif
 	                                 RingBuffer<std::complex<float>> *,
 	                                 RingBuffer<std::complex<float>> *);
@@ -68,7 +72,9 @@ private:
 	int16_t		numofStreams;
 	uint8_t		QAMMode;
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	aacHandler	*aacFunctions;
+#endif
 #endif
 signals:
 	void		showIQ		(int);

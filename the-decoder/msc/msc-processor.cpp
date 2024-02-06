@@ -40,14 +40,18 @@
 		                         drmDecoder	*m_form,
 	                                 int8_t		qam64Roulette,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                 aacHandler *aacFunctions,
+#endif
 #endif
 	                                 RingBuffer<std::complex<float>> *b
 	                                 ):
 	                                    my_dataProcessor (theState, 
 	                                                      m_form,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                                      aacFunctions,
+#endif
 #endif
 	                                                      b) {
 	this	-> theState	= theState;

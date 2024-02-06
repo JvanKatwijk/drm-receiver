@@ -247,8 +247,8 @@ CONFIG		+= fdk-aac
 # CONFIG	+= estimator_1
 # CONFIG	+= estimator_2	does not work yet
 # CONFIG	+= estimator_jan
-# CONFIG	+= estimator_eigen
-CONFIG		+= estimator_arma
+  CONFIG	+= estimator_eigen
+#CONFIG		+= estimator_arma
 
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
@@ -279,21 +279,23 @@ CONFIG		+= rtlsdr
 # CONFIG	+= estimator_1
 # CONFIG	+= estimator_2	does not work yet
 # CONFIG	+= estimator_jan
- CONFIG	+= estimator_eigen
+  CONFIG	+= estimator_eigen
 #CONFIG		+= estimator_arma
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/eigen3
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
 INCLUDEPATH += /usr/local/include
-LIBS    += -L/usr/i686-w64-mingw32/sys-root/mingw/lib
+LIBS	+= -L/usr/i686-w64-mingw32/sys-root/mingw/lib
+LIBS	+= /usr/i686-w64-mingw32/sys-root/mingw/bin/libsndfile-1.dll
+LIBS	+= /usr/i686-w64-mingw32/sys-root/mingw/bin/libsamplerate-0.dll
 LIBS    += -lfftw3f
 LIBS    += -lportaudio
 LIBS    += -lqwt-qt5
 #LIBS    += -lqwt
 LIBS    += -lusb-1.0
-LIBS    += -lsndfile
-LIBS    += -lsamplerate
+#LIBS    += -lsndfile
+#LIBS    += -lsamplerate
 LIBS    += -lole32
 #CONFIG		+= -lfaad_drm
 CONFIG		+= fdk-aac
@@ -373,11 +375,13 @@ pmsdr	{
 
 fdk-aac	{
 DEFINES		+= __WITH_FDK_AAC__
+#DEFINES	+= __DOWNLOAD__
 unix {
-#LIBS		+= -lfdk-aac
+LIBS		+= -lfdk-aac
 }
 win32 {
 #LIBS		+= -lfdk-aac-2
+DEFINES		+= __DOWNLOAD__
 }
 #LIBS		+= -lfdk-aac -larmadillo
 INCLUDEPATH	+= /usr/local/include/fdk-aac

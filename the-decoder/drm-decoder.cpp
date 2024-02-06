@@ -44,11 +44,15 @@
 	                                 my_Reader (&inputBuffer,
 	                                           2 * 16384, this),
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                 aacFunctions (0),
+#endif
 #endif
 	                                 my_backendController (this, 4,
 #ifdef	__WITH_FDK_AAC__
+#ifdef	__DOWNLOAD__
 	                                                       &aacFunctions,
+#endif
 #endif
 	                                                       audioBuffer,
 	                                                       &iqBuffer),
@@ -69,7 +73,7 @@
 		     modulate (selectedFrequency - centerFrequency);
 
 	drmError		= false;
-	nSymbols		= 25;
+	nSymbols		= 20;
 	modeInf. Mode		= 2;
 	modeInf. Spectrum	= 3;
 
@@ -120,7 +124,7 @@ void	drmDecoder::
 	for (int i = 0; i < length; i ++) {
 	   std::complex<float> sample =
 	                       std::complex<float> (real (buffer [i]),
-	                                            real (buffer [i]));
+	                                            imag (buffer [i]));
 	   sample	= passbandFilter. Pass (sample);
 	   sample	= theMixer. do_shift (sample, theOffset);
 //

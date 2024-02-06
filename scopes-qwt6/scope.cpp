@@ -25,6 +25,7 @@
  */
 #include	"scope.h"
 #include	<qwt_picker_machine.h>
+#include	<QPen>
 /*
  *	The "scope" combines the Qwt widgets and control for both
  *	the spectrumdisplay and the waterfall display.

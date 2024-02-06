@@ -43,15 +43,23 @@ uint16_t	res	= 0;
 //
 	aacProcessor_fdk::aacProcessor_fdk (stateDescriptor *theState,
 	                                    drmDecoder *drm,
+#ifdef	__DOWNLOAD__
 	                                    aacHandler	*aacFunctions,
+#endif
 	                                    RingBuffer<std::complex<float>>* out) :
 	                                   my_messageProcessor (drm) {
 
 	this	-> theState	= theState;
 	this	-> drmMaster	= drm;
+#ifdef	__DOWNLOAD__
 	this	-> aacFunctions	= aacFunctions;
+#endif
 	this	-> audioOut	= out;
+#ifdef	__DOWNLOAD__
 	this	-> handle	= aacFunctions -> aacDecoder_Open (TT_DRM, 2);
+#else
+	this	-> handle	= aacDecoder_Open (TT_DRM, 2);
+#endif
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         drmMaster, SLOT (set_faadSyncLabel (bool)));
 	connect (this, SIGNAL (aacData (const QString &)),
@@ -64,7 +72,11 @@ uint16_t	res	= 0;
 
 	aacProcessor_fdk::~aacProcessor_fdk	() {
 	if (handle != nullptr)
+#ifdef	__DOWNLOAD__
 	   aacFunctions	-> aacDecoder_Close (handle);
+#else
+	   aacDecoder_Close (handle);
+#endif
 }
 
 void	aacProcessor_fdk::process_aac (uint8_t *v, int16_t mscIndex,
@@ -203,7 +215,6 @@ int16_t		payLoad_length = 0;
 }
 
 void	aacProcessor_fdk::playOut (int16_t	mscIndex) {
-int16_t	i;
 uint8_t	audioSamplingRate	= theState -> streams [mscIndex].
 	                                                   audioSamplingRate;
 uint8_t	SBR_flag		= theState -> streams [mscIndex].
@@ -225,12 +236,14 @@ QString text;
 	aacData (text);
 
 	reinit (audioDescriptor, mscIndex);
-	for (i = 0; i < numFrames; i ++) {
+	for (int i = 0; i < numFrames; i ++) {
 	   int16_t	index = i;
 	   bool		convOK;
 	   int16_t	cnt;
 	   int32_t	rate;
 	   if (f [index]. length < 0)
+	      continue;
+	   if (f [index]. length > 1000)
 	      continue;
 #if 0
 	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
@@ -311,10 +324,18 @@ void	aacProcessor_fdk::init	() {
 	UCHAR *codecP		= &currentConfig [0];
 	uint32_t codecSize	= currentConfig. size ();
 	AAC_DECODER_ERROR err =
+#ifdef	__DOWNLOAD__
 	    aacFunctions -> aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
+#else
+	    aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
+#endif
 	if (err == AAC_DEC_OK) {
 	   CStreamInfo *pInfo =
+#ifdef	__DOWNLOAD__
 	           aacFunctions -> aacDecoder_GetStreamInfo (handle);
+#else
+	           aacDecoder_GetStreamInfo (handle);
+#endif
 	   if (pInfo == nullptr) {
 	      fprintf (stderr, "No stream info\n");
 	   }
@@ -339,14 +360,22 @@ uint32_t	bytesValid	= 0;
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
 	errorStatus =
+#ifdef	__DOWNLOAD__
 	     aacFunctions -> aacDecoder_Fill (handle, &bb,
 	                                       &frameSize, &bytesValid);
+#else
+	     aacDecoder_Fill (handle, &bb, &frameSize, &bytesValid);
+#endif
 
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
 	errorStatus =
+#ifdef	__DOWNLOAD__
 	     aacFunctions -> aacDecoder_DecodeFrame (handle,
 	                                             localBuffer, 16 * 980, 0);
+#else
+	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, 0);
+#endif
 #if 0
 	fprintf (stderr, "fdk-aac errorstatus %x\n",
 	                       errorStatus);
@@ -363,7 +392,11 @@ uint32_t	bytesValid	= 0;
 	}
 
 	CStreamInfo *fdk_info =
+#ifdef	__DOWNLOAD__
 	                 aacFunctions ->aacDecoder_GetStreamInfo (handle);
+#else
+	                 aacDecoder_GetStreamInfo (handle);
+#endif
 	if (fdk_info -> numChannels == 1) {
 	   for (int i = 0; i < fdk_info -> frameSize; i ++) {
 	      buffer [2 * i] 	= localBuffer [i];

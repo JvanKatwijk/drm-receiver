@@ -25,7 +25,7 @@
 #define	__AAC_PROCESSOR_FDK__
 
 #include	<QObject>
-//#include	<fdk-aac/aacdecoder_lib.h>
+#include	<fdk-aac/aacdecoder_lib.h>
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<cstring>
@@ -50,7 +50,9 @@ Q_OBJECT
 public:
 		aacProcessor_fdk   (stateDescriptor *,
 	                            drmDecoder *,
+#ifdef	__DOWNLOAD__
 	                            aacHandler	*,
+#endif
 	                            RingBuffer<std::complex<float>> *);
 	        ~aacProcessor_fdk  ();
 
@@ -67,7 +69,9 @@ private:
 	int16_t         selectedAudioService;
 	upConverter	*theConverter;
 	int		currentRate;
+#ifdef	__DOWNLOAD__
 	aacHandler	*aacFunctions;
+#endif
 
 	void		handle_uep_audio        (uint8_t *, int16_t,
 	                                 int16_t, int16_t, int16_t, int16_t);
