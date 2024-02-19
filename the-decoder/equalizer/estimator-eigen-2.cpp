@@ -43,7 +43,7 @@ complex<float> createExp (float s) {
 //	of the class for each of the N symbols of a frame. 
 
 //
-	estimator_1::estimator_1 (std::complex<float> 	**refFrame,
+	estimator_2::estimator_2 (std::complex<float> 	**refFrame,
 	                          uint8_t	Mode,
 	                          uint8_t	Spectrum,
 	                          int16_t	refSymbol) {
@@ -60,8 +60,7 @@ int16_t	pilotIndex, tap;
 	fftSize			= Tu_of (Mode);
 	numberofCarriers	= K_max - K_min + 1;
 	numberofPilots		= getnrPilots (refSymbol);
-	numberofTaps		= Tg_of (Mode) - 1;
-//	numberofTaps		= numberofPilots;
+	numberofTaps		= 2 *Tg_of (Mode) - 1;
 	F_p			= MatrixXd (numberofPilots, numberofTaps);
 	S_p			= MatrixXd (numberofPilots,
 	                                          numberofPilots);
@@ -103,14 +102,14 @@ int16_t	pilotIndex, tap;
 	A_p_inv = A_p. transpose () * (A_p * A_p. transpose ()). inverse ();
 }
 
-	estimator_1::~estimator_1 () {
+	estimator_2::~estimator_2 () {
 	delete[]	pilotTable;
 }
 
 //
-void	estimator_1::estimate (std::complex<float> *testRow,
-	                            std::complex<float> *resultRow) {
-int16_t		index;
+void	estimator_2::estimate (std::complex<float> *testRow,
+	                            std::complex<float> *resultRow,
+	                            std::vector<std::complex<float>> &channel) {
 Vector	h_td (numberofTaps);
 Vector  H_fd (numberofPilots);
 Vector  X_p  (numberofPilots);
@@ -120,22 +119,41 @@ Vector  X_p  (numberofPilots);
 //	H_fd    = F_p * h_td;
 
 
-	for (index = 0; index < numberofPilots; index ++) 
+	for (int index = 0; index < numberofPilots; index ++) 
 	   X_p (index) = testRow [indexFor (pilotTable [index])];
 //
 ////	Ok, the matrices are filled, now computing the channelvalues
 	h_td	= A_p_inv * X_p;
 	H_fd	= F_p * h_td;
 //
-	for (index = 0; index < numberofPilots; index ++)
+	for (int index = 0; index < numberofPilots; index ++)
 	   resultRow [indexFor (pilotTable [index])] = H_fd [index];
+	channel. resize (numberofPilots);
+	for (int index = 0; index < numberofPilots; index ++)
+	   channel. at (index) = h_td [index];
 }
 
-int16_t estimator_1::indexFor (int16_t carrier) {
+float	estimator_2::testQuality	(ourSignal *v) {
+std::complex<float> res	= 0;
+int count	= 0;
+	
+	for (int carrier = K_min; carrier <= K_max; carrier ++) {
+	   if (carrier == 0)
+	      continue;
+	   if (isPilotCell (Mode, refSymbol, carrier)) {
+	      count ++;
+	      res += v [indexFor (carrier)]. signalValue / 
+	                     getPilotValue (Mode, Spectrum, refSymbol, carrier);
+	   }
+	}
+	fprintf (stderr, "%f %f\n", arg (res), abs (res)/ count);
+	return abs (res);
+}
+int16_t estimator_2::indexFor (int16_t carrier) {
         return carrier - K_min;
 }
 
-int16_t estimator_1::getnrPilots (int16_t symbolno) {
+int16_t estimator_2::getnrPilots (int16_t symbolno) {
 int16_t         carrier;
 int16_t         amount = 0;
 

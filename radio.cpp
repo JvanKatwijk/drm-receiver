@@ -189,7 +189,7 @@ QString	FrequencytoString (int32_t freq) {
         secondsTimer. start (1000);
 
 //	and off we go
-	theDecoder	= new drmDecoder (this, &audioData);
+	theDecoder	= new drmDecoder (this, settings,  &audioData);
 //	bind the signals in the decoder to some slots
 	connect (theDecoder, SIGNAL (audioAvailable (int, int)),
 	         this, SLOT (processAudio (int, int)));

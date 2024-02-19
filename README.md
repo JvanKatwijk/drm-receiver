@@ -23,16 +23,16 @@ The decoder uses the FDK_AAC library for AAC decoding, meaning that
 The decoder
 -----------------------------------------------------------------------
 
-![overview](/drm-decoder-goed.png?raw=true)
 
-The decoder (see the picture above) takes a samplerate of 12000
+The decoder takes a samplerate of 12000
 Samples/second as input. 
 
 The incoming sample stream is best seen as a sequence of **words**,
 for mode B, such a word contains just over 300 samples.
 
-Almost all processing is done in the **frequency domain**,
-the incoming **words** are processed by an FFT processor,
+Apaprt from the time synchronization, i.e. finding in the input stream
+where the **words** start, all processing is done in the **frequency domain**.
+The incoming **words** are processed by an FFT processor,
 and each incoming word is eventually translated into a word
 containing just over 200 carriers (The FFT is done on segments of 256 samples).
 These translated words are grouped into **frames** (for mode B a frame
@@ -43,7 +43,9 @@ i.e. it is defined which carriers are used for synchonization, which carriers
 belong to the FAC (Fast Access Channel), which carriers belong to  the
 SDR (Service Description Channel) and which carriers contain the payload.
 
-The decoder gives some information on the state of decoding.
+![overview](/drm-decoder-1.png?raw=true)
+
+The decoder gives quite some information on the state of decoding.
 The 4 boxes top right tell about the synchronization reached,
 from top to bottom
  * time sync tells whether or not the software thinks the input blocks
@@ -62,45 +64,45 @@ or QAM64 format. The audio services are encoded as AAC streams or xHE-AAC
 streams, that is why this software uses the FDK_AAC library, since that
 is able to handle both formats.
 
-In the picture above, it shows that all 4 elements show green.
+The boxes, jer elabeled "3" and "c" tell that in the transmission the
+mode "c" was detected and the spectrum layout "3" (the latter just indicating
+a 10 KHz wide signal).
+The box with "QAM16" tells that the audio content is encoded in QAM16, i.e
+each complex carrier takes one of 16 positions (which can be decoded into 
+4 bits), and the box with "AAC" tells that the audio was encoded in AAC format
+(the other formak is xHE-AAC).
+
 
 The 3 numbers  in the middle of the widget give an indication of the
 quality of the decoding.
 
-Top left of the widget the frequency offset is indicated, the "big" number
-essentially tells how many carriers the input is off, the "small" number
-tells the offset to the nearest varrier frequency.
+Top left of the widget the frequency offset is indicated,
+the total offset can be obtained by adding the two numbers.
 
-The bottom scope tells the transformation to be done on the signal
-(this transformation is done in the frequency domain), the yellow line
-tells the required correction on the amplitude, the red line the
-required correction of the phase.
-In the picture above the curves are reasonably smooth and decoding goed well,
-there is sound.
-In the picture below, it shows that both the correction on the amplitude
-as the correction on the phase, while not shown here, in time both curves
-behave kind of wild. The effect is that even SDC decoding fails, and
-so does the aac decoding.
+The label tells that the picture is taken from a (recorded) transmission
+of "the voice of Nigeria"
 
-![overview](/drm-decoder-wild.png?raw=true)
 
-It holds in general, decoding will be successfull when
-the  "equalizer" curves are reasonably smooth, both
-over all carriers as over successive frames.
-Of course, the examples above are relatively simple, since the audio, i.e.
-the service, was encoded in QAM16, i.e. each value may take one of
-16 positions.
+The "scope" with the yellow arrows gives an impression on the amount
+with which the signal has to be corrected. In the frequency domain
+signal, some carriers are known to have a predefined phase and amplitude,
+i.e. pilots. The scope tells the correction to be applied on these
+pilots, information that can be used to transform all carriers.
 
-It will be obvious that decoding QAM64 encoded data is harder, and
-handling it with wild moving correction curves will often result in
-loss of audio.
+![overview](/drm-decoder-2.png?raw=true)
 
-![overview](/drm-decoder-qam64.png?raw=true)
+The second picture shows - from a different recorded transmission - the
+so-called channel. On the way from transmitter to receiver the signal
+is malformed, in the picture the impulse response of the channel, i.e.
+the way the channel filters the transmission , is shown.
+
+
+![overview](/drm-decoder-3.png?raw=true)
 
 The small black scope shows the constellation of the decoded data.
-While in the pictures above - where the audio was encoded as QAM16 -
-the 16 dots show (more or less) clearly, the picture
-showing QAM64 is a little messy, it is hard to identify the 64 positions.
+In the first pisture the signal was QAM16, in the last two pictures a
+QAM64 encoding is used. The last picture shows  an almost ideal signal,
+all 64 positions the carriers may take are clearly identifyable.
 
 --------------------------------------------------------------------------
 A note on building an executable and equalization
@@ -110,12 +112,6 @@ For building an executable the - more or less - standard libraries
 are supposed to be installed.
 Qt, Qwt, fftw3, libsamplerate and libsndfile and of course, the
 support libraries for the devices one chooses.
-
-There is one thing that might be slightly more complex, it has to do
-with preparation for the equalisation.
-Input to the equalizer is an estimate of the channel,  in the implementation
-there are some choices, represented by different versions of 
-the "estimator"s in the equalizer directory.
 
 The estimator computes the difference between the pilot values as
 seen in the data and the pilot values as they should be.

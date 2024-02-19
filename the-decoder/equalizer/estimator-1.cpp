@@ -62,6 +62,23 @@ int16_t	carrier;
 	}
 }
 
+float	estimator_1::testQuality	(ourSignal *v) {
+std::complex<float> res	= 0;
+int count	= 0;
+	
+	for (int carrier = K_min; carrier <= K_max; carrier ++) {
+	   if (carrier == 0)
+	      continue;
+	   if (isPilotCell (Mode, refSymbol, carrier)) {
+	      count ++;
+	      res += v [indexFor (carrier)]. signalValue / 
+	                     getPilotValue (Mode, Spectrum, refSymbol, carrier);
+	   }
+	}
+	fprintf (stderr, "%f %f\n", arg (res), abs (res)/ count);
+	return abs (res);
+}
+
 int16_t estimator_1::indexFor (int16_t carrier) {
         return carrier - K_min;
 }

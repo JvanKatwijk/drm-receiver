@@ -37,6 +37,7 @@ public:
 		~estimator_1	();
 	void	estimate	(std::complex<float> *,
 	                                   std::complex<float> *);
+	float	testQuality	(ourSignal *);
 private:
 	std::complex<float>	**refFrame;
 	uint8_t		Mode;

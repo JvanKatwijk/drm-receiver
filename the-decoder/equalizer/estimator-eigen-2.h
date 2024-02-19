@@ -27,18 +27,22 @@
 #include	<Eigen/Dense>
 #include	<QString>
 #include	"radio-constants.h"
-#
+#include	<vector>
+
 using namespace	Eigen;
 
 //	The processor for estimating the channel(s) of a single
 //	symbol using the "Eigen" library
 //
-class	estimator_1 {
+class	estimator_2 {
 public:
-		estimator_1	(std::complex<float> **,
+		estimator_2	(std::complex<float> **,
 	                         uint8_t, uint8_t, int16_t);
-		~estimator_1	();
-	void	estimate	(std::complex<float> *, std::complex<float> *);
+		~estimator_2	();
+	void	estimate	(std::complex<float> *,
+	                         std::complex<float> *,
+	                         std::vector<std::complex<float>> &);
+	float	testQuality	(ourSignal *);
 private:
 	std::complex<float>     **refFrame;
         uint8_t         Mode;

@@ -241,13 +241,13 @@ CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
-CONFIG		+= fdk-aac
-#CONFIG		+= faad
+#CONFIG		+= fdk-aac
+CONFIG		+= faad
 # choose one of the estimators
 # CONFIG	+= estimator_1
 # CONFIG	+= estimator_2	does not work yet
 # CONFIG	+= estimator_jan
-  CONFIG	+= estimator_eigen
+ CONFIG	+= estimator_eigen
 #CONFIG		+= estimator_arma
 
 LIBS		+= -L/usr/lib64
@@ -428,7 +428,9 @@ SOURCES		+= ./the-decoder/equalizer/estimator-jan-2.cpp
 estimator_eigen {
 DEFINES		+= ESTIMATOR_EIGEN
 INCLUDEPATH	+= /usr/include/eigen3
+HEADERS		+= ./the-decoder/equalizer/estimator-1.h
 HEADERS		+= ./the-decoder/equalizer/estimator-eigen-2.h
+SOURCES		+= ./the-decoder/equalizer/estimator-1.cpp
 SOURCES		+= ./the-decoder/equalizer/estimator-eigen-2.cpp
 }
 

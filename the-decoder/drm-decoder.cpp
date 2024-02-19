@@ -29,6 +29,7 @@
 #include	<math.h>
 
 	drmDecoder::drmDecoder (RadioInterface *theRadio,
+	                        QSettings	*drmSettings,
 	                        RingBuffer<std::complex<float>> *audioBuffer):
 	                                 myFrame (nullptr),
 	                                 m_worker (nullptr),
@@ -36,8 +37,8 @@
 	                                 iqBuffer (32768),
 	                                 eqBuffer (32768),
 	                                 theMixer     (INRATE),
-	                                 passbandFilter (25,
-	                                                 5000,
+	                                 passbandFilter (15,
+	                                                 5500,
 	                                                 INRATE),
 	                                 theDecimator (INRATE / WORKING_RATE),
 //	                                 localMixer (WORKING_RATE),
@@ -58,11 +59,12 @@
 	                                                       &iqBuffer),
 	                                theState (1, 3) {
 	this	-> theRadio	= theRadio;
-
+	this	-> drmSettings	= drmSettings;
 	setupUi (&myFrame);
 	my_eqDisplay            = new EQDisplay (equalizerDisplay);
 	my_iqDisplay            = new IQDisplay (iqPlotter, 512);
 
+	scopeMode		= SHOW_PILOTS;
 	myFrame. show ();
 	running. store (false);
 
@@ -77,6 +79,15 @@
 	modeInf. Mode		= 2;
 	modeInf. Spectrum	= 3;
 
+	int	s	= drmSettings	-> value ("strength", 0). toInt ();
+	strengthSelector	-> setValue (s);
+	s		= drmSettings -> value ("f_cut_k", 20). toInt ();
+	f_cutSelector		-> setValue (s);
+
+	connect (strengthSelector, SIGNAL (valueChanged (int)),
+	         this, SLOT (handle_strengthSelector (int)));
+	connect (f_cutSelector, SIGNAL (valueChanged (int)),
+	         this, SLOT (handle_f_cutSelector (int)));
 	connect (this, SIGNAL (setTimeSync (bool)),
                  this, SLOT (executeTimeSync (bool)));
         connect (this, SIGNAL (setFACSync (bool)),
@@ -91,6 +102,8 @@
                  this, SLOT (select_channel_1 ()));
         connect (channel_2, SIGNAL (clicked ()),
                  this, SLOT (select_channel_2 ()));
+	connect (modeSelector, SIGNAL (activated (const QString &)),
+	         this, SLOT (handle_modeSelector (const QString &)));
 
 	m_worker	=
 	       new std::thread (&drmDecoder::WorkerFunction, this);
@@ -118,7 +131,7 @@ void	drmDecoder::
 	                    theRadio -> get_centerFrequency ();
 	if (passbandFilter. offset () != theOffset) {
 	   passbandFilter. modulate (theOffset);
-	   fprintf (stderr, "theOffset = %d\n", theOffset);
+//	   fprintf (stderr, "theOffset = %d\n", theOffset);
 	}
 
 	for (int i = 0; i < length; i ++) {
@@ -187,10 +200,14 @@ float     sampleclockOffset       = 0;
               myArray<bool> frame_12 (nrSymbols, nrCarriers);
 
 	      correlator myCorrelator (&modeInf);
+//	      fprintf (stderr, "Equalizer with %d %f\n",
+//	                          strengthSelector -> value (),
+//	                          f_cutSelector -> value () / 100.0f);
 	      equalizer_1 my_Equalizer (this,
 	                                modeInf.Mode,
 	                                modeInf.Spectrum,
-	                                1,
+	                                strengthSelector -> value (),
+	                                f_cutSelector -> value (),
 	                                &eqBuffer);
 	      std::vector<std::complex<float>> displayVector;
 	      displayVector. resize (Kmax (modeInf. Mode, modeInf. Spectrum) -
@@ -250,6 +267,7 @@ float     sampleclockOffset       = 0;
 	      symbol_no    = 0;
 	      frameReady   = false;
 	      while (running. load () && !frameReady) {
+	          my_Equalizer. set_scopeMode (scopeMode);
 		  my_wordCollector.getWord (inbank.element(lc),
 				   modeInf.freqOffset_integer,
 				  lc == 0,        // no-op
@@ -316,6 +334,7 @@ float     sampleclockOffset       = 0;
 		  
 		
 	      while (true) {
+	          my_Equalizer. set_scopeMode (scopeMode);
 //	when we are here, we can start thinking about  SDC's and superframes
 //	The first frame of a superframe has an SDC part
 	         if (isFirstFrame (&theState)) {
@@ -737,7 +756,10 @@ void    drmDecoder::show_eqsymbol       (int amount) {
 std::complex<float> line [amount];
 
         eqBuffer. getDataFromBuffer (line, amount);
-        my_eqDisplay    -> show (line, amount);
+	if (scopeMode == SHOW_PILOTS)
+           my_eqDisplay    -> show_pilots (line, amount);
+	else
+           my_eqDisplay    -> show_channel (line, amount);
 }
 
 void    drmDecoder::showIQ  (int amount) {
@@ -765,5 +787,17 @@ void	drmDecoder::select_channel_1	() {
 
 void	drmDecoder::select_channel_2	() {
 	theState. activate_channel_2 ();
+}
+
+void	drmDecoder::handle_strengthSelector (int s) {
+	drmSettings	-> setValue ("strength", s);
+}
+
+void	drmDecoder::handle_f_cutSelector (int n) {
+	drmSettings	-> setValue ("f_cut_k", n);
+}
+
+void	drmDecoder::handle_modeSelector	(const QString &m) {
+	scopeMode = m == "Pilots" ? SHOW_PILOTS : SHOW_CHANNEL;
 }
 

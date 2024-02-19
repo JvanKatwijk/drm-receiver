@@ -447,11 +447,11 @@ uint32_t                ndev;
 	   goto closeAPI;
 	}
 
-	if (apiVersion < (SDRPLAY_API_VERSION - 0.01)) {
-	   fprintf (stderr, "API versions don't match (local=%.2f dll=%.2f)\n",
-	                                      SDRPLAY_API_VERSION, apiVersion);
-	   goto closeAPI;
-	}
+//	if (apiVersion < (SDRPLAY_API_VERSION - 0.01)) {
+//	   fprintf (stderr, "API versions don't match (local=%.2f dll=%.2f)\n",
+//	                                      SDRPLAY_API_VERSION, apiVersion);
+//	   goto closeAPI;
+//	}
 	
 	fprintf (stderr, "api version %f detected\n", apiVersion);
 //

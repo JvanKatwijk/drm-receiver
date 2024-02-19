@@ -74,6 +74,7 @@ struct metrics_struct {
 	DRM_FLOAT	rTow1;
 };
 
+
 typedef struct metrics_struct metrics;
 
 //
@@ -181,5 +182,8 @@ int16_t		Kmin		(uint8_t, uint8_t);
 int16_t		Kmax		(uint8_t, uint8_t);
 int16_t		ususedCarriers	(uint8_t);
 DRM_FLOAT	sinc		(DRM_FLOAT);
+
+#define		SHOW_CHANNEL	0100
+#define		SHOW_PILOTS	0200
 #endif
 

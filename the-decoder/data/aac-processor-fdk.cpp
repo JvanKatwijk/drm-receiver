@@ -145,9 +145,9 @@ int16_t	payloadLength;
 	         f [i]. audio [audioinHP + j] =
 	                    get_MSCBits (v, (entryinLP++) * 8, 8);
 	}
-	if (theState -> streams [i]. textFlag)
-	         my_messageProcessor.
-	                   processMessage (v, (startLow + lengthLow - 4) * 8);
+//	if (theState -> streams [i]. textFlag)
+//	         my_messageProcessor.
+//	                   processMessage (v, (startLow + lengthLow - 4) * 8);
 
 	
 	playOut (mscIndex);

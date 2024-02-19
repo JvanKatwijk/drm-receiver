@@ -2,6 +2,7 @@
 
 #include	<QObject>
 #include	<QFrame>
+#include	<QSettings>
 #include	<thread>
 #include	<mutex>
 #include	<atomic>
@@ -40,6 +41,7 @@ Q_OBJECT
 public:
 	
 		drmDecoder (RadioInterface *,
+	                    QSettings	*,
 	                    RingBuffer<std::complex<float>> *);
 	virtual ~drmDecoder ();
         void    processBuffer (std::complex<float> *, int length);
@@ -86,6 +88,9 @@ private:
         int             VFOFRequency;
         int             selectedFrequency;
         int             Raw_Rate;
+
+	int		scopeMode;
+	QSettings	*drmSettings;
 //
 //
         int16_t         nSymbols;
@@ -112,6 +117,9 @@ private:
 private slots:
 	void		select_channel_1	();
 	void		select_channel_2	();
+	void		handle_strengthSelector	(int);
+	void		handle_f_cutSelector	(int);
+	void		handle_modeSelector	(const QString &);
 public slots:
 	void            set_faadSyncLabel	(bool);
 	void		set_messageLabel	(const QString &);
