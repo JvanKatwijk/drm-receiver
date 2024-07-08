@@ -32,12 +32,14 @@
 #include	"radio-constants.h"
 #include	"up-filter.h"
 #include	"ringbuffer.h"
+#ifdef	__MINGW32__
 #include	"aac-handler.h"
+#endif
 #include	"message-processor.h"
 
 class	drmDecoder;
 class	stateDescriptor;
-class	upConverter;
+class	drmConverter;
 
 typedef	struct frame {
 	int16_t length, startPos;
@@ -50,7 +52,7 @@ Q_OBJECT
 public:
 		aacProcessor_fdk   (stateDescriptor *,
 	                            drmDecoder *,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                            aacHandler	*,
 #endif
 	                            RingBuffer<std::complex<float>> *);
@@ -67,9 +69,9 @@ private:
 //	upFilter	upFilter_12000;
 	int16_t         numFrames;
 	int16_t         selectedAudioService;
-	upConverter	*theConverter;
+	drmConverter	*theConverter;
 	int		currentRate;
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	aacHandler	*aacFunctions;
 #endif
 

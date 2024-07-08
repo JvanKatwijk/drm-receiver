@@ -39,7 +39,7 @@
 #include	"message-processor.h"
 
 class	drmDecoder;
-//class	upConverter;
+//class	drmConverter;
 class	rateConverter;
 class	stateDescriptor;
 
@@ -48,7 +48,7 @@ Q_OBJECT
 public:
 			xheaacProcessor	(stateDescriptor *,
 	                                 drmDecoder *,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacHandler	*,
 #endif
 	                                 RingBuffer<std::complex<float>> *);
@@ -69,13 +69,13 @@ private:
                                                         int streamId);
 	std::vector<uint8_t>	frameBuffer;
 	std::vector<uint32_t> borders;
+//	drmConverter	*theConverter;
 	rateConverter	*theConverter;
-//	upConverter	*theConverter;
 	int		numFrames;
 	void		writeOut	(int16_t *, int16_t, int32_t);
 	void		toOutput	(std::complex<float> *, int16_t);
 	void		playOut		(std::vector<uint8_t> &, int, int);
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	aacHandler	*aacFunctions;
 #endif
 

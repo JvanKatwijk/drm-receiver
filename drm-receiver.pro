@@ -7,21 +7,29 @@ CONFIG	+= console
 #CONFIG	-= console
 TARGET	= drm-receiver
 QMAKE_CXXFLAGS	+= -std=c++14 
-QMAKE_CFLAGS	+= -flto -ffast-math 
-QMAKE_CXXFLAGS	+= -flto -ffast-math 
-QMAKE_LFLAGS	+= -flto
-#QMAKE_CFLAGS	+= -g
-#QMAKE_CXXFLAGS	+= -g
-#QMAKE_LFLAGS	+= -g
-#QMAKE_CXXFLAGS	+= -fsanitize=address
-#QMAKE_CFLAGS	+= -fsanitize=address
-#QMAKE_LFLAGS	+= -fsanitize=address
+#QMAKE_CFLAGS	+= -flto -ffast-math 
+#QMAKE_CXXFLAGS	+= -flto -ffast-math 
+#QMAKE_LFLAGS	+= -flto
+QMAKE_CFLAGS	+= -g
+QMAKE_CXXFLAGS	+= -g
+QMAKE_LFLAGS	+= -g
+QMAKE_CXXFLAGS	+= -fsanitize=address
+QMAKE_CFLAGS	+= -fsanitize=address
+QMAKE_LFLAGS	+= -fsanitize=address
 RC_ICONS	=  drm.ico
 RESOURCES       += resources.qrc
+
+        DEFINES         +=  __WITH_FDK_AAC__
+        LIBS            += -lfdk-aac
+#       LIBS            += -lfdk-aac-2
+        PKGCONFIG       += fdk-aac
+        INCLUDEPATH     += ./fdk-aac
+        INCLUDEPATH     += /usr/include/eigen3
 
 DEPENDPATH += .  \
 	      filters \
 	      various \
+	      kiss \
 	      output \
 	      scopes-qwt6 \
 	      devices \
@@ -39,6 +47,7 @@ DEPENDPATH += .  \
 INCLUDEPATH += .  \
 	      filters \
 	      various \
+	      kiss \
 	      output \
 	      scopes-qwt6 \
 	      devices \
@@ -59,6 +68,9 @@ INCLUDEPATH += .  \
 HEADERS += ./radio-constants.h \
 	   ./radio.h \
 	   ./bandplan.h \
+	   ./kiss/kiss_fft.h \
+	   ./kiss/kiss_fftr.h \
+	   ./kiss/_kiss_fft_guts.h \
 #	   ./output/upconverter.h \
 	   ./output/audiosink.h \
            ./various/ringbuffer.h \
@@ -69,13 +81,14 @@ HEADERS += ./radio-constants.h \
 	   ./various/program-list.h \
 	   ./various/popup-keypad.h \
 	   ./various/downconverter.h \
-	   ./various/rate-converter.h \
+#	   ./various/rate-converter.h \
 	   ./various/up-converter.h \
            ./filters/fft-filters.h \
            ./filters/fir-filters.h \
            ./filters/iir-filters.h \
 	   ./filters/decimating_filter.h \
 	   ./filters/hilbertfilter.h \
+	   ./filters/decimator.h \
 	   ./scopes-qwt6/virtual-scope.h \
 	   ./scopes-qwt6/spectrogramdata.h \
 	   ./scopes-qwt6/waterfall-scope.h \
@@ -87,16 +100,12 @@ HEADERS += ./radio-constants.h \
            ./devices/filereader/filereader.h \
            ./devices/filereader/filehulp.h \
 	   ./the-decoder/drm-decoder.h \
-	   ./the-decoder/decimator-25.h \
-	   ./the-decoder/decimator.h \
-	   ./the-decoder/drm-bandfilter.h \
 	   ./the-decoder/eqdisplay.h \
 	   ./the-decoder/iqdisplay.h \
-#	   ./the-decoder/lowpassfilter.h \
 	   ./the-decoder/basics.h \
-	   ./the-decoder/utilities.h \
-#	   ./the-decoder/data/neaacdec.h \
-#	   ./the-decoder/data/aac-processor-faad.h \
+#	   ./the-decoder/utilities.h \
+	   ./the-decoder/drm-converter.h \
+	   ./the-decoder/rate-converter.h \
 	   ./the-decoder/data/data-processor.h \
 	   ./the-decoder/data/message-processor.h \
 #	   ./the-decoder/data/up-filter.h \
@@ -118,6 +127,8 @@ HEADERS += ./radio-constants.h \
 	   ./the-decoder/ofdm/word-collector.h \
 	   ./the-decoder/equalizer/equalizer-1.h \
 	   ./the-decoder/equalizer/equalizer-base.h \
+	   ./the-decoder/equalizer/estimator-1.h \
+	   ./the-decoder/equalizer/estimator-eigen-2.h \
 	   ./the-decoder/equalizer/matrix2.h \
 	   ./the-decoder/equalizer/referenceframe.h \
 	   ./the-decoder/parameters/msc-config.h \
@@ -146,6 +157,8 @@ FORMS	+= ./the-decoder/drmdecoder.ui
 SOURCES += ./main.cpp \
 	   ./radio.cpp \
 	   ./bandplan.cpp \
+	   ./kiss/kiss_fft.c \
+	   ./kiss/kiss_fftr.c \
 #	   ./output/upconverter.cpp \
            ./output/audiosink.cpp \
            ./various/fft.cpp \
@@ -155,13 +168,12 @@ SOURCES += ./main.cpp \
 	   ./various/slidingfft.cpp \
 	   ./various/program-list.cpp \
 	   ./various/downconverter.cpp \
-	   ./various/rate-converter.cpp \
-	   ./various/up-converter.cpp \
            ./filters/fft-filters.cpp \
            ./filters/fir-filters.cpp \
            ./filters/iir-filters.cpp \
 	   ./filters/decimating_filter.cpp \
 	   ./filters/hilbertfilter.cpp \
+	   ./filters/decimator.cpp \
 	   ./scopes-qwt6/virtual-scope.cpp \
 	   ./scopes-qwt6/waterfall-scope.cpp \
 	   ./scopes-qwt6/spectrum-scope.cpp \
@@ -172,18 +184,13 @@ SOURCES += ./main.cpp \
            ./devices/filereader/filereader.cpp \
            ./devices/filereader/filehulp.cpp \
 	   ./the-decoder/drm-decoder.cpp \
-	   ./the-decoder/decimator-25.cpp \
-	   ./the-decoder/decimator.cpp \
-	   ./the-decoder/drm-bandfilter.cpp \
 	   ./the-decoder/eqdisplay.cpp \
 	   ./the-decoder/iqdisplay.cpp \
-#	   ./the-decoder/lowpassfilter.cpp \
-	   ./the-decoder/utilities.cpp \
+	   ./the-decoder/drm-converter.cpp \
+	   ./the-decoder/rate-converter.cpp \
 	   ./the-decoder/basics.cpp \
-#	   ./the-decoder/data/aac-processor-faad.cpp \
 	   ./the-decoder/data/data-processor.cpp \
 	   ./the-decoder/data/message-processor.cpp \
-#	   ./the-decoder/data/lowpassfir.cpp \
 	   ./the-decoder/data/up-filter.cpp \
 	   ./the-decoder/fac/fac-tables.cpp \
 	   ./the-decoder/fac/fac-processor.cpp \
@@ -202,6 +209,8 @@ SOURCES += ./main.cpp \
 	   ./the-decoder/ofdm/word-collector.cpp \
 	   ./the-decoder/equalizer/equalizer-1.cpp \
 	   ./the-decoder/equalizer/equalizer-base.cpp \
+	   ./the-decoder/equalizer/estimator-1.cpp \
+	   ./the-decoder/equalizer/estimator-eigen-2.cpp \
 	   ./the-decoder/equalizer/matrix2.cpp \
 	   ./the-decoder/equalizer/referenceframe.cpp \
 	   ./the-decoder/parameters/msc-config.cpp \
@@ -241,14 +250,8 @@ CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
-#CONFIG		+= fdk-aac
-CONFIG		+= faad
-# choose one of the estimators
-# CONFIG	+= estimator_1
-# CONFIG	+= estimator_2	does not work yet
-# CONFIG	+= estimator_jan
- CONFIG	+= estimator_eigen
-#CONFIG		+= estimator_arma
+CONFIG		+= fdk-aac
+#CONFIG		+= faad
 
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
@@ -275,12 +278,6 @@ CONFIG		+= sdrplay-v2
 CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
-# choose one of the estimators
-# CONFIG	+= estimator_1
-# CONFIG	+= estimator_2	does not work yet
-# CONFIG	+= estimator_jan
-  CONFIG	+= estimator_eigen
-#CONFIG		+= estimator_arma
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/eigen3
@@ -402,43 +399,5 @@ SOURCES		+= ./the-decoder/data/aac-processor-faad.cpp
 #	           ./the-decoder/data/drm-aacdecoder.cpp 
 LIBS		+= -lfaad_drm
 #LIBS		+= -lfaad_drm -larmadillo
-}
-
-estimator_1 {
-DEFINES		+= ESTIMATOR_1
-HEADERS		+= ./the-decoder/equalizer/estimator-1.h
-SOURCES		+= ./the-decoder/equalizer/estimator-1.cpp
-}
-
-estimator_2 {
-DEFINES		+= ESTIMATOR_2
-INCLUDEPATH	+= /usr/include/eigen3
-HEADERS		+= ./the-decoder/equalizer/estimator-2.h
-SOURCES		+= ./the-decoder/equalizer/estimator-2.cpp
-}
-
-# 
-estimator_jan {
-DEFINES		+= ESTIMATOR_JAN
-HEADERS		+= ./the-decoder/equalizer/estimator-jan-2.h
-SOURCES		+= ./the-decoder/equalizer/estimator-jan-2.cpp
-}
-
-# you have the eigen template library installed?
-estimator_eigen {
-DEFINES		+= ESTIMATOR_EIGEN
-INCLUDEPATH	+= /usr/include/eigen3
-HEADERS		+= ./the-decoder/equalizer/estimator-1.h
-HEADERS		+= ./the-decoder/equalizer/estimator-eigen-2.h
-SOURCES		+= ./the-decoder/equalizer/estimator-1.cpp
-SOURCES		+= ./the-decoder/equalizer/estimator-eigen-2.cpp
-}
-
-# you have armadillo installed ?
-estimator_arma {
-DEFINES		+= ESTIMATOR_ARMA
-HEADERS		+= ./the-decoder/equalizer/estimator-arma-2.h
-SOURCES		+= ./the-decoder/equalizer/estimator-arma-2.cpp
-LIBS		+= -larmadillo
 }
 

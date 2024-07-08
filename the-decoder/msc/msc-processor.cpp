@@ -40,7 +40,7 @@
 		                         drmDecoder	*m_form,
 	                                 int8_t		qam64Roulette,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacHandler *aacFunctions,
 #endif
 #endif
@@ -49,7 +49,7 @@
 	                                    my_dataProcessor (theState, 
 	                                                      m_form,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                                      aacFunctions,
 #endif
 #endif
@@ -130,8 +130,13 @@ void	mscProcessor::addtoMux	(int16_t blockno, int32_t cnt, theSignal v) {
 	(void)blockno; (void)cnt;
 	tempBuffer [bufferP ++] = v;
 	if (bufferP >= muxsampleLength) {
-	   uint8_t *dataBuffer =
-	    (uint8_t *)alloca ((theState -> dataLength * BITSPERBYTE + 100) * sizeof (uint8_t));
+	   uint8_t *dataBuffer;
+	   if (theState -> dataLength < 0) { // emergency
+	      bufferP = 0;
+	      return;
+	   }
+	   dataBuffer =
+	    (uint8_t *)alloca ((theState -> dataLength * BITSPERBYTE + 200) * sizeof (uint8_t));
 	   my_deInterleaver -> deInterleave (tempBuffer,
 	                                     this -> muxsampleBuf);
 	   my_mscHandler    -> process (this -> muxsampleBuf, dataBuffer);

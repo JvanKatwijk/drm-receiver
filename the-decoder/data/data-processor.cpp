@@ -33,7 +33,7 @@
 	dataProcessor::dataProcessor	(stateDescriptor *theState,
 	                                 drmDecoder *m_form,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacHandler	*aacFunctions,
 #endif
 #endif
@@ -42,13 +42,13 @@
 #ifdef	__WITH_FDK_AAC__
 	                                      my_aacProcessor (theState,
 	                                                       m_form,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                                       aacFunctions,
 #endif
 	                                                       b),
 	                                      my_xheaacProcessor (theState,
 	                                                          m_form,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                                          aacFunctions,
 #endif
 	                                                          b)

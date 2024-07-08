@@ -4,20 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the drm receiver
- *
- *    drm receiver is free software; you can redistribute it and/or modify
+ *    This file is part of the SDR-J 
+ *    SDR-J is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm receiver is distributed in the hope that it will be useful,
+ *    SDR-J is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm receiver; if not, write to the Free Software
+ *    along with SDR-J; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *	Simple channel estimator for DRM based on private communication
@@ -44,7 +43,7 @@ complex<float> createExp (float s) {
 //	of the class for each of the N symbols of a frame. 
 
 //
-	estimator_1::estimator_1 (std::complex<float> 	**refFrame,
+	estimator_2::estimator_2 (std::complex<float> 	**refFrame,
 	                          uint8_t	Mode,
 	                          uint8_t	Spectrum,
 	                          int16_t	refSymbol) {
@@ -112,12 +111,12 @@ int16_t	pilotIndex, tap;
 	S_pxF_p			= S_p * F_p;
 }
 
-	estimator_1::~estimator_1 () {
+	estimator_2::~estimator_2 (void) {
 	delete[]	pilotTable;
 }
 
 //
-void	estimator_1::estimate (std::complex<float> *testRow,
+void	estimator_2::estimate (std::complex<float> *testRow,
 	                            std::complex<float> *resultRow) {
 int16_t		index;
 Vector	h_td (numberofTaps);
@@ -136,11 +135,11 @@ Vector  X_p  (numberofPilots);
 	                  H_fd [index];
 }
 
-int16_t estimator_1::indexFor (int16_t carrier) {
+int16_t estimator_2::indexFor (int16_t carrier) {
         return carrier - K_min;
 }
 
-int16_t estimator_1::getnrPilots (int16_t symbolno) {
+int16_t estimator_2::getnrPilots (int16_t symbolno) {
 int16_t         carrier;
 int16_t         amount = 0;
 

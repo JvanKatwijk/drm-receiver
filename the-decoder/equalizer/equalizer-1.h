@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__EQUALIZER_1__
-#define	__EQUALIZER_1__
+#pragma once
 
 #include	<QObject>
 #include	"basics.h"
@@ -46,6 +45,7 @@ public:
 	                                 uint8_t	Spectrum,
 	                                 int		strength,
 	                                 int		f_cut_k,
+	                                 bool,
 	                                 RingBuffer<std::complex<float>> *);
 			~equalizer_1 	();
 	bool		equalize	(std::complex<float> *,
@@ -66,13 +66,15 @@ private:
 	int16_t		buildTrainers	(int16_t);
 	int16_t		rndcnt;
 	estimator_2	*estimator_channel;
-	estimator_1	**Estimators;
+//	estimator_1	**estimators;
+	estimator_2	**estimators;
 	int16_t		windowsinFrame;
 	int16_t		periodforPilots;
 	int16_t		periodforSymbols;
 	double		**W_symbol_blk [20];
 	float		f_cut_t;
 	float		f_cut_k;
+	bool		linear;
 	std::vector<std::vector<trainer>> theTrainers;
 	std::vector<std::vector<std::complex<float>>> pilotEstimates;
 	int16_t		trainers_per_window [10];
@@ -89,6 +91,4 @@ private:
 signals:
 	void		show_eqsymbol	(int);
 };
-
-#endif
 

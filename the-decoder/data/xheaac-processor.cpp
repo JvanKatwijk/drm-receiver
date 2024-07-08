@@ -30,6 +30,9 @@
 #include	<deque>
 #include	<vector>
 #include	<complex>
+#ifndef	__MINGW32__
+#include	<fdk-aac/aacdecoder_lib.h>   
+#endif
 
 static
 const uint16_t crcPolynome [] = {
@@ -78,7 +81,7 @@ uint16_t        res     = 0;
 
 	xheaacProcessor::xheaacProcessor (stateDescriptor *theState,
 	                                  drmDecoder *drm,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                  aacHandler	*aacFunctions,
 #endif
 	                                  RingBuffer<std::complex<float>> *b):
@@ -86,11 +89,11 @@ uint16_t        res     = 0;
 	                                    my_messageProcessor (drm) {
 	this	-> theState	= theState;
 	this	-> parent	= drm;
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	this	-> aacFunctions	= aacFunctions;
 #endif
 	this	-> audioOut	= b;
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	this	-> handle	= aacFunctions -> aacDecoder_Open (TT_DRM, 3);
 #else
 	this	-> handle	= aacDecoder_Open (TT_DRM, 3);
@@ -111,7 +114,7 @@ uint16_t        res     = 0;
 
 	xheaacProcessor::~xheaacProcessor	() {
 	if (handle == nullptr)
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	   aacFunctions -> aacDecoder_Close (handle);
 #else
 	   aacDecoder_Close (handle);
@@ -139,14 +142,12 @@ int	failure		= 0;
 	(void)startHigh; (void)startLow;
 	(void)bitReservoirLevel;
 	(void)numChannels;
-	if (!theCRC. doCRC (v, 16)) {
-//	   fprintf (stderr, "oei\n");
+	if (!theCRC. doCRC (v, 16) || (frameBorderCount == 0)) {
+//	   fprintf (stderr, "crc error or (%d = 0)", frameBorderCount);
 	   faadSuccess (false);
 	   return;
 	}
 
-	if (frameBorderCount < 0)
-	   return;
 	if (textFlag != 0) {
 	   my_messageProcessor.
 	                   processMessage (v, (startLow + lengthLow - 4) * 8);
@@ -157,6 +158,7 @@ int	failure		= 0;
 	std::vector<uint8_t> audioDescriptor =
 	                         getAudioInformation (theState, streamId);
 	reinit (audioDescriptor, streamId);
+
 	for (int i = 0; i < frameBorderCount; i++) {
 	   uint32_t frameBorderIndex =
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i, 12);
@@ -164,25 +166,25 @@ int	failure		= 0;
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i + 12, 4);
 
 	   if (frameBorderCountRepeat != frameBorderCount) {
-//	      fprintf (stderr, "fout?\n");
 	      faadSuccess (false);
 	      return;
 	   }
-//	   fprintf (stderr, "border [%d] = %d\n",
-//	                           i, frameBorderIndex);
 	   borders [i] = frameBorderIndex;
 	}
 
 	for (int i = 0; i < frameBorderCount - 1; i ++)
 	   if (borders [i] >= borders [i + 1]) {
 	      faadSuccess (false);
+//	      fprintf (stderr, "Fout-2\n");
 	      return;
 	   }
 //
 //	we do not look at the usac crc
+
 	uint32_t directoryOffset = length - 2 * frameBorderCount - 2;
 	if (borders [frameBorderCount - 1] >= directoryOffset) {
 	   faadSuccess (false);
+//	   fprintf (stderr, "fout 3\n");
 	   return;
 	}
 
@@ -229,6 +231,7 @@ int	failure		= 0;
 	         success ++;
 	      else
 	         failure ++;
+	
 	      playOut (frameBuffer, frameBuffer. size (), 0);
 	      break;
 	}
@@ -269,6 +272,8 @@ static
 bool		convOK = false;
 int16_t	cnt;
 int32_t	rate;
+float ff = 0;
+
 	decodeFrame (f. data (),
 	             f. size (),
 //	             f. size () - 2,
@@ -317,15 +322,16 @@ void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	fprintf (stderr, "processing %d samples (rate %d)\n",
 	                  cnt, pcmRate);
 #endif
-	std::complex<float> local [theConverter -> getOutputsize ()];
+	std::complex<float> local [theConverter -> getOutputsize () + 10];
 	for (int i = 0; i < cnt; i ++) {
 	   std::complex<float> tmp = 
 	                    std::complex<float> (buffer [2 * i] / 8192.0,
 	                                         buffer [2 * i + 1] / 8192.0);
 	   int amount;
 	   bool b = theConverter -> convert (tmp, local, &amount);
-	   if (b)
+	   if (b) {
 	      toOutput (local, amount);
+	   }
 	}
 }
 
@@ -352,7 +358,7 @@ void	xheaacProcessor::init	() {
 	UCHAR *codecP		= &currentConfig [0];
 	uint32_t codecSize	= currentConfig. size ();
 	AAC_DECODER_ERROR err =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	           aacFunctions -> aacDecoder_ConfigRaw (handle,
 	                                                 &codecP, &codecSize);
 #else
@@ -360,7 +366,7 @@ void	xheaacProcessor::init	() {
 #endif
 	if (err == AAC_DEC_OK) {
 	   CStreamInfo *pInfo =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	              aacFunctions -> aacDecoder_GetStreamInfo (handle);
 #else
 	              aacDecoder_GetStreamInfo (handle);
@@ -374,7 +380,7 @@ void	xheaacProcessor::init	() {
 }
 
 static
-int16_t	localBuffer [8 * 32768];
+int16_t	localBuffer [16 * 32768];
 
 void	xheaacProcessor::decodeFrame (uint8_t	*audioFrame,
 	                              uint32_t	frameSize,
@@ -389,7 +395,7 @@ int	flags		= 0;
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
 	errorStatus =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	     aacFunctions -> aacDecoder_Fill (handle, &bb,
 	                                          &frameSize, &bytesValid);
 #else
@@ -402,12 +408,12 @@ int	flags		= 0;
 	if (!*conversionOK)
            flags = AACDEC_INTR;
 	errorStatus =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	     aacFunctions -> aacDecoder_DecodeFrame (handle,
 	                                             localBuffer,
-	                                             2048, flags);
+	                                             2 * 2048, flags);
 #else
-	     aacDecoder_DecodeFrame (handle, localBuffer, 2048, flags);
+	     aacDecoder_DecodeFrame (handle, localBuffer, 2 * 2048, flags);
 #endif
 #if 0
 	if (errorStatus != 0)
@@ -430,7 +436,7 @@ int	flags		= 0;
 	}
 
 	CStreamInfo *fdk_info =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                aacFunctions -> aacDecoder_GetStreamInfo (handle);
 #else
 	                aacDecoder_GetStreamInfo (handle);

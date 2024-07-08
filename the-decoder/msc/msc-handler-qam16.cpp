@@ -116,7 +116,6 @@ float	denom;
 }
 
 void	QAM16_SM_Handler::process	(theSignal *v, uint8_t *o) {
-uint8_t *oo	= o;
 int16_t	highProtectedbits	= stream_0 -> highBits () +
 	                          stream_1 -> highBits ();
 int16_t	lowProtectedbits	= stream_0 -> lowBits () +
@@ -178,6 +177,6 @@ float mer = 10 * log10 (computeMER. computemer (v, theState -> muxSize));
 //	apply PRBS
 //	m_form -> set_messageLabel ("sm16 process fase 2");
 	thePRBS -> doPRBS (&bitsOut [0]);
-	memcpy (oo, bitsOut.data (), (lengthA + lengthB) * BITSPERBYTE);
+	memcpy (o, bitsOut.data (), (lengthA + lengthB) * BITSPERBYTE);
 }
 

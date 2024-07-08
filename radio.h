@@ -34,6 +34,8 @@
 #include        "radio-constants.h"
 #include        "ringbuffer.h"
 #include	"shifter.h"
+#include	"fft-filters.h"
+#include	"decimator.h"
 
 class		deviceHandler;
 class		drmDecoder;
@@ -43,7 +45,6 @@ class           fft_scope;
 class           audioSink;
 class           keyPad;
 class           programList;
-class		fftFilter;
 class		bandPlan;
 
 class	RadioInterface:public QMainWindow,
@@ -61,6 +62,13 @@ public:
 private:
         RingBuffer<std::complex<float> > inputData;
         RingBuffer<std::complex<float> > audioData;
+
+	struct band {
+           int32_t      lowF;
+           int32_t      highF;
+           int32_t      currentOffset;
+        }theBand;
+
 	int32_t		centerFrequency;
 	int32_t		selectedFrequency;
 	QSettings       *settings;
@@ -78,9 +86,12 @@ private:
         deviceHandler	*theDevice;
 	drmDecoder	*theDecoder;
         fftScope        *hfScope;
-//	fftFilter	hfFilter;
+	fftFilter	hfFilter;
+	shifter		hfShifter;
+	decimator	theDecimator;
 	int16_t		mouseIncrement;
 	int16_t		delayCount;
+	void		set_inMiddle	();
 //
 	SNDFILE		*dumpfilePointer;
 	QTimer		secondsTimer;

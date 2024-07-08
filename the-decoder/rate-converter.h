@@ -47,7 +47,7 @@ public:
 		rateConverter (int32_t inRate, int32_t outRate, 
 	                      int32_t inSize);
 
-		~rateConverter ();
+		~rateConverter (void);
 
 bool	convert (std::complex<float> v,
 	                       std::complex<float> *out, int32_t *amount);

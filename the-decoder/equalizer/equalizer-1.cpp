@@ -75,6 +75,7 @@
 	                                  uint8_t	Spectrum,
 	                                  int		strength,
 	                                  int		f_cut_param,
+	                                  bool		linear,
 	                                  RingBuffer<std::complex<float>> *b):
 	                                     equalizer_base (Mode, Spectrum) {
 int16_t	i, window;
@@ -85,6 +86,7 @@ float	**PHI_2;
 float	*THETA;
 
 	this	-> scopeMode	= SHOW_PILOTS;
+	this	-> linear	= linear;
 	this	-> eqBuffer	= b;
 	connect (this, SIGNAL (show_eqsymbol (int)),
                  parent, SLOT (show_eqsymbol (int)));
@@ -146,7 +148,7 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //
 //	values taken from diorama
 	f_cut_t = 0.0675 / symbols_to_delay;
-	f_cut_t = 0.001 / symbols_to_delay;
+	f_cut_t = 0.0075 / symbols_to_delay;
 //	f_cut_k = 1.75 * (float) Tg / (float) Tu;
 	f_cut_k = f_cut_param / 100.0 * (float) Tg / (float) Tu;
 //
@@ -197,7 +199,7 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 	         int16_t sym_2	= currentTrainers [trainer_2]. symbol;
 	         int16_t car_2	= currentTrainers [trainer_2]. carrier;
 	         PHI_2 [trainer_1][trainer_2] = sinc ((car_1 - car_2) * f_cut_k)
-	                                    * sinc ((sym_1 - sym_2) * f_cut_t);
+	                                      * sinc ((sym_1 - sym_2) * f_cut_t);
               }
 	   }	// end of trainer_1 loop
 
@@ -255,18 +257,18 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //	The W_symbol_blk filters are ready now
 //
 //	and finally, the estimators
-	Estimators	= new estimator_1 *[symbolsinFrame];
+	estimators	= new estimator_2 *[symbolsinFrame];
 	for (i = 0; i < symbolsinFrame; i ++)
-	   Estimators [i] = new estimator_1 (refFrame, Mode, Spectrum, i);
-	estimator_channel = new estimator_2 (refFrame, Mode, Spectrum, 0);
+	   estimators [i] = new estimator_2 (refFrame, Mode, Spectrum, i);
+	estimator_channel = new estimator_2 (refFrame, Mode, Spectrum, 1);
 }
 
 		equalizer_1::~equalizer_1 () {
 int16_t	i;
 	for (i = 0; i < symbolsinFrame; i ++)
-	   delete Estimators [i];
-	delete [] Estimators;
-	delete	estimator_channel;
+	   delete estimators [i];
+	delete [] estimators;
+	delete estimator_channel;
 //
 //	W_symbol_blk is a matrix with three dimensions
 	for (int window = 0; window < windowsinFrame; window ++) { 
@@ -399,20 +401,21 @@ int16_t	i;
 //	*delta_freq_offset	= (arg (offs1) + arg (offs7) / periodforSymbols) / 2;
 
 	std::vector<std::complex<float>> VV;
-	if ((newSymbol == 0) && scopeMode == SHOW_CHANNEL) {
-           estimator_channel  -> estimate (testFrame [0],
-                                           pilotEstimates [0]. data (), VV);
-           std::complex<float> xx [K_max - K_min + 1];
-           for (int index = 0; index < VV. size (); index ++) {
-              xx [index] = VV [index];
-           }
-           eqBuffer -> putDataIntoBuffer (xx, VV. size ());
-           show_eqsymbol (VV. size ());
-        }
-
-	Estimators [newSymbol] ->
+	std::vector<std::complex<float>> DD;
+	if ((newSymbol == 2) && (scopeMode == SHOW_CHANNEL)) {
+	   estimator_channel  -> estimate (testFrame [2],
+	                                   pilotEstimates [2]. data (), VV, DD);
+	   std::complex<float> xx [VV. size ()];
+	   for (int index = 0; index < VV. size (); index ++) {
+	      xx [index] = VV [index];
+	   }
+	   eqBuffer -> putDataIntoBuffer (xx, VV. size ());
+	   show_eqsymbol (VV. size ());
+	}
+	estimators [newSymbol] ->
 	              estimate (testFrame [newSymbol],
-	                        pilotEstimates [newSymbol]. data ());
+	                        pilotEstimates [newSymbol]. data (), VV, DD);
+//	                        pilotEstimates [newSymbol]. data ());
 
 //	For equalizing symbol X, we need the pilotvalues
 //	from the symbols X - symbols_to_delay .. X + symbols_to_delay - 1
@@ -421,9 +424,38 @@ int16_t	i;
 //	the symbol "symbols_to_delay" back.
 //	
 	symbol_to_process = realSym (newSymbol - symbols_to_delay);
+
 	processSymbol (symbol_to_process,
 	               outFrame -> element (symbol_to_process),
 	               v);
+	if (linear) {
+	   std::vector<std::complex<float>> hulpV (K_max - K_min + 1);
+	   estimators [symbol_to_process] ->
+	              estimate (testFrame [symbol_to_process], hulpV. data (), VV, DD);
+	   for (int i = 0; i < hulpV. size (); i ++)
+	      outFrame -> element (symbol_to_process) [i]. signalValue =
+	                 testFrame [symbol_to_process] [i] / DD [i];
+	}
+
+	if ((symbol_to_process == 3)  && (scopeMode == SHOW_ERROR)) {
+	   std::complex<float> xx [K_max - K_min + 1];
+	   int teller = 0;
+	   for (int carrier = K_min; carrier <= K_max; carrier ++) {
+	      if ((carrier != 0) &&
+	          (isPilotCell (Mode, symbol_to_process, carrier))) {
+	         xx [carrier - K_min] =
+                    outFrame -> element (symbol_to_process)
+	                                  [indexFor (carrier)]. signalValue -
+	                  getPilotValue (Mode, Spectrum, symbol_to_process, carrier);
+	         teller ++;
+	      }
+	      else
+	         xx [carrier - K_min] = 0;
+	   }
+	   eqBuffer -> putDataIntoBuffer (xx, K_max - K_min + 1);
+	   show_eqsymbol (K_max - K_min + 1);
+	}
+
 //	If we have a frame full of output: return true
 	return symbol_to_process == symbolsinFrame - 1;
 }

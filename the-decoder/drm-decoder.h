@@ -1,8 +1,8 @@
 #pragma once
 
+#include	<QSettings>
 #include	<QObject>
 #include	<QFrame>
-#include	<QSettings>
 #include	<thread>
 #include	<mutex>
 #include	<atomic>
@@ -11,54 +11,49 @@
 
 //      for the payload we have
 #include	"ringbuffer.h"
-#include	"decimator-25.h"
-#include	"drm-bandfilter.h"
 #include	"fir-filters.h"
 #include	"utilities.h"
 #include	"basics.h"
 #include	"reader.h"
 #include	"backend-controller.h"
 #include	"state-descriptor.h"
-#include	"drm-shifter.h"
 #include	"my-array.h"
 //	for the fdk-aac functionw we have
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 #include	"aac-handler.h"
 #endif
 #endif
 class	EQDisplay;
 class	IQDisplay;
+class	QSettings;
+
 #include	"ui_drmdecoder.h"
 
-#define         DECIMATOR       8
-#define         INRATE          96000
 #define         WORKING_RATE    12000
-#define         FILTER_DEFAULT  21
 
 class drmDecoder: public QObject, private Ui_drmdecoder {
 Q_OBJECT
 public:
 	
 		drmDecoder (RadioInterface *,
-	                    QSettings	*,
+	                    QSettings *,
 	                    RingBuffer<std::complex<float>> *);
 	virtual ~drmDecoder ();
-        void    processBuffer (std::complex<float> *, int length);
+        void    processBuffer	(std::complex<float> *, int length);
+        void    process		(std::complex<float>);
 
 private:
 	QFrame			myFrame;
+	QSettings		*drmSettings;
+	RingBuffer<std::complex<float>> *audioOut;
 	std::thread		* m_worker;
 	RingBuffer<std::complex<float>>	inputBuffer;
 	RingBuffer<std::complex<float>> iqBuffer;
         RingBuffer<std::complex<float>> eqBuffer;
-	drmShifter	        theMixer;
-	drmBandfilter	        passbandFilter;
-	decimator_25	        theDecimator;
-//	drmShifter	        localMixer;
 	Reader			my_Reader;   // single instance during life
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	aacHandler		aacFunctions;
 #endif
 #endif
@@ -71,7 +66,6 @@ private:
 	std::mutex		m_lock;
 	std::mutex	        locker;
 	void			WorkerFunction	();
-	void			process		(std::complex<float>);
 	void			processSample	(std::complex<float>);
 	int			resample	(std::complex<float>,
                                                  std::complex<float> *);
@@ -79,7 +73,7 @@ private:
 	void			getMode		(Reader *my_Reader,
 	                                                 smodeInfo *m);
 
-
+//
 //
         std::atomic<bool>       running;
 
@@ -88,11 +82,9 @@ private:
         int             VFOFRequency;
         int             selectedFrequency;
         int             Raw_Rate;
-
+//
+//
 	int		scopeMode;
-	QSettings	*drmSettings;
-//
-//
         int16_t         nSymbols;
         int32_t         sampleRate;
         int8_t          windowDepth;
@@ -117,9 +109,11 @@ private:
 private slots:
 	void		select_channel_1	();
 	void		select_channel_2	();
-	void		handle_strengthSelector	(int);
-	void		handle_f_cutSelector	(int);
-	void		handle_modeSelector	(const QString &);
+	void            handle_strengthSelector (int);
+        void            handle_f_cutSelector    (int);
+        void            handle_modeSelector     (const QString &);
+	void		handle_reset		();
+
 public slots:
 	void            set_faadSyncLabel	(bool);
 	void		set_messageLabel	(const QString &);

@@ -27,8 +27,8 @@
 #include	<fdk-aac/aacdecoder_lib.h>
 #include        "drm-decoder.h"
 #include        "state-descriptor.h"
+#include	"drm-converter.h"
 #include	"aac-processor-fdk.h"
-#include	"up-converter.h"
 
 static	inline
 uint16_t	get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
@@ -43,7 +43,7 @@ uint16_t	res	= 0;
 //
 	aacProcessor_fdk::aacProcessor_fdk (stateDescriptor *theState,
 	                                    drmDecoder *drm,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                    aacHandler	*aacFunctions,
 #endif
 	                                    RingBuffer<std::complex<float>>* out) :
@@ -51,11 +51,11 @@ uint16_t	res	= 0;
 
 	this	-> theState	= theState;
 	this	-> drmMaster	= drm;
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	this	-> aacFunctions	= aacFunctions;
 #endif
 	this	-> audioOut	= out;
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW332__
 	this	-> handle	= aacFunctions -> aacDecoder_Open (TT_DRM, 2);
 #else
 	this	-> handle	= aacDecoder_Open (TT_DRM, 2);
@@ -72,7 +72,7 @@ uint16_t	res	= 0;
 
 	aacProcessor_fdk::~aacProcessor_fdk	() {
 	if (handle != nullptr)
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	   aacFunctions	-> aacDecoder_Close (handle);
 #else
 	   aacDecoder_Close (handle);
@@ -84,7 +84,7 @@ void	aacProcessor_fdk::process_aac (uint8_t *v, int16_t mscIndex,
 	                               int16_t startLow,  int16_t lengthLow) {
 	if (lengthHigh != 0) 
 	   handle_uep_audio (v, mscIndex, startHigh, lengthHigh,
-	                            startLow, lengthLow - 4);
+	                            startLow, lengthLow);
 	else 
 	   handle_eep_audio (v, mscIndex,  startLow, lengthLow);
 }
@@ -145,11 +145,10 @@ int16_t	payloadLength;
 	         f [i]. audio [audioinHP + j] =
 	                    get_MSCBits (v, (entryinLP++) * 8, 8);
 	}
-//	if (theState -> streams [i]. textFlag)
-//	         my_messageProcessor.
-//	                   processMessage (v, (startLow + lengthLow - 4) * 8);
+	if (theState -> streams [i]. textFlag)
+	         my_messageProcessor.
+	                   processMessage (v, (startLow + lengthLow - 4) * 8);
 
-	
 	playOut (mscIndex);
 }
 
@@ -215,6 +214,7 @@ int16_t		payLoad_length = 0;
 }
 
 void	aacProcessor_fdk::playOut (int16_t	mscIndex) {
+int16_t	i;
 uint8_t	audioSamplingRate	= theState -> streams [mscIndex].
 	                                                   audioSamplingRate;
 uint8_t	SBR_flag		= theState -> streams [mscIndex].
@@ -236,14 +236,12 @@ QString text;
 	aacData (text);
 
 	reinit (audioDescriptor, mscIndex);
-	for (int i = 0; i < numFrames; i ++) {
+	for (i = 0; i < numFrames; i ++) {
 	   int16_t	index = i;
 	   bool		convOK;
 	   int16_t	cnt;
 	   int32_t	rate;
 	   if (f [index]. length < 0)
-	      continue;
-	   if (f [index]. length > 1000)
 	      continue;
 #if 0
 	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
@@ -276,13 +274,13 @@ void	aacProcessor_fdk::writeOut (int16_t *buffer, int16_t cnt,
 	                                                 int32_t pcmRate) {
 int16_t	i;
 	if (theConverter == nullptr) {
-	   theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+	   theConverter = new drmConverter (pcmRate, 48000, pcmRate / 10);
            currentRate  = pcmRate;
         }
 
         if (pcmRate != currentRate) {
            delete theConverter;
-           theConverter = new upConverter (pcmRate, 48000, pcmRate / 10);
+           theConverter = new drmConverter (pcmRate, 48000, pcmRate / 10);
            currentRate = pcmRate;
         }
 
@@ -324,14 +322,14 @@ void	aacProcessor_fdk::init	() {
 	UCHAR *codecP		= &currentConfig [0];
 	uint32_t codecSize	= currentConfig. size ();
 	AAC_DECODER_ERROR err =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	    aacFunctions -> aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
 #else
 	    aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
 #endif
 	if (err == AAC_DEC_OK) {
 	   CStreamInfo *pInfo =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	           aacFunctions -> aacDecoder_GetStreamInfo (handle);
 #else
 	           aacDecoder_GetStreamInfo (handle);
@@ -360,7 +358,7 @@ uint32_t	bytesValid	= 0;
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
 	errorStatus =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	     aacFunctions -> aacDecoder_Fill (handle, &bb,
 	                                       &frameSize, &bytesValid);
 #else
@@ -370,7 +368,7 @@ uint32_t	bytesValid	= 0;
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
 	errorStatus =
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	     aacFunctions -> aacDecoder_DecodeFrame (handle,
 	                                             localBuffer, 16 * 980, 0);
 #else
@@ -392,8 +390,8 @@ uint32_t	bytesValid	= 0;
 	}
 
 	CStreamInfo *fdk_info =
-#ifdef	__DOWNLOAD__
-	                 aacFunctions ->aacDecoder_GetStreamInfo (handle);
+#ifdef	__MINGW32__
+	                 aacFunctions -> aacDecoder_GetStreamInfo (handle);
 #else
 	                 aacDecoder_GetStreamInfo (handle);
 #endif

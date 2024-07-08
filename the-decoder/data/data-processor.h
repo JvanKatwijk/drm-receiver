@@ -28,7 +28,7 @@
 #include	<cstring>
 #include	"ringbuffer.h"
 #ifdef  __WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 #include	"aac-handler.h"
 #endif
 #include        "aac-processor-fdk.h"
@@ -36,7 +36,6 @@
 #else
 #include	"aac-processor-faad.h"
 #endif
-#include	"message-processor.h"
 
 class	stateDescriptor;
 class	drmDecoder;
@@ -47,7 +46,7 @@ public:
 		dataProcessor	(stateDescriptor *,
 	                         drmDecoder *,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                         aacHandler *,
 #endif
 #endif

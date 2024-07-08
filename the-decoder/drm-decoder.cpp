@@ -1,15 +1,12 @@
 
-//#include	<sstream>
-//#include	<unoevent.h>
 #include	<vector>
 #include	<chrono>
 
 #include	"drm-decoder.h"
+
 //
 //	drm specifics
 
-#include	"drm-bandfilter.h"
-#include	"drm-shifter.h"
 #include	"utilities.h"
 
 #include	"timesync.h"
@@ -29,29 +26,23 @@
 #include	<math.h>
 
 	drmDecoder::drmDecoder (RadioInterface *theRadio,
-	                        QSettings	*drmSettings,
+	                        QSettings *s,
 	                        RingBuffer<std::complex<float>> *audioBuffer):
 	                                 myFrame (nullptr),
 	                                 m_worker (nullptr),
 	                                 inputBuffer  (16 * 32768),
 	                                 iqBuffer (32768),
 	                                 eqBuffer (32768),
-	                                 theMixer     (INRATE),
-	                                 passbandFilter (15,
-	                                                 5500,
-	                                                 INRATE),
-	                                 theDecimator (INRATE / WORKING_RATE),
-//	                                 localMixer (WORKING_RATE),
 	                                 my_Reader (&inputBuffer,
 	                                           2 * 16384, this),
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacFunctions (0),
 #endif
 #endif
 	                                 my_backendController (this, 4,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                                       &aacFunctions,
 #endif
 #endif
@@ -59,7 +50,7 @@
 	                                                       &iqBuffer),
 	                                theState (1, 3) {
 	this	-> theRadio	= theRadio;
-	this	-> drmSettings	= drmSettings;
+	drmSettings		= s;
 	setupUi (&myFrame);
 	my_eqDisplay            = new EQDisplay (equalizerDisplay);
 	my_iqDisplay            = new IQDisplay (iqPlotter, 512);
@@ -68,26 +59,22 @@
 	myFrame. show ();
 	running. store (false);
 
-	selectedFrequency
-	                = theRadio -> get_selectedFrequency ();
-	centerFrequency = theRadio -> get_centerFrequency ();
-	passbandFilter.
-		     modulate (selectedFrequency - centerFrequency);
-
 	drmError		= false;
-	nSymbols		= 20;
+	nSymbols		= 25;
 	modeInf. Mode		= 2;
 	modeInf. Spectrum	= 3;
+	int st			= s   -> value ("strength", 0). toInt ();
+        strengthSelector        -> setValue (st);
+        st			= s    -> value ("f_cut_k", 20). toInt ();
+        f_cutSelector           -> setValue (st);
 
-	int	s	= drmSettings	-> value ("strength", 0). toInt ();
-	strengthSelector	-> setValue (s);
-	s		= drmSettings -> value ("f_cut_k", 20). toInt ();
-	f_cutSelector		-> setValue (s);
+        connect (strengthSelector, SIGNAL (valueChanged (int)),
+                 this, SLOT (handle_strengthSelector (int)));
+        connect (f_cutSelector, SIGNAL (valueChanged (int)),
+                 this, SLOT (handle_f_cutSelector (int)));
+	connect (modeSelector, SIGNAL (activated (const QString &)),
+                 this, SLOT (handle_modeSelector (const QString &)));
 
-	connect (strengthSelector, SIGNAL (valueChanged (int)),
-	         this, SLOT (handle_strengthSelector (int)));
-	connect (f_cutSelector, SIGNAL (valueChanged (int)),
-	         this, SLOT (handle_f_cutSelector (int)));
 	connect (this, SIGNAL (setTimeSync (bool)),
                  this, SLOT (executeTimeSync (bool)));
         connect (this, SIGNAL (setFACSync (bool)),
@@ -102,9 +89,9 @@
                  this, SLOT (select_channel_1 ()));
         connect (channel_2, SIGNAL (clicked ()),
                  this, SLOT (select_channel_2 ()));
-	connect (modeSelector, SIGNAL (activated (const QString &)),
-	         this, SLOT (handle_modeSelector (const QString &)));
 
+	connect (resetButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_reset ()));
 	m_worker	=
 	       new std::thread (&drmDecoder::WorkerFunction, this);
 }
@@ -123,27 +110,11 @@
 //
 void	drmDecoder::
 	         processBuffer (std::complex<float>* buffer, int length) {
-	if (!running. load () || drmError) {
-	   return;
-	}
-	
-	int theOffset = theRadio -> get_selectedFrequency  () -
-	                    theRadio -> get_centerFrequency ();
-	if (passbandFilter. offset () != theOffset) {
-	   passbandFilter. modulate (theOffset);
-//	   fprintf (stderr, "theOffset = %d\n", theOffset);
-	}
+	inputBuffer. putDataIntoBuffer (buffer, length);
+}
 
-	for (int i = 0; i < length; i ++) {
-	   std::complex<float> sample =
-	                       std::complex<float> (real (buffer [i]),
-	                                            imag (buffer [i]));
-	   sample	= passbandFilter. Pass (sample);
-	   sample	= theMixer. do_shift (sample, theOffset);
-//
-	   if (theDecimator. Pass (sample, &sample)) 
-	      inputBuffer. putDataIntoBuffer (&sample, 1);
-	}
+void	drmDecoder::process (std::complex<float> s) {
+	inputBuffer. putDataIntoBuffer (&s, 1);
 }
 //
 
@@ -196,19 +167,16 @@ float     sampleclockOffset       = 0;
 
 	      myArray<std::complex<float>> inbank (nrSymbols, nrCarriers);
 	      myArray<theSignal> outbank (nrSymbols, nrCarriers);
-	      myArray<bool> frame_0 (nrSymbols, nrCarriers);
-              myArray<bool> frame_12 (nrSymbols, nrCarriers);
-
 	      correlator myCorrelator (&modeInf);
-//	      fprintf (stderr, "Equalizer with %d %f\n",
-//	                          strengthSelector -> value (),
-//	                          f_cutSelector -> value () / 100.0f);
 	      equalizer_1 my_Equalizer (this,
 	                                modeInf.Mode,
 	                                modeInf.Spectrum,
 	                                strengthSelector -> value (),
 	                                f_cutSelector -> value (),
+	                                eqSelector -> isChecked (),
 	                                &eqBuffer);
+	
+	         my_Equalizer. set_scopeMode (scopeMode);
 	      std::vector<std::complex<float>> displayVector;
 	      displayVector. resize (Kmax (modeInf. Mode, modeInf. Spectrum) -
 	                             Kmin (modeInf. Mode, modeInf. Spectrum) + 1);
@@ -267,7 +235,7 @@ float     sampleclockOffset       = 0;
 	      symbol_no    = 0;
 	      frameReady   = false;
 	      while (running. load () && !frameReady) {
-	          my_Equalizer. set_scopeMode (scopeMode);
+	         my_Equalizer. set_scopeMode (scopeMode);
 		  my_wordCollector.getWord (inbank.element(lc),
 				   modeInf.freqOffset_integer,
 				  lc == 0,        // no-op
@@ -308,21 +276,6 @@ float     sampleclockOffset       = 0;
 //	on FAC and other data cells, we better create the table here.
 	      sdcTable. resize (sdcCells (&modeInf));
 	      set_sdcCells (&modeInf);
-//      To speed up checking for data elements, we create
-//      a matrix with truth values for the data elements
-              int16_t      K_min   = Kmin (modeInf. Mode, modeInf. Spectrum);
-              int16_t      K_max   = Kmax (modeInf. Mode, modeInf. Spectrum);
-              for (int nsymbol = 0;
-                   nsymbol < symbolsperFrame (modeInf. Mode); nsymbol ++) {
-                 for (int ncarrier = K_min; ncarrier <= K_max; ncarrier ++) {
-                      frame_0. setElement (nsymbol, ncarrier - K_min,
-                                 isDatacell (&modeInf, nsymbol, ncarrier, 0));
-                      frame_12. setElement (nsymbol, ncarrier - K_min,
-                                 isDatacell (&modeInf, nsymbol, ncarrier, 1));
-                 }
-              }
-
-//      Having set the matrices and tables, it is time for sdc processing
 	      sdcProcessor my_sdcProcessor (this, &modeInf,
 	                                    sdcTable, &theState);
 
@@ -334,7 +287,7 @@ float     sampleclockOffset       = 0;
 		  
 		
 	      while (true) {
-	          my_Equalizer. set_scopeMode (scopeMode);
+	         my_Equalizer. set_scopeMode (scopeMode);
 //	when we are here, we can start thinking about  SDC's and superframes
 //	The first frame of a superframe has an SDC part
 	         if (isFirstFrame (&theState)) {
@@ -350,62 +303,11 @@ float     sampleclockOffset       = 0;
 	               my_backendController. reset (&theState);
 	            superframer	= sdcOK;
 	         }
-	         float nominator = 0;
-	         float denominator = 0;
-	         for (int s = 0; s < nrSymbols; s ++) {
-	            for (int c = K_min; c <= K_max; c ++) {
-	               if (isPilotCell (modeInf. Mode, s, c)) {
-	                  std::complex<float> ss =
-	                            getPilotValue (modeInf. Mode,
-	                                            modeInf. Spectrum, s, c);
-	                  std::complex<float> rr =
-	                         outbank. elementValue (s, c - K_min). signalValue;
-	                  nominator += real (ss) * real (ss) +
-	                                         imag (ss) * imag (ss);	
-	                  float dI = real (ss) - real (rr);
-	                  float dQ = imag (ss) - imag (rr);
-	                  denominator += dI * dI + dQ * dQ;
-	               }
-	            }
-	         }
-//	         fprintf (stderr, "error %f\n", 10 * log10 (nominator / denominator));
 //
 //	when here, add the current frame to the superframe.
 //	Obviously, we cannot garantee that all data is in order
-//	         if (superframer)
-//	            addtoSuperFrame (&modeInf, blockCount ++, &outbank);
-	         if (superframer) {
-	            static int teller = 0;
-	            int blockno = blockCount;
-	            blockCount ++;
-
-	            myArray<bool> *hetFrame;
-	            if (isFirstFrame (&theState)) {
-	               my_backendController. newFrame (&theState);
-	               hetFrame = &frame_0;
-	            }
-	            else
-	               hetFrame = &frame_12;
-	               
-	            for (int symbol = 0;
-	                    symbol < symbolsperFrame (modeInf. Mode);
-	                                                     symbol ++) {
-	               for (int carrier = K_min; carrier <= K_max; carrier ++) {
-//	                  if (isDatacell (&modeInf, symbol,
-//	                                             carrier, blockno)) {
-	                  if (hetFrame -> elementValue (symbol, carrier - K_min)) {
-	                     my_backendController.
-	                             addtoMux (blockno, teller ++,
-                                     outbank. element (symbol)[carrier - K_min]);
-	                  }
-	               }
-	            }
-
-	            if (isLastFrame (&theState)) {
-	               my_backendController. endofFrame ();
-	               teller = 0;
-	            }
-	         }
+	         if (superframer)
+	            addtoSuperFrame (&modeInf, blockCount ++, &outbank);
 
 //	when we are here, it is time to build the next frame
 	         frameReady	= false;
@@ -450,8 +352,8 @@ float     sampleclockOffset       = 0;
 	         }
 	      }	// end of main loop
 	   } catch (int e) {
-	   if (!running. load ())
-	      return;
+	      if (!running. load ())
+	         return;
 	   }
 	}
 }
@@ -618,6 +520,9 @@ int16_t	symbol, carrier;
 int16_t	   K_min		= Kmin (m -> Mode, m -> Spectrum);
 int16_t	   K_max		= Kmax (m -> Mode, m -> Spectrum);
 
+	if (theState. numofStreams <= 0) 
+	   return;
+
 	if (isFirstFrame (&theState))
 	   my_backendController. newFrame (&theState);
 
@@ -755,11 +660,14 @@ void	drmDecoder::audioAvailable	() {
 void    drmDecoder::show_eqsymbol       (int amount) {
 std::complex<float> line [amount];
 
-        eqBuffer. getDataFromBuffer (line, amount);
-	if (scopeMode == SHOW_PILOTS)
+	eqBuffer. getDataFromBuffer (line, amount);
+        if (scopeMode == SHOW_PILOTS)
            my_eqDisplay    -> show_pilots (line, amount);
-	else
+        else
+	if (scopeMode == SHOW_CHANNEL)
            my_eqDisplay    -> show_channel (line, amount);
+	else
+	   my_eqDisplay	 -> show_pilots (line, amount);
 }
 
 void    drmDecoder::showIQ  (int amount) {
@@ -781,6 +689,20 @@ int     scopeWidth      = scopeSlider -> value();
 	my_iqDisplay -> DisplayIQ (Values, scopeWidth / avg);
 }
 
+void    drmDecoder::handle_strengthSelector (int s) {
+        drmSettings     -> setValue ("strength", s);
+}
+
+void    drmDecoder::handle_f_cutSelector (int n) {
+        drmSettings     -> setValue ("f_cut_k", n);
+}
+
+void    drmDecoder::handle_modeSelector (const QString &m) {
+        scopeMode = m == "Pilots" ?  SHOW_PILOTS :
+	                  m == "Channel" ? SHOW_CHANNEL : SHOW_ERROR;
+}
+
+
 void	drmDecoder::select_channel_1	() {
 	theState. activate_channel_1 ();
 }
@@ -789,15 +711,8 @@ void	drmDecoder::select_channel_2	() {
 	theState. activate_channel_2 ();
 }
 
-void	drmDecoder::handle_strengthSelector (int s) {
-	drmSettings	-> setValue ("strength", s);
-}
-
-void	drmDecoder::handle_f_cutSelector (int n) {
-	drmSettings	-> setValue ("f_cut_k", n);
-}
-
-void	drmDecoder::handle_modeSelector	(const QString &m) {
-	scopeMode = m == "Pilots" ? SHOW_PILOTS : SHOW_CHANNEL;
+void	drmDecoder::handle_reset	() {
+	fprintf (stderr, "Going to signal\n");
+	my_Reader.signal ();
 }
 

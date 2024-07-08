@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of drm2
+ *    This file is part of drm receiver
  *
  *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -105,7 +105,10 @@ QString	FrequencytoString (int32_t freq) {
 	                                QWidget		*parent):
 	                                    QMainWindow (parent),
 	                                    inputData	(1024 * 1024),
-	                                    audioData	(48000) {
+	                                    hfShifter	(96000),
+	                                    hfFilter	(2048, 377),
+	                                    audioData	(48000),
+	                                    theDecimator (96000, 12000) {
 
 	this	-> settings	= sI;
 	this	-> my_bandPlan	= my_bandPlan;
@@ -119,6 +122,10 @@ QString	FrequencytoString (int32_t freq) {
 	scopeWidth		= inputRate;
 	centerFrequency		= KHz (14070);
 	selectedFrequency	= KHz (14070);
+
+	theBand. currentOffset	= 0;
+	theBand. lowF		= -5000;
+	theBand. highF		= 5000;
 	mouseIncrement		= 5;
 //	scope and settings
 	hfScopeSlider	-> setValue (50);
@@ -362,6 +369,10 @@ void	RadioInterface::setFrequency (int32_t frequency) {
 	theDevice	-> setVFOFrequency (centerFrequency);
 	hfScope		-> setScope  (centerFrequency,
 	                              centerFrequency - selectedFrequency);
+	hfFilter. setBand (theBand. currentOffset + theBand. lowF,
+                           theBand. currentOffset + theBand. highF,
+                                                  inputRate);
+	fprintf (stderr, "Low %d high %d\n", theBand. lowF, theBand. highF);
 	QString ff	= FrequencytoString (selectedFrequency);
 	frequencyDisplay	-> display (ff);
 	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (selectedFrequency));
@@ -370,23 +381,45 @@ void	RadioInterface::setFrequency (int32_t frequency) {
 //	adjustFrequency is called whenever clicking the mouse
 void	RadioInterface::adjustFrequency_khz (int32_t n) {
 	adjustFrequency_hz (1000 * n);
+	fprintf (stderr, "adjusting %d Hz\n", n * 1000);
 }
 
 void	RadioInterface::adjustFrequency_hz (int32_t n) {
-int h = inputRate / 2 - KHz (5);
-	if ((selectedFrequency + n >= centerFrequency + h) ||
-	    (selectedFrequency + n <= centerFrequency - h)) {
-	   setFrequency (centerFrequency + n);	
-	   centerFrequency = theDevice -> getVFOFrequency ();
-	   selectedFrequency = centerFrequency;
+int	lowF	= theBand. lowF;
+int	highF	= theBand. highF;
+int	currOff	= theBand. currentOffset;
+
+	if ((currOff + highF + n >= scopeWidth / 2 - scopeWidth / 20) ||
+	    (currOff + lowF + n <= - scopeWidth / 2 + scopeWidth / 20) ) {
+	   quint64 newFreq = theDevice -> getVFOFrequency () +
+	                                   theBand. currentOffset + n;
+	   setFrequency ((quint64)newFreq);
+	   return;
 	}
-	else 
-	   selectedFrequency += n;
-	hfScope	-> setScope (centerFrequency,
-	              selectedFrequency - centerFrequency);
-	QString ff 		= FrequencytoString (selectedFrequency);
-	frequencyDisplay	-> display (selectedFrequency);
-	bandLabel		-> setText (my_bandPlan -> getFrequencyLabel (selectedFrequency));
+	else {
+	   theBand. currentOffset += n;
+	   hfScope -> setScope (theDevice -> getVFOFrequency (),
+	                                   theBand. currentOffset);
+	   hfFilter. setBand (theBand. currentOffset + theBand. lowF,
+	                      theBand. currentOffset + theBand. highF,
+	                            inputRate);
+	}
+
+	int freq		= theDevice -> getVFOFrequency () +
+	                                    theBand. currentOffset;
+	QString ff = FrequencytoString ((quint64)freq);
+	frequencyDisplay	-> display (ff);
+//	bandLabel	-> setAutoFillBackground (true);
+//	bandLabel	-> setPalette (labelPalette);
+	bandLabel	-> setText (my_bandPlan -> getFrequencyLabel (freq));
+}
+
+
+//      just a convenience button
+void    RadioInterface::set_inMiddle () {
+        quint64 newFreq = theDevice -> getVFOFrequency () +
+                                            theBand. currentOffset;
+        setFrequency (newFreq);
 }
 
 int32_t	RadioInterface::get_selectedFrequency	() {
@@ -397,7 +430,7 @@ int32_t	RadioInterface::get_centerFrequency	() {
 	return centerFrequency;
 }
 //
-void    RadioInterface::set_freqSave    (void) {
+void    RadioInterface::set_freqSave    () {
         if (myLine == NULL)
            myLine  = new QLineEdit ();
         myLine  -> show ();
@@ -405,7 +438,7 @@ void    RadioInterface::set_freqSave    (void) {
                  this, SLOT (handle_myLine (void)));
 }
 
-void    RadioInterface::handle_myLine (void) {
+void    RadioInterface::handle_myLine () {
 QString programName     = myLine -> text ();
         myList  -> addRow (programName, QString::number (selectedFrequency / Khz (1)));
         disconnect (myLine, SIGNAL (returnPressed (void)),
@@ -425,7 +458,8 @@ void	RadioInterface::wheelEvent (QWheelEvent *e) {
 //////////////////////////////////////////////////////////////////
 //
 void	RadioInterface::sampleHandler (int amount) {
-std::complex<float>   buffer [512];
+std::complex<float>   buffer [theDecimator. inSize ()]; 
+std::complex<float> ifBuffer [theDecimator. outSize ()];
 float dumpBuffer [2 * 512];
 int	i, j;
 
@@ -440,9 +474,18 @@ int	i, j;
               }
               sf_writef_float (dumpfilePointer, dumpBuffer, 512);
            }
-	      
-	   theDecoder -> processBuffer (buffer, 512);
-	}
+
+	   for (i = 0; i < 512; i ++) {
+              float agcGain;
+              std::complex<float> temp = hfFilter. Pass (buffer [i]);
+              temp = hfShifter. do_shift (temp, theBand. currentOffset);
+              if (theDecimator. add (temp, ifBuffer)) {
+                 for (j = 0; j < theDecimator. outSize (); j ++) {
+                    theDecoder -> process (ifBuffer [j]);
+                 }
+              }
+           }
+        }
 }
 //
 //

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>567</width>
+    <width>715</width>
     <height>401</height>
    </rect>
   </property>
@@ -313,7 +313,12 @@
        </item>
        <item>
         <property name="text">
-         <string>channel</string>
+         <string>Channel</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Errors</string>
         </property>
        </item>
       </widget>
@@ -361,6 +366,20 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="eqSelector">
+       <property name="text">
+        <string>linear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton">
+       <property name="text">
+        <string>reset</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="selectedService">
        <property name="font">

@@ -33,16 +33,17 @@
 	           backendController	(drmDecoder	*m_form,
 	                                 int8_t		qam64Roulette,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacHandler	*aacFunctions,
 #endif
 #endif
 	                                 RingBuffer<std::complex<float>> *b,
 	                                 RingBuffer<std::complex<float>> *iq) {
 	this	-> m_form		= m_form;
+
 	this	-> qam64Roulette	= qam64Roulette;
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	this	-> aacFunctions		= aacFunctions;
 #endif
 #endif
@@ -72,9 +73,9 @@
 void	backendController::reset	(stateDescriptor *theState) {
 	if (theWorker != nullptr)
 	   delete theWorker;
-#ifdef  __WITH_FDK_AAC__
+#ifdef  __WITH_FDK_AAC__ 
 	theWorker = new mscProcessor (theState, m_form, 4,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
                                                  aacFunctions,
 #endif
 	                                         audioBuffer);
@@ -85,9 +86,9 @@ void	backendController::reset	(stateDescriptor *theState) {
 
 void	backendController::newFrame	(stateDescriptor *theState) {
 	if (theWorker == nullptr) 
-#ifdef	__WITH_FDK_AAC__
+#ifdef __WITH_FDK_AAC__ 
 	   theWorker = new mscProcessor (theState, m_form, 4,
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                           aacFunctions,
 #endif
 	                                           audioBuffer);

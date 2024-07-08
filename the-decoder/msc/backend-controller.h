@@ -1,4 +1,3 @@
-#
 /*
  *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -36,7 +35,7 @@ class	drmDecoder;
 class	mscProcessor;
 
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 #include	"aac-handler.h"
 #endif
 #endif
@@ -47,7 +46,7 @@ public:
 		backendController	(drmDecoder *,
 	                                 int8_t,
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	                                 aacHandler	*,
 #endif
 #endif
@@ -72,7 +71,7 @@ private:
 	int16_t		numofStreams;
 	uint8_t		QAMMode;
 #ifdef	__WITH_FDK_AAC__
-#ifdef	__DOWNLOAD__
+#ifdef	__MINGW32__
 	aacHandler	*aacFunctions;
 #endif
 #endif

@@ -1,5 +1,4 @@
 
-
 -----------------------------------------------------------------------------
 Redesign and re-implementation of the drm decoder
 -----------------------------------------------------------------------------
@@ -9,20 +8,19 @@ radio.
 In Europe DRM is not very popular, most stations that started
 a DRM transmission in the first decade of the century
 already stopped. However,
-Rumenia and Kuwait still have a regular DRM transmission that I can receive,
+Rumenia still has a number of regular DRM transmissions that I can receive,
 the website "http://www.hfcc.org/drm/" gives an overview.
 
 ![overview](/drm-receiver.png?raw=true)
 
 The DRMm receiver is an experimental tool, a heavily reduced swradio,
-with a single decoder, just for DRM.
-The decoder uses the FDK_AAC library for AAC decoding, meaning that
-**xHE-AAC** can be decoded next to **AAC**.
+with a single decoder, just for DRM. The decoder is a copy of the
+decoder in the SW receover software.
+The decoder uses the FDK_AAC library for AAC  and xHe-AAC decoding.
 
 -----------------------------------------------------------------------
 The decoder
 -----------------------------------------------------------------------
-
 
 The decoder takes a samplerate of 12000
 Samples/second as input. 
@@ -30,7 +28,7 @@ Samples/second as input.
 The incoming sample stream is best seen as a sequence of **words**,
 for mode B, such a word contains just over 300 samples.
 
-Apaprt from the time synchronization, i.e. finding in the input stream
+Apart from the  **time synchronization**, i.e. finding in the input stream
 where the **words** start, all processing is done in the **frequency domain**.
 The incoming **words** are processed by an FFT processor,
 and each incoming word is eventually translated into a word
@@ -57,21 +55,23 @@ it gives general information on the structure of the transmission;
 The SDC contains - as the name suggests - data telling where to find
 the sevice data and how to interpret it.
 SDC data is encoded as QAM4 or QAM16;
- *aacSync tells about the decoding of the selected service. While the previous
+ * aacSync tells about the decoding of the selected service. While the previous
 ones dealt with the whole content of the transmission, the selected service
 may be just one of 4. The payload of the transmision is encoded in QAM16
-or QAM64 format. The audio services are encoded as AAC streams or xHE-AAC
+or QAM64 format. The audio services are encoded as AAC or xHE-AAC
 streams, that is why this software uses the FDK_AAC library, since that
 is able to handle both formats.
+Note that in previous versions, there was a bug, a buffer overflow with
+one of the output samplerates of the xHe-AAC streams, causing the software\
+to crash.
 
-The boxes, jer elabeled "3" and "c" tell that in the transmission the
-mode "c" was detected and the spectrum layout "3" (the latter just indicating
+The boxes, here elabeled "3" and "B" tell that in the transmission the
+mode "B" was detected and the spectrum layout "3" (the latter just indicating
 a 10 KHz wide signal).
 The box with "QAM16" tells that the audio content is encoded in QAM16, i.e
 each complex carrier takes one of 16 positions (which can be decoded into 
 4 bits), and the box with "AAC" tells that the audio was encoded in AAC format
 (the other formak is xHE-AAC).
-
 
 The 3 numbers  in the middle of the widget give an indication of the
 quality of the decoding.
@@ -79,9 +79,8 @@ quality of the decoding.
 Top left of the widget the frequency offset is indicated,
 the total offset can be obtained by adding the two numbers.
 
-The label tells that the picture is taken from a (recorded) transmission
-of "the voice of Nigeria"
-
+The label tells that the picture is taken from a transmission
+of RadioRomaniaIntl.
 
 The "scope" with the yellow arrows gives an impression on the amount
 with which the signal has to be corrected. In the frequency domain
@@ -91,18 +90,21 @@ pilots, information that can be used to transform all carriers.
 
 ![overview](/drm-decoder-2.png?raw=true)
 
-The second picture shows - from a different recorded transmission - the
-so-called channel. On the way from transmitter to receiver the signal
+The second picture shows - from the same recording a few minutes later - the
+so-called **channel**. On the way from transmitter to receiver the signal
 is malformed, in the picture the impulse response of the channel, i.e.
 the way the channel filters the transmission , is shown.
 
-
 ![overview](/drm-decoder-3.png?raw=true)
 
-The small black scope shows the constellation of the decoded data.
-In the first pisture the signal was QAM16, in the last two pictures a
-QAM64 encoding is used. The last picture shows  an almost ideal signal,
-all 64 positions the carriers may take are clearly identifyable.
+The third picture shows, again from the same transmission, the
+measured errors in the pilots after an attempt to correct.
+
+The computation of the channel is based on an NLE approach, the actual
+equalixation is done using the corrected pilots.
+Just for illustration, the equalization done by interpolation
+of the corrected pilots  can be selected by setting the "linear" checkbox.
+Note however, that than a reset of the decoder is required.
 
 --------------------------------------------------------------------------
 A note on building an executable and equalization
