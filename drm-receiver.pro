@@ -7,15 +7,15 @@ CONFIG	+= console
 #CONFIG	-= console
 TARGET	= drm-receiver
 QMAKE_CXXFLAGS	+= -std=c++14 
-#QMAKE_CFLAGS	+= -flto -ffast-math 
-#QMAKE_CXXFLAGS	+= -flto -ffast-math 
-#QMAKE_LFLAGS	+= -flto
-QMAKE_CFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -g
-QMAKE_LFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -fsanitize=address
-QMAKE_CFLAGS	+= -fsanitize=address
-QMAKE_LFLAGS	+= -fsanitize=address
+QMAKE_CFLAGS	+= -flto -ffast-math 
+QMAKE_CXXFLAGS	+= -flto -ffast-math 
+QMAKE_LFLAGS	+= -flto
+#QMAKE_CFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -g
+#QMAKE_LFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -fsanitize=address
+#QMAKE_CFLAGS	+= -fsanitize=address
+#QMAKE_LFLAGS	+= -fsanitize=address
 RC_ICONS	=  drm.ico
 RESOURCES       += resources.qrc
 
