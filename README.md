@@ -141,8 +141,8 @@ seen in the data and the pilot values as they should be.
 	recall that h_td is the chaannel in the time domain, so
 	h_fd = F_p * h_td is the solution
 
-Estimator_1 is the simplest one, it works though.
-Estimator_3 uses the "eigen" template library  for the matric operations.
+The estimaator uses the eigen library (all rights reserver) to
+estimate the channel.
 
 The equalizer itself is indirectly derived from the one in diorama, which 
 was aMatlab implementation, and was translated (transltterated) by M. Bos

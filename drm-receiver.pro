@@ -20,8 +20,8 @@ RC_ICONS	=  drm.ico
 RESOURCES       += resources.qrc
 
         DEFINES         +=  __WITH_FDK_AAC__
-        LIBS            += -lfdk-aac
-#       LIBS            += -lfdk-aac-2
+#        LIBS            += -lfdk-aac
+	LIBS            += -lfdk-aac-2
         PKGCONFIG       += fdk-aac
         INCLUDEPATH     += ./fdk-aac
         INCLUDEPATH     += /usr/include/eigen3
