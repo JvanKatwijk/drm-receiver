@@ -97,6 +97,7 @@ uint16_t        res     = 0;
 	this	-> handle	= aacFunctions -> aacDecoder_Open (TT_DRM, 3);
 #else
 	this	-> handle	= aacDecoder_Open (TT_DRM, 3);
+	fprintf (stderr, "handle = %X\n", this -> handle);
 #endif
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (set_faadSyncLabel (bool)));
@@ -154,6 +155,10 @@ int	failure		= 0;
 	   length -= 4;
 	}
 
+	fprintf (stderr, "frameborderCount = %d, streamId %d\n",
+	                               frameBorderCount, streamId);
+	if (frameBorderCount == 0)
+	   return;
 	borders. resize	(frameBorderCount);
 	std::vector<uint8_t> audioDescriptor =
 	                         getAudioInformation (theState, streamId);

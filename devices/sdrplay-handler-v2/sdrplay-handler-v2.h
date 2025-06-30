@@ -118,7 +118,7 @@ public:
 	int32_t		sampleCnt;
 	uint32_t	inputRate;
 	int32_t		outputRate;
-	void		report_dataAvailable	(void);
+	void		report_dataAvailable	();
 	decimatingFIR	*filter_1;
 	decimatingFIR	*filter_2;
 	int		denominator;

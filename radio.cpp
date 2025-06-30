@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C)  2020
+ *    Copyright (C)  2020 .. 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -52,6 +52,9 @@
 #ifdef	HAVE_RTLSDR
 #include	"rtlsdr-handler.h"
 #endif
+#ifdef	HAVE_SPYSERVER
+#include	"spyserver-client.h"
+#endif
 //
 #include	"deviceselect.h"
 #include	"drm-decoder.h"
@@ -61,6 +64,7 @@
 #define	D_RTL_TCP	"rtl_tcp"
 #define	D_HACKRF	"hackrf"
 #define	D_RTLSDR	"dabstick"
+#define	D_SPYSERVER	"spyserver_client"
 static 
 const char *deviceTable [] = {
 #ifdef	HAVE_SDRPLAY_V2
@@ -77,6 +81,9 @@ const char *deviceTable [] = {
 #endif
 #ifdef	HAVE_RTL_TCP
 	D_RTL_TCP,
+#endif
+#ifdef	HAVE_SPYSERVER
+	D_SPYSERVER,
 #endif
 	nullptr
 };
@@ -226,11 +233,14 @@ QString	FrequencytoString (int32_t freq) {
 	      hfScope	 -> set_bitDepth (theDevice -> bitDepth ());
 	      connect (theDevice, SIGNAL (dataAvailable (int)),
 	               this, SLOT (sampleHandler (int)));
+	      fprintf (stderr, "Device hier?\n");
 	      theDevice	-> restartReader ();
+	      fprintf (stderr, "Hier??\n");
 	   }
 	   else
 	      throw (24);
 	}
+	fprintf (stderr, "end van radio start\n");
 }
 
 void    RadioInterface::quickStart () {
@@ -295,7 +305,10 @@ QStringList devices;
 	   QString s = devices. at (theIndex);
 	   if (s == "quit")
 	      return nullptr;
+	   fprintf (stderr, "we go for %s\n", s. toLatin1 (). data ());
 	   theDevice	= getDevice (s, settings, hfBuffer);
+	   theDevice -> restartReader ();
+	   fprintf (stderr, "Hebben we een device?\n");
 	}
 	return theDevice;
 }
@@ -336,6 +349,18 @@ deviceHandler	*RadioInterface::
 	   fprintf (stderr, "going for the stick\n");
 	   try {
 	      return new rtlsdrHandler (this, settings, b);
+	   } catch (int e) {
+	   }
+	}
+	else
+#endif
+#ifdef HAVE_SPYSERVER
+	if (s == D_SPYSERVER) {
+	   fprintf (stderr, "going for the spyServer client\n");
+	   try {
+	      deviceHandler *tt =  new spyServer_client (this, settings, b);
+	      tt -> restartReader ();
+	      return tt;
 	   } catch (int e) {
 	   }
 	}

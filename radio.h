@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C)  2018
+ *    Copyright (C)  2018 - 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__DRM_2__
-#define	__DRM_2__
+#pragma once
 
 #include        <QMainWindow>
 #include        <QTimer>
@@ -132,4 +131,3 @@ public slots:
         void            processAudio		(int, int);
 };
 
-#endif
