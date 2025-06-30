@@ -1,6 +1,8 @@
 
 Redesign and re-implementation of the drm decoder
 -----------------------------------------------------------------------------
+New: support for connecting to a spyserver
+----------------------------------------------------------------------------
 
 **DRM (Digital Radio Mondiale)** is - as the name suggests - a form of digital
 radio. 
