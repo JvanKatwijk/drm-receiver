@@ -25,9 +25,9 @@
 static
 QString FrequencytoString (int32_t freq) {
         if (freq < 10)
-           return QString ('0' + (uint8_t)(freq % 10));
+           return QString (QChar ('0' + (uint8_t)(freq % 10)));
         return
-           FrequencytoString (freq / 10). append (QString ('0' + (uint8_t)(freq % 10)));
+           FrequencytoString (freq / 10). append (QChar ('0' + (uint8_t)(freq % 10)));
 }
 
 //	A simple keypad for the FM receiver. 13 buttons and
@@ -86,7 +86,8 @@ QString FrequencytoString (int32_t freq) {
 	thePad		-> addButton (clearButton, 103);
 	thePad		-> addButton (correctButton, 104);
 	theDisplay	-> display (0);
-	connect (thePad, SIGNAL (buttonClicked (int)),
+	connect (thePad, SIGNAL (idClicked (int)),
+//	connect (thePad, SIGNAL (buttonClicked (int)),
 	         this, SLOT (collectData (int)));
 	connect (this, SIGNAL (newFrequency (int32_t)),
 	         mr, SLOT (setFrequency (int32_t)));

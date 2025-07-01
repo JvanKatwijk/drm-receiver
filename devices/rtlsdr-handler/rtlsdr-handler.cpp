@@ -214,7 +214,7 @@ QString	temp;
 	rtlsdr_set_tuner_gain_mode (device, 1);
 	rtlsdr_set_tuner_gain (device, theGain);
 	
-	connect (combo_gain, SIGNAL (activated (const QString &)),
+	connect (combo_gain, SIGNAL (textActivated (const QString &)),
 	         this, SLOT (setExternalGain (const QString &)));
 	connect (f_correction, SIGNAL (valueChanged (int)),
 	         this, SLOT (setCorrection (int)));

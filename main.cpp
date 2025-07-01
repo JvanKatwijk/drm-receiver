@@ -66,7 +66,7 @@ QString	bandplanFile	= QDir::homePath ();
 
 	QCoreApplication::setOrganizationName ("Lazy Chair Computing");
         QCoreApplication::setOrganizationDomain ("Lazy Chair Computing");
-        QCoreApplication::setApplicationName ("sw-radio");
+        QCoreApplication::setApplicationName ("drm-radio");
         QCoreApplication::setApplicationVersion (QString (CURRENT_VERSION) + " Git: " + GITHASH);
 
         iniFile. append ("/");
@@ -88,7 +88,7 @@ QString	bandplanFile	= QDir::homePath ();
                  break;
 
               case 'B':
-                 bandplanFile       = atoi (optarg);
+                 bandplanFile	= optarg;
                  break;
 
              default:
@@ -101,6 +101,9 @@ QString	bandplanFile	= QDir::homePath ();
 #endif
 	QApplication a (argc, argv);
 
+
+	QLabel testlabel;
+	fprintf (stderr, "bij F\n");
         QFile file (":res/Combinear.qss");
         if (file .open (QFile::ReadOnly | QFile::Text)) {
            a. setStyleSheet (file.readAll ());

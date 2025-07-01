@@ -7,15 +7,15 @@ CONFIG	+= console
 #CONFIG	-= console
 TARGET	= drm-receiver
 QMAKE_CXXFLAGS	+= -std=c++17 
-#QMAKE_CFLAGS	+= -flto -ffast-math 
-#QMAKE_CXXFLAGS	+= -flto -ffast-math 
-#QMAKE_LFLAGS	+= -flto
-QMAKE_CFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -g
-QMAKE_LFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -fsanitize=address
-QMAKE_CFLAGS	+= -fsanitize=address
-QMAKE_LFLAGS	+= -fsanitize=address
+QMAKE_CFLAGS	+= -flto -ffast-math 
+QMAKE_CXXFLAGS	+= -flto -ffast-math 
+QMAKE_LFLAGS	+= -flto
+#QMAKE_CFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -g
+#QMAKE_LFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -fsanitize=address
+#QMAKE_CFLAGS	+= -fsanitize=address
+#QMAKE_LFLAGS	+= -fsanitize=address
 RC_ICONS	=  drm.ico
 RESOURCES       += resources.qrc
 
@@ -258,8 +258,8 @@ LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 LIBS            += -lfaad_drm
 INCLUDEPATH	+= /usr/include/qt5/qwt
-LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
-LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
+LIBS		+= -lqwt-qt6 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
+#LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
 }
 
 win32 {
@@ -282,14 +282,14 @@ CONFIG		+= rtlsdr
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/eigen3
-INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
+INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt6/qwt
 INCLUDEPATH += /usr/local/include
 LIBS	+= -L/usr/i686-w64-mingw32/sys-root/mingw/lib
 LIBS	+= /usr/i686-w64-mingw32/sys-root/mingw/bin/libsndfile-1.dll
 LIBS	+= /usr/i686-w64-mingw32/sys-root/mingw/bin/libsamplerate-0.dll
 LIBS    += -lfftw3f
 LIBS    += -lportaudio
-LIBS    += -lqwt-qt5
+LIBS    += -lqwt-qt6
 #LIBS    += -lqwt
 LIBS    += -lusb-1.0
 #LIBS    += -lsndfile

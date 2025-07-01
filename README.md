@@ -2,7 +2,11 @@
 Redesign and re-implementation of the drm decoder
 -----------------------------------------------------------------------------
 New: support for connecting to a spyserver
-----------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Note that the ".pro" file now is for use with Qt6
+----------------------------------------------------------------------------:
+
 
 **DRM (Digital Radio Mondiale)** is - as the name suggests - a form of digital
 radio. 

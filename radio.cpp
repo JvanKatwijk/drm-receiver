@@ -101,9 +101,9 @@ int	res	= 1;
 
 QString	FrequencytoString (int32_t freq) {
 	if (freq < 10)
-	   return QString ('0' + (uint8_t)(freq % 10));
+	   return QString (QChar ('0' + (uint8_t)(freq % 10)));
 	return 
-	   FrequencytoString (freq / 10). append (QString ('0' + (uint8_t)(freq % 10)));
+	   FrequencytoString (freq / 10). append (QChar ('0' + (uint8_t)(freq % 10)));
 }
 
 	RadioInterface::RadioInterface (QSettings	*sI,
@@ -174,8 +174,8 @@ QString	FrequencytoString (int32_t freq) {
 	audioHandler -> selectDefaultDevice ();
 
         mykeyPad                = new keyPad (this);
-        connect (freqButton, SIGNAL (clicked (void)),
-                 this, SLOT (handle_freqButton (void)));
+        connect (freqButton, SIGNAL (clicked ()),
+                 this, SLOT (handle_freqButton ()));
 
 	connect (mouse_Inc, SIGNAL (valueChanged (int)),
 	         this, SLOT (set_mouseIncrement (int)));
@@ -183,8 +183,8 @@ QString	FrequencytoString (int32_t freq) {
         connect (streamOutSelector, SIGNAL (activated (int)),
                  this, SLOT (setStreamOutSelector (int)));
 
-	connect (freqSave, SIGNAL (clicked (void)),
-                 this, SLOT (set_freqSave (void)));
+	connect (freqSave, SIGNAL (clicked ()),
+                 this, SLOT (set_freqSave ()));
 
         myList  = new programList (this, stationList);
         myList  -> show ();
@@ -476,7 +476,7 @@ void	RadioInterface::set_mouseIncrement (int inc) {
 }
 
 void	RadioInterface::wheelEvent (QWheelEvent *e) {
-	adjustFrequency_hz ((e -> delta () > 0) ?
+	adjustFrequency_hz ((e -> angleDelta (). rx () > 0) ?
 	                        mouseIncrement : -mouseIncrement);
 }
 

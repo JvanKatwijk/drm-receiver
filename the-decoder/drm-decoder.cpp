@@ -72,7 +72,7 @@
                  this, SLOT (handle_strengthSelector (int)));
         connect (f_cutSelector, SIGNAL (valueChanged (int)),
                  this, SLOT (handle_f_cutSelector (int)));
-	connect (modeSelector, SIGNAL (activated (const QString &)),
+	connect (modeSelector, SIGNAL (textActivated (const QString &)),
                  this, SLOT (handle_modeSelector (const QString &)));
 
 	connect (this, SIGNAL (setTimeSync (bool)),

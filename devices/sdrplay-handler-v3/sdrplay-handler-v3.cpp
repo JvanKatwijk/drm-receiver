@@ -101,9 +101,9 @@
 	         this, SLOT (set_agcControl (int)));
 	connect (ppmControl, SIGNAL (valueChanged (int)),
 	         this, SLOT (set_ppmControl (int)));
-	connect (antennaSelector, SIGNAL (activated (const QString &)),
+	connect (antennaSelector, SIGNAL (textActivated (const QString &)),
 	         this, SLOT (set_selectAntenna (const QString &)));
-	connect (amPortSelector, SIGNAL (activated (const QString &)),
+	connect (amPortSelector, SIGNAL (textActivated (const QString &)),
 	         this, SLOT (set_amPortSelect (const QString &)));
 	connect (biasT_selector, SIGNAL (stateChanged (int)),
 	         this, SLOT (set_biasT (int)));
