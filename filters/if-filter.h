@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2014
+ *    Copyright (C) 2014 .. 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -23,8 +23,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__IF_FILTER__
-#define	__IF_FILTER__
+#pragma once
 
 #include	"radio-constants.h"
 #include	"fft-filters.h"
@@ -43,5 +42,4 @@ private:
 	int32_t		theMiddle;
 };
 
-#endif
 

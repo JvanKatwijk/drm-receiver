@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __FIR_FILTERS__
-#define __FIR_FILTERS__
+#pragma once
 
 #include	"radio-constants.h"
 #include	<vector>
@@ -126,5 +125,4 @@ private:
 	void		adjustFilter	(float);
 };
 
-#endif
 

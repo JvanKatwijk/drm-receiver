@@ -20,8 +20,8 @@
  *    along with swradio; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__SPECTROGRAMDATA__
-#define	__SPECTROGRAMDATA__
+
+#pragma once
 
 #include	<qwt_interval.h>
 #include	<QPen>
@@ -92,5 +92,4 @@ double value (double x, double y) const {
 
 };
 
-#endif
 

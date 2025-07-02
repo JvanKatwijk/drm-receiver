@@ -22,8 +22,8 @@
  *    You should have received a copy of the GNU General Public License
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__DECIMATOR__
-#define	__DECIMATOR__
+
+#pragma once
 
 #include	<stdint.h>
 #include	<samplerate.h>
@@ -48,5 +48,6 @@ private:
 	float           *outBuffer;
 	int32_t         inp;
 };
-#endif
+
+
 

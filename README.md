@@ -1,7 +1,16 @@
 
 Redesign and re-implementation of the drm decoder
 -----------------------------------------------------------------------------
-New: support for connecting to a spyserver
+
+The new version supports, next to the SDRplay and HackRf the spyServer.
+In my environment SW signals suffer from pollution by solar panels etc, and
+while my antenna equipment is less than optimal, I added support for the
+spyServer.
+Now recall that most drm transmissions are in SW, varying from 6 to 15 Khz,
+frequencies not supported by regular AIRsoy devices or by V3 DABsticks.
+It turns out that there are a few spyServers connected to an AirspyHF,
+which obviously does support the frequencies used for DRM.
+
 
 -------------------------------------------------------------------------------
 Note that the ".pro" file now is for use with Qt6
@@ -184,16 +193,14 @@ devices with which shortwave reception is possible
 
  * the Hackrf. 
 
- * the DABsticks, for RT820 based sticks with a driver that allows selecting frequencies
-as low as 13 MHz. Note that direct sampling gives real rather than complex samples and is not usable.
-
+ * connecting to a spyServer with a spyServer client
 
 Copyright
 -------------------------------------------------------------------------------
 
  Copyright
 
-        Copyright (C)  2019, 2023
+        Copyright (C)  2019, 2025
         Jan van Katwijk (J.vanKatwijk@gmail.com)
         Lazy Chair Computing
 
