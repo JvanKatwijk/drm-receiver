@@ -25,7 +25,6 @@
 	bandPlan::bandPlan (QString fileName) {
 	labelTable. resize (0);
 	loadPlan (fileName);
-	
 }
 
 	bandPlan::~bandPlan () {

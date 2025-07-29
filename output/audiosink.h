@@ -2,7 +2,7 @@
 /*
  *    Copyright (C)  2014 .. 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the drm receiver
  *
@@ -22,6 +22,7 @@
  */
 
 #pragma once
+
 #include	"radio-constants.h"
 #include	<sndfile.h>
 #include	<portaudio.h>
@@ -37,19 +38,19 @@ public:
 			~audioSink		(void);
 	int16_t		numberofDevices		(void);
 const	char		*outputChannelwithRate	(int16_t, int32_t);
-	void		stop			(void);
-	void		restart			(void);
+	void		stop			();
+	void		restart			();
 	int32_t		putSample		(DSPCOMPLEX);
 	int32_t		putSamples		(DSPCOMPLEX *, int32_t);
-	int16_t		invalidDevice		(void);
+	int16_t		invalidDevice		();
 	bool		isValidDevice		(int16_t);
 
-	int32_t		capacity		(void);
-	bool		selectDefaultDevice	(void);
+	int32_t		capacity		();
+	bool		selectDefaultDevice	();
 	bool		selectDevice		(int16_t);
 	void		startDumping		(SNDFILE *);
-	void		stopDumping		(void);
-	int32_t		getSelectedRate		(void);
+	void		stopDumping		();
+	int32_t		getSelectedRate		();
 private:
 	bool		OutputrateIsSupported	(int16_t, int32_t);
 	int32_t		CardRate;

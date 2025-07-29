@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __SDRPLAY_HANDLER_V2
-#define	__SDRPLAY_HANDLER_V2
+#pragma once
 
 #include	<QObject>
 #include	<QFrame>
@@ -177,5 +176,6 @@ private slots:
 	void		set_antennaSelect	(const QString &);
 	void		set_tunerSelect		(const QString &);
 };
-#endif
+
+
 

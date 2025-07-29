@@ -249,6 +249,7 @@ CONFIG		+= sdrplay
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 CONFIG		+= spyServer
+CONFIG		+= card-reader
 DEFINES		+= HAVE_DRM_DECODER
 DEFINES		+= ESTIMATOR_1
 CONFIG		+= fdk-aac
@@ -368,21 +369,13 @@ spyServer  {
 	FORMS		+= ./devices/spy-server/spyserver-widget.ui
 }
 
-pmsdr	{
-	DEFINES		+= HAVE_PMSDR
-	TARGET		= swradio-pmsdr
-	FORMS		+= ./devices/pmsdr-handler/pmsdr-widget.ui
-	DEPENDPATH	+= ./devices/pmsdr-handler
-        INCLUDEPATH     += ./devices/pmsdr-handler
-        HEADERS         += ./devices/pmsdr-handler/pmsdr-handler.h \
-			   ./devices/pmsdr-handler/pmsdr_comm.h \
-	                   ./devices/pmsdr-handler/pmsdr_usb.h \
-	                   ./devices/pmsdr-handler/si570-handler.h 
-        SOURCES         += ./devices/pmsdr-handler/pmsdr-handler.cpp \
-			   ./devices/pmsdr-handler/pmsdr_comm.cpp \
-	                   ./devices/pmsdr-handler/pmsdr_usb.cpp \
-	                   ./devices/pmsdr-handler/si570-handler.cpp 
-	CONFIG		+= cardreader
+card-reader	{
+	DEFINES		+= HAVE_CARDREADER
+	FORMS		+= ./devices/card-reader/cardreader-widget.ui
+	DEPENDPATH	+= ./devices/card-reader
+        INCLUDEPATH     += ./devices/card-reader
+        HEADERS         += ./devices/card-reader/card-reader.h 
+        SOURCES         += ./devices/card-reader/card-reader.cpp
 }
 
 fdk-aac	{

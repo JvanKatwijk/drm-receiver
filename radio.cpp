@@ -55,6 +55,9 @@
 #ifdef	HAVE_SPYSERVER
 #include	"spyserver-client.h"
 #endif
+#ifdef	HAVE_CARDREADER
+#include	"card-reader.h"
+#endif
 //
 #include	"deviceselect.h"
 #include	"drm-decoder.h"
@@ -65,6 +68,7 @@
 #define	D_HACKRF	"hackrf"
 #define	D_RTLSDR	"dabstick"
 #define	D_SPYSERVER	"spyserver_client"
+#define	D_CARDREADER	"card-reader"
 static 
 const char *deviceTable [] = {
 #ifdef	HAVE_SDRPLAY_V2
@@ -84,6 +88,9 @@ const char *deviceTable [] = {
 #endif
 #ifdef	HAVE_SPYSERVER
 	D_SPYSERVER,
+#endif
+#ifdef	HAVE_CARDREADER
+	D_CARDREADER,
 #endif
 	nullptr
 };
@@ -136,60 +143,60 @@ QString	FrequencytoString (int32_t freq) {
 	mouseIncrement		= 5;
 //	scope and settings
 	hfScopeSlider	-> setValue (50);
-        hfScope		= new fftScope (hfSpectrum,
-                                        displaySize,
-                                        kHz (1),        // scale
-                                        inputRate,
-                                        hfScopeSlider -> value (),
-                                        8);
+	hfScope		= new fftScope (hfSpectrum,
+	                                displaySize,
+	                                kHz (1),        // scale
+	                                inputRate,
+	                                hfScopeSlider -> value (),
+	                                8);
 	hfScope		-> set_bitDepth (12);	// default
 	centerFrequency		= KHz (14070);	// default
 	selectedFrequency	= KHz (14070);	// default
 	hfScope	-> setScope (centerFrequency, selectedFrequency - centerFrequency);
-        connect (hfScope,
-                 SIGNAL (clickedwithLeft (int)),
-                 this,
-                 SLOT (adjustFrequency_khz (int)));
+	connect (hfScope,
+	         SIGNAL (clickedwithLeft (int)),
+	         this,
+	         SLOT (adjustFrequency_khz (int)));
 	connect (hfScope,
 	         SIGNAL (clickedwithRight (int)),
 	         this, SLOT (switch_hfViewMode (int)));
-        connect (hfScopeSlider, SIGNAL (valueChanged (int)),
-                 this, SLOT (set_hfscopeLevel (int)));
+	connect (hfScopeSlider, SIGNAL (valueChanged (int)),
+	         this, SLOT (set_hfscopeLevel (int)));
 
 //	output device
-        audioHandler            = new audioSink (this -> audioRate, 16384);
-        outTable                = new int16_t
-                                     [audioHandler -> numberofDevices () + 1];
-        for (int i = 0; i < audioHandler -> numberofDevices (); i ++)
-           outTable [i] = -1;
+	audioHandler            = new audioSink (this -> audioRate, 16384);
+	outTable                = new int16_t
+	                             [audioHandler -> numberofDevices () + 1];
+	for (int i = 0; i < audioHandler -> numberofDevices (); i ++)
+	   outTable [i] = -1;
 
-        try {
-           setupSoundOut (streamOutSelector, audioHandler,
-                          audioRate, outTable);
-        } catch (int e) {
-           QMessageBox::warning (this, tr ("sdr"),
-                                       tr ("Opening audio failed\n"));
-           abort ();
+	try {
+	   setupSoundOut (streamOutSelector, audioHandler,
+	                  audioRate, outTable);
+	} catch (int e) {
+	   QMessageBox::warning (this, tr ("sdr"),
+	                               tr ("Opening audio failed\n"));
+	   abort ();
 	}
 	audioHandler -> selectDefaultDevice ();
 
-        mykeyPad                = new keyPad (this);
-        connect (freqButton, SIGNAL (clicked ()),
-                 this, SLOT (handle_freqButton ()));
+	mykeyPad                = new keyPad (this);
+	connect (freqButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_freqButton ()));
 
 	connect (mouse_Inc, SIGNAL (valueChanged (int)),
 	         this, SLOT (set_mouseIncrement (int)));
 
-        connect (streamOutSelector, SIGNAL (activated (int)),
-                 this, SLOT (setStreamOutSelector (int)));
+	connect (streamOutSelector, SIGNAL (activated (int)),
+	         this, SLOT (setStreamOutSelector (int)));
 
 	connect (freqSave, SIGNAL (clicked ()),
-                 this, SLOT (set_freqSave ()));
+	         this, SLOT (set_freqSave ()));
 
-        myList  = new programList (this, stationList);
-        myList  -> show ();
+	myList  = new programList (this, stationList);
+	myList  -> show ();
 	myLine	= NULL;
-        audioHandler    -> selectDefaultDevice ();
+	audioHandler    -> selectDefaultDevice ();
 
 	theDevice		= nullptr;
 	delayCount		= 0;
@@ -199,8 +206,8 @@ QString	FrequencytoString (int32_t freq) {
 	         this, SLOT (set_dumpButton (void)));
 	secondsTimer. setInterval (1000);
 	connect (&secondsTimer, SIGNAL (timeout (void)),
-                 this, SLOT (updateTime (void)));
-        secondsTimer. start (1000);
+	         this, SLOT (updateTime (void)));
+	secondsTimer. start (1000);
 
 //	and off we go
 	theDecoder	= new drmDecoder (this, settings,  &audioData);
@@ -212,11 +219,13 @@ QString	FrequencytoString (int32_t freq) {
 	QString device =
 	            settings -> value ("device", "no device").toString ();
 	int k = -1;
+	fprintf (stderr, "Looking for device %s\n", device. toLatin1 (). data ());
 	for (int i = 0; deviceTable [i] != nullptr; i ++)
 	   if (deviceTable [i] == device) {
 	      k = i;
 	      break;
 	}
+	fprintf (stderr, "K = %d\n", k);
 	if (k != -1) {
 	   starter	= new QTimer;
 	   startKnop	= k;
@@ -244,12 +253,12 @@ QString	FrequencytoString (int32_t freq) {
 }
 
 void    RadioInterface::quickStart () {
-        disconnect (starter, SIGNAL (timeout ()),
-                    this, SLOT (quickStart ()));
-        fprintf (stderr, "going for quickStart\n");
-        delete starter;
-        if (getDevice (deviceTable [startKnop], settings, &inputData) == nullptr)
-           if (setDevice (settings, &inputData) == nullptr) {
+	disconnect (starter, SIGNAL (timeout ()),
+	            this, SLOT (quickStart ()));
+	fprintf (stderr, "going for quickStart\n");
+	delete starter;
+	if (getDevice (deviceTable [startKnop], settings, &inputData) == nullptr)
+	   if (setDevice (settings, &inputData) == nullptr) {
 	      hfScope	 -> set_bitDepth (theDevice -> bitDepth ());
 	      connect (theDevice, SIGNAL (dataAvailable (int)),
 	               this, SLOT (sampleHandler (int)));
@@ -260,7 +269,7 @@ void    RadioInterface::quickStart () {
 }
 
 //      The end of all
-        RadioInterface::~RadioInterface () {
+	RadioInterface::~RadioInterface () {
 }
 //
 //	If the user quits before selecting a device ....
@@ -279,10 +288,10 @@ void	RadioInterface::handle_quitButton	(void) {
 	fprintf (stderr, "we kappen ermee\n");
 	delete		theDecoder;
 	secondsTimer. stop ();
-        delete		myList;
+	delete		myList;
 	delete []	outTable;
 	delete		hfScope;
-        delete		mykeyPad;
+	delete		mykeyPad;
 }
 
 deviceHandler	*RadioInterface::
@@ -366,6 +375,26 @@ deviceHandler	*RadioInterface::
 	}
 	else
 #endif
+#ifdef HAVE_CARDREADER
+	if (s == D_CARDREADER) {
+	   fprintf (stderr, "going for the cardreader\n");
+	   try {
+	      deviceHandler *tt =  new cardReader (this, settings, b);
+	      tt -> restartReader ();
+	      return tt;
+	   } catch (int e) {
+	      if (e == 20)
+	         QMessageBox::warning (this, tr ("drm"),
+	                               tr ("Init of portaudio library failed"));
+	      else
+	      if (e == 21)
+	         QMessageBox::warning (this, tr ("drm"),
+	                               tr ("No input channels detected"));
+//	      fall through
+	   }
+	}
+	else
+#endif
 	if (s == "filereader") {
 	   try {
 	      return new fileReader (this, settings, b);
@@ -380,10 +409,10 @@ deviceHandler	*RadioInterface::
 //
 //	
 void    RadioInterface::handle_freqButton (void) {
-        if (mykeyPad -> isVisible ())
-           mykeyPad -> hidePad ();
-        else
-           mykeyPad     -> showPad ();
+	if (mykeyPad -> isVisible ())
+	   mykeyPad -> hidePad ();
+	else
+	   mykeyPad     -> showPad ();
 }
 
 //	setFrequency is called from the frequency panel
@@ -395,8 +424,8 @@ void	RadioInterface::setFrequency (int32_t frequency) {
 	hfScope		-> setScope  (centerFrequency,
 	                              centerFrequency - selectedFrequency);
 	hfFilter. setBand (theBand. currentOffset + theBand. lowF,
-                           theBand. currentOffset + theBand. highF,
-                                                  inputRate);
+	                   theBand. currentOffset + theBand. highF,
+	                                          inputRate);
 	fprintf (stderr, "Low %d high %d\n", theBand. lowF, theBand. highF);
 	QString ff	= FrequencytoString (selectedFrequency);
 	frequencyDisplay	-> display (ff);
@@ -442,9 +471,9 @@ int	currOff	= theBand. currentOffset;
 
 //      just a convenience button
 void    RadioInterface::set_inMiddle () {
-        quint64 newFreq = theDevice -> getVFOFrequency () +
-                                            theBand. currentOffset;
-        setFrequency (newFreq);
+	quint64 newFreq = theDevice -> getVFOFrequency () +
+	                                    theBand. currentOffset;
+	setFrequency (newFreq);
 }
 
 int32_t	RadioInterface::get_selectedFrequency	() {
@@ -456,19 +485,19 @@ int32_t	RadioInterface::get_centerFrequency	() {
 }
 //
 void    RadioInterface::set_freqSave    () {
-        if (myLine == NULL)
-           myLine  = new QLineEdit ();
-        myLine  -> show ();
-        connect (myLine, SIGNAL (returnPressed (void)),
-                 this, SLOT (handle_myLine (void)));
+	if (myLine == NULL)
+	   myLine  = new QLineEdit ();
+	myLine  -> show ();
+	connect (myLine, SIGNAL (returnPressed (void)),
+	         this, SLOT (handle_myLine (void)));
 }
 
 void    RadioInterface::handle_myLine () {
 QString programName     = myLine -> text ();
-        myList  -> addRow (programName, QString::number (selectedFrequency / Khz (1)));
-        disconnect (myLine, SIGNAL (returnPressed (void)),
-                    this, SLOT (handle_myLine (void)));
-        myLine  -> hide ();
+	myList  -> addRow (programName, QString::number (selectedFrequency / Khz (1)));
+	disconnect (myLine, SIGNAL (returnPressed (void)),
+	            this, SLOT (handle_myLine (void)));
+	myLine  -> hide ();
 }
 
 void	RadioInterface::set_mouseIncrement (int inc) {
@@ -494,28 +523,28 @@ int	i, j;
 	   hfScope	-> addElements (buffer, 512);
 	   if (dumpfilePointer != NULL) {
 	      for (i = 0; i < 512; i ++) {
-                 dumpBuffer [2 * i]	= real (buffer [i]);
-                 dumpBuffer [2 * i + 1] = imag (buffer [i]);
-              }
-              sf_writef_float (dumpfilePointer, dumpBuffer, 512);
-           }
+	         dumpBuffer [2 * i]	= real (buffer [i]);
+	         dumpBuffer [2 * i + 1] = imag (buffer [i]);
+	      }
+	      sf_writef_float (dumpfilePointer, dumpBuffer, 512);
+	   }
 
 	   for (i = 0; i < 512; i ++) {
-              float agcGain;
-              std::complex<float> temp = hfFilter. Pass (buffer [i]);
-              temp = hfShifter. do_shift (temp, theBand. currentOffset);
-              if (theDecimator. add (temp, ifBuffer)) {
-                 for (j = 0; j < theDecimator. outSize (); j ++) {
-                    theDecoder -> process (ifBuffer [j]);
-                 }
-              }
-           }
-        }
+	      float agcGain;
+	      std::complex<float> temp = hfFilter. Pass (buffer [i]);
+	      temp = hfShifter. do_shift (temp, theBand. currentOffset);
+	      if (theDecimator. add (temp, ifBuffer)) {
+	         for (j = 0; j < theDecimator. outSize (); j ++) {
+	            theDecoder -> process (ifBuffer [j]);
+	         }
+	      }
+	   }
+	}
 }
 //
 //
 void    RadioInterface::set_hfscopeLevel (int level) {
-        hfScope -> setLevel (level);
+	hfScope -> setLevel (level);
 }
 
 //	do not forget that ocnt starts with 1, due
@@ -549,6 +578,7 @@ int16_t	outputDevice;
 	if (idx == 0)
 	   return;
 
+	return;
 	outputDevice = outTable [idx];
 	if (!audioHandler -> isValidDevice (outputDevice)) 
 	   return;
@@ -567,13 +597,13 @@ int16_t	outputDevice;
 void    RadioInterface::processAudio  (int amount, int rate) {
 DSPCOMPLEX buffer [rate / 10];
 
-        (void)amount;
+	(void)amount;
 	usleep (1000);
-        while (audioData. GetRingBufferReadAvailable () >
-                                                 (uint32_t)rate / 10) {
-           audioData. getDataFromBuffer (buffer, rate / 10);
+	while (audioData. GetRingBufferReadAvailable () >
+	                                         (uint32_t)rate / 10) {
+	   audioData. getDataFromBuffer (buffer, rate / 10);
 	   audioHandler      -> putSamples (buffer, rate / 10);
-        }
+	}
 }
 
 void	RadioInterface::switch_hfViewMode	(int d) {
@@ -585,7 +615,7 @@ void	RadioInterface::updateTime		(void) {
 QDateTime currentTime = QDateTime::currentDateTime ();
 
 	timeDisplay     -> setText (currentTime.
-                                    toString (QString ("dd.MM.yy:hh:mm:ss")));
+	                            toString (QString ("dd.MM.yy:hh:mm:ss")));
 }
 
 void	RadioInterface::set_dumpButton (void) {
@@ -624,16 +654,16 @@ SF_INFO	*sf_info	= (SF_INFO *)alloca (sizeof (SF_INFO));
 #include <QCloseEvent>
 void RadioInterface::closeEvent (QCloseEvent *event) {
 
-        QMessageBox::StandardButton resultButton =
-                        QMessageBox::question (this, "dabRadio",
-                                               tr("Are you sure?\n"),
-                                               QMessageBox::No | QMessageBox::Yes,
-                                               QMessageBox::Yes);
-        if (resultButton != QMessageBox::Yes) {
-           event -> ignore();
-        } else {
-           handle_quitButton ();
-           event -> accept ();
-        }
+	QMessageBox::StandardButton resultButton =
+	                QMessageBox::question (this, "dabRadio",
+	                                       tr("Are you sure?\n"),
+	                                       QMessageBox::No | QMessageBox::Yes,
+	                                       QMessageBox::Yes);
+	if (resultButton != QMessageBox::Yes) {
+	   event -> ignore();
+	} else {
+	   handle_quitButton ();
+	   event -> accept ();
+	}
 }
 

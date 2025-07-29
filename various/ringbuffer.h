@@ -65,9 +65,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
-#ifndef __RINGBUFFER
-#define	__RINGBUFFER
+#pragma once
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<string.h>
@@ -154,19 +152,19 @@ public:
  * 	functions for checking available data for reading and space
  * 	for writing
  */
-uint32_t	GetRingBufferReadAvailable (void) {
+uint32_t	GetRingBufferReadAvailable () {
 	return (writeIndex - readIndex) & bigMask;
 }
 
-//int32_t	ReadSpace	(void){
+//int32_t	ReadSpace	(){
 //	return GetRingBufferReadAvailable ();
 //}
 
-uint32_t	GetRingBufferWriteAvailable (void) {
+uint32_t	GetRingBufferWriteAvailable () {
 	return  bufferSize - GetRingBufferReadAvailable ();
 }
 
-int32_t	WriteSpace	(void) {
+int32_t	WriteSpace	() {
 	return GetRingBufferWriteAvailable ();
 }
 
@@ -336,5 +334,6 @@ int32_t	skipDataInBuffer (uint32_t n_values) {
 }
 
 };
-#endif
+
+
 

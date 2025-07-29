@@ -2,7 +2,8 @@
 Redesign and re-implementation of the drm decoder
 -----------------------------------------------------------------------------
 
-The new version supports, next to the SDRplay and HackRf the spyServer.
+The new version supports, next to the SDRplay and HackRf, the spyServer
+and a soundcard input.
 In my environment SW signals suffer from pollution by solar panels etc, and
 while my antenna equipment is less than optimal, I added support for the
 spyServer.
@@ -11,11 +12,14 @@ frequencies not supported by regular AIRsoy devices or by V3 DABsticks.
 It turns out that there are a few spyServers connected to an AirspyHF,
 which obviously does support the frequencies used for DRM.
 
+Soundcard input is very experimental and limited. It is assumed that control
+of the device that generates the output is separate. I.e. changing the 
+frequency on the drm main widget will effect the frequency indication on
+the spectrum display, no changes were applied to the input device.
 
 -------------------------------------------------------------------------------
 Note that the ".pro" file now is for use with Qt6
 ----------------------------------------------------------------------------:
-
 
 **DRM (Digital Radio Mondiale)** is - as the name suggests - a form of digital
 radio. 
