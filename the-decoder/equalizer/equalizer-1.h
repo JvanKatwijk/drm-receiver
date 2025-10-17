@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDRunoPlugin_drm
+ *    This file is part of the drm receiver
  *
- *    drm plugin is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm plugin is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm plugin; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
@@ -29,7 +29,6 @@
 #include	"ringbuffer.h"
 #include	<vector>
 #include	"my-array.h"
-class		estimator_1;
 class		estimator_2;
 class		drmDecoder;
 typedef	struct {
@@ -43,11 +42,10 @@ public:
 			equalizer_1 	(drmDecoder	*,
 	                                 uint8_t	Mode,
 	                                 uint8_t	Spectrum,
-	                                 int		strength,
-	                                 int		f_cut_k,
-	                                 bool,
 	                                 RingBuffer<std::complex<float>> *);
-			~equalizer_1 	();
+			~equalizer_1 	();	
+	void		makeTheta	(float *, int, int, float, float);
+	void		makePhi		(float **, int, float, float);
 	bool		equalize	(std::complex<float> *,
 	                                 int16_t,
 	                                 myArray<theSignal>*,
@@ -64,9 +62,12 @@ private:
 	RingBuffer<std::complex<float>> *eqBuffer;
 	void		getRelAddress	(int16_t, int16_t *, int16_t *);
 	int16_t		buildTrainers	(int16_t);
+	std::complex<float>
+                        build_corrector (int symbol, int carrier,
+                                         int windowBase, int realWindow);
+
 	int16_t		rndcnt;
 	estimator_2	*estimator_channel;
-//	estimator_1	**estimators;
 	estimator_2	**estimators;
 	int16_t		windowsinFrame;
 	int16_t		periodforPilots;
@@ -74,7 +75,6 @@ private:
 	double		**W_symbol_blk [20];
 	float		f_cut_t;
 	float		f_cut_k;
-	bool		linear;
 	std::vector<std::vector<trainer>> theTrainers;
 	std::vector<std::vector<std::complex<float>>> pilotEstimates;
 	int16_t		trainers_per_window [10];
@@ -87,6 +87,7 @@ private:
 	int16_t		Tu;
 	int16_t		Tg;
 
+	float		sigmaq_noise;
 	int		scopeMode;
 signals:
 	void		show_eqsymbol	(int);

@@ -95,6 +95,7 @@ const char *deviceTable [] = {
 	nullptr
 };
 
+float	Alpha	= 1.0 / 12000;
 static int startKnop;
 static	QTimer	*starter;
 
@@ -136,6 +137,9 @@ QString	FrequencytoString (int32_t freq) {
 	scopeWidth		= inputRate;
 	centerFrequency		= KHz (14070);
 	selectedFrequency	= KHz (14070);
+
+	dcReal                  = 0;
+        dcImag                  = 0;
 
 	theBand. currentOffset	= 0;
 	theBand. lowF		= -5000;
@@ -186,7 +190,10 @@ QString	FrequencytoString (int32_t freq) {
 
 	connect (mouse_Inc, SIGNAL (valueChanged (int)),
 	         this, SLOT (set_mouseIncrement (int)));
-
+	connect (upButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_upButton ()));
+	connect (downButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_downButton ()));
 	connect (streamOutSelector, SIGNAL (activated (int)),
 	         this, SLOT (setStreamOutSelector (int)));
 
@@ -505,9 +512,18 @@ void	RadioInterface::set_mouseIncrement (int inc) {
 }
 
 void	RadioInterface::wheelEvent (QWheelEvent *e) {
-	adjustFrequency_hz ((e -> angleDelta (). rx () > 0) ?
-	                        mouseIncrement : -mouseIncrement);
+//	adjustFrequency_hz ((e -> angleDelta (). rx () > 0) ?
+//	                        mouseIncrement : -mouseIncrement);
 }
+
+void	RadioInterface::handle_upButton	() {
+	adjustFrequency_hz (mouseIncrement);
+}
+
+void	RadioInterface::handle_downButton	() {
+	adjustFrequency_hz (-mouseIncrement);
+}
+
 
 //////////////////////////////////////////////////////////////////
 //
@@ -515,26 +531,31 @@ void	RadioInterface::sampleHandler (int amount) {
 std::complex<float>   buffer [theDecimator. inSize ()]; 
 std::complex<float> ifBuffer [theDecimator. outSize ()];
 float dumpBuffer [2 * 512];
-int	i, j;
 
 	(void)amount;
 	while (inputData. GetRingBufferReadAvailable () > 512) {
 	   inputData. getDataFromBuffer (buffer, 512);
 	   hfScope	-> addElements (buffer, 512);
 	   if (dumpfilePointer != NULL) {
-	      for (i = 0; i < 512; i ++) {
+	      for (int i = 0; i < 512; i ++) {
 	         dumpBuffer [2 * i]	= real (buffer [i]);
 	         dumpBuffer [2 * i + 1] = imag (buffer [i]);
 	      }
 	      sf_writef_float (dumpfilePointer, dumpBuffer, 512);
 	   }
 
-	   for (i = 0; i < 512; i ++) {
-	      float agcGain;
-	      std::complex<float> temp = hfFilter. Pass (buffer [i]);
+	   for (int i = 0; i < 512; i ++) {
+	      std::complex<float> v = buffer [i];
+              dcReal            = compute_avg (dcReal, real (v), Alpha);
+              dcImag            = compute_avg (dcImag, imag (v), Alpha);
+              v = std::complex<float> (real (v) - dcReal, imag (v) - dcImag);
+
+              std::complex<float> temp = hfFilter. Pass (v);
+
+//	      std::complex<float> temp = hfFilter. Pass (buffer [i]);
 	      temp = hfShifter. do_shift (temp, theBand. currentOffset);
 	      if (theDecimator. add (temp, ifBuffer)) {
-	         for (j = 0; j < theDecimator. outSize (); j ++) {
+	         for (int j = 0; j < theDecimator. outSize (); j ++) {
 	            theDecoder -> process (ifBuffer [j]);
 	         }
 	      }

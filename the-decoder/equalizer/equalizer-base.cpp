@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDRunoPlugin_drm
+ *    This file is part of the drm receiver
  *
- *    drm plugin is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm plugin is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm plugin; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
@@ -44,7 +44,7 @@ int16_t	i;
 	   testFrame [i] = new std::complex<DRM_FLOAT> [carriersinSymbol];
 }
 
-		equalizer_base::~equalizer_base (void) {
+		equalizer_base::~equalizer_base () {
 int16_t	i;
 	for (i = 0; i < symbolsinFrame; i ++) {
 	   delete [] refFrame [i];
@@ -58,14 +58,14 @@ int16_t	equalizer_base::indexFor (int16_t carrier) {
 	return carrier - Kmin (Mode, Spectrum);
 }
 	
-void	equalizer_base::init_gain_ref_cells (void) {
+void	equalizer_base::init_gain_ref_cells () {
 int16_t symbol, carrier;
 DRM_FLOAT	mean_energy	= 0;
-int16_t	cellCount	= 0;
+//int16_t	cellCount	= 0;
 int16_t	totalCount	= 0;
 
 	for (symbol = 0; symbol < symbolsperFrame (Mode); symbol ++) {
-	   int16_t prevCarriers = symbol * (carriersinSymbol);
+//	   int16_t prevCarriers = symbol * (carriersinSymbol);
 	   for (carrier = K_min; carrier <= K_max; carrier ++) {
 	      totalCount ++;
 	      if (isPilotCell (Mode, symbol, carrier)) {
@@ -104,20 +104,20 @@ int16_t	equalizer_base::actualRow (int16_t symbol, int16_t firstRow) {
 	         symbol + firstRow - symbolsinFrame : symbol + firstRow;
 }
 
-DRM_FLOAT	equalizer_base::getMeanEnergy	(void) {
+float	equalizer_base::getMeanEnergy	() {
 	return meanEnergy;
 }
 
-std::complex<DRM_FLOAT> **equalizer_base::getChannels	(void) {
+std::complex<float> **equalizer_base::getChannels	() {
 	return refFrame;
 }
 
 //
 //
-bool	equalizer_base::equalize (std::complex<DRM_FLOAT> *testRow,
+bool	equalizer_base::equalize (std::complex<float> *testRow,
 	                          int16_t index,
-	                          theSignal **outFrame,
-	                          std::vector<std::complex<DRM_FLOAT>> &v) {
+	                          myArray<theSignal> *outFrame,
+	                          std::vector<std::complex<float>> &v) {
 	(void) testRow;
 	(void) index;
 	(void) outFrame; 
@@ -127,11 +127,11 @@ bool	equalizer_base::equalize (std::complex<DRM_FLOAT> *testRow,
 
 bool	equalizer_base::equalize (std::complex<DRM_FLOAT> *testRow,
 	                          int16_t index,
-	                          theSignal **outFrame,
-	                          DRM_FLOAT *fractout,
-	                          DRM_FLOAT *freqOut,
-	                          DRM_FLOAT *sampleclockOffset,
-	                          std::vector<std::complex<DRM_FLOAT>> &v) {
+	                          myArray<theSignal> *outFrame,
+	                          float	 *fractout,
+	                          float	 *freqOut,
+	                          float	 *sampleclockOffset,
+	                          std::vector<std::complex<float>> &v) {
 	(void) testRow;
 	(void) index;
 	(void) outFrame; 

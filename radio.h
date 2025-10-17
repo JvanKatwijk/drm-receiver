@@ -91,6 +91,10 @@ private:
 	int16_t		mouseIncrement;
 	int16_t		delayCount;
 	void		set_inMiddle	();
+
+	float           dcReal;
+        float           dcImag;
+
 //
 	SNDFILE		*dumpfilePointer;
 	QTimer		secondsTimer;
@@ -125,6 +129,9 @@ private slots:
 	void		updateTime		(void);
 	void		set_dumpButton		(void);
 	void		closeEvent		(QCloseEvent *event);
+
+	void		handle_upButton		();
+	void		handle_downButton	();
 public slots:
 	void		quickStart		();
 	void		sampleHandler		(int amount);

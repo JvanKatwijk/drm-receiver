@@ -106,6 +106,10 @@ float	get_db (float x, int32_t y) {
 	return 20 * log10 ((x + 1) / (float)(y));
 }
 
+static inline  
+float   compute_avg     (float oldVal, float newVal, float Alpha) {
+        return (1 - Alpha) * oldVal + Alpha * newVal;
+}
 
 static	inline
 float	PI_Constrain (float val) {

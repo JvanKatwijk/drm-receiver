@@ -63,15 +63,11 @@
 	nSymbols		= 25;
 	modeInf. Mode		= 2;
 	modeInf. Spectrum	= 3;
-	int st			= s   -> value ("strength", 0). toInt ();
-        strengthSelector        -> setValue (st);
-        st			= s    -> value ("f_cut_k", 20). toInt ();
-        f_cutSelector           -> setValue (st);
 
-        connect (strengthSelector, SIGNAL (valueChanged (int)),
-                 this, SLOT (handle_strengthSelector (int)));
-        connect (f_cutSelector, SIGNAL (valueChanged (int)),
-                 this, SLOT (handle_f_cutSelector (int)));
+//	connect (strengthSelector, SIGNAL (valueChanged (int)),
+//	         this, SLOT (handle_strengthSelector (int)));
+//	connect (f_cutSelector, SIGNAL (valueChanged (int)),
+//	         this, SLOT (handle_f_cutSelector (int)));
 	connect (modeSelector, SIGNAL (textActivated (const QString &)),
                  this, SLOT (handle_modeSelector (const QString &)));
 
@@ -171,12 +167,9 @@ float     sampleclockOffset       = 0;
 	      equalizer_1 my_Equalizer (this,
 	                                modeInf.Mode,
 	                                modeInf.Spectrum,
-	                                strengthSelector -> value (),
-	                                f_cutSelector -> value (),
-	                                eqSelector -> isChecked (),
 	                                &eqBuffer);
 	
-	         my_Equalizer. set_scopeMode (scopeMode);
+	      my_Equalizer. set_scopeMode (scopeMode);
 	      std::vector<std::complex<float>> displayVector;
 	      displayVector. resize (Kmax (modeInf. Mode, modeInf. Spectrum) -
 	                             Kmin (modeInf. Mode, modeInf. Spectrum) + 1);
@@ -687,14 +680,6 @@ int     scopeWidth      = scopeSlider -> value();
 	}
 	avg     /= t;
 	my_iqDisplay -> DisplayIQ (Values, scopeWidth / avg);
-}
-
-void    drmDecoder::handle_strengthSelector (int s) {
-        drmSettings     -> setValue ("strength", s);
-}
-
-void    drmDecoder::handle_f_cutSelector (int n) {
-        drmSettings     -> setValue ("f_cut_k", n);
 }
 
 void    drmDecoder::handle_modeSelector (const QString &m) {

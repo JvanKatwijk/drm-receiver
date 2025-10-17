@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>715</width>
-    <height>401</height>
+    <width>600</width>
+    <height>408</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,10 +24,10 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;quot;Coarse frequency offset as measured by the software&amp;quot;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::Shape::NoFrame</enum>
          </property>
          <property name="segmentStyle">
-          <enum>QLCDNumber::Flat</enum>
+          <enum>QLCDNumber::SegmentStyle::Flat</enum>
          </property>
         </widget>
        </item>
@@ -37,10 +37,10 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fine frequency offset as measured by the software (i.e. the offset to the nearest carrier).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::Shape::NoFrame</enum>
          </property>
          <property name="segmentStyle">
-          <enum>QLCDNumber::Flat</enum>
+          <enum>QLCDNumber::SegmentStyle::Flat</enum>
          </property>
         </widget>
        </item>
@@ -51,7 +51,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="countryLabel">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -77,7 +77,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="timeLabel">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -100,7 +100,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="programTypeLabel">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -123,7 +123,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="aacDataLabel">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -160,7 +160,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time sync label, green means time synchronization is OK.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -180,7 +180,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FAC sync label, Green means that FAC's could be decoded (easy, often 4QAM).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -200,7 +200,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SDC sync label, green means SDC's could be decoded (usually 16 QAM).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -220,7 +220,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Faad sync label. Green means that the AAC decoder could decode audio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -232,36 +232,78 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QSpinBox" name="strengthSelector">
-       <property name="maximum">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="f_cutSelector">
-       <property name="minimum">
-        <number>10</number>
-       </property>
-       <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="singleStep">
-        <number>5</number>
-       </property>
-       <property name="value">
-        <number>20</number>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QComboBox" name="modeSelector">
+         <item>
+          <property name="text">
+           <string>Pilots</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Channel</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Errors</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLCDNumber" name="fac_mer">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estimate of the SNR of the DRM signal.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::SegmentStyle::Flat</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLCDNumber" name="sdc_mer">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::SegmentStyle::Flat</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLCDNumber" name="msc_mer">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::SegmentStyle::Flat</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QLabel" name="spectrumIndicator">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -271,7 +313,7 @@
        <item>
         <widget class="QLabel" name="modeIndicator">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -281,7 +323,7 @@
        <item>
         <widget class="QLabel" name="datacoding">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -291,7 +333,7 @@
        <item>
         <widget class="QLabel" name="audioModelabel">
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="text">
           <string/>
@@ -303,76 +345,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QComboBox" name="modeSelector">
-       <item>
-        <property name="text">
-         <string>Pilots</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Channel</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Errors</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLCDNumber" name="fac_mer">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estimate of the SNR of the DRM signal.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <property name="segmentStyle">
-        <enum>QLCDNumber::Flat</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLCDNumber" name="sdc_mer">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="segmentStyle">
-        <enum>QLCDNumber::Flat</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLCDNumber" name="msc_mer">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="segmentStyle">
-        <enum>QLCDNumber::Flat</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QCheckBox" name="eqSelector">
-       <property name="text">
-        <string>linear</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="resetButton">
        <property name="text">
@@ -385,7 +358,6 @@
        <property name="font">
         <font>
          <pointsize>15</pointsize>
-         <weight>75</weight>
          <italic>true</italic>
          <bold>true</bold>
         </font>
@@ -398,7 +370,7 @@
      <item>
       <widget class="QLabel" name="messageLabel">
        <property name="frameShape">
-        <enum>QFrame::Box</enum>
+        <enum>QFrame::Shape::Box</enum>
        </property>
        <property name="text">
         <string/>
@@ -408,7 +380,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6">
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
       <widget class="QwtPlot" name="equalizerDisplay">
        <property name="maximumSize">
@@ -425,7 +397,7 @@
         <number>50</number>
        </property>
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>

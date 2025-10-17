@@ -28,20 +28,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDRunoPlugin_drm
+ *    This file is part of the drm receiver
  *
- *    drm plugin is free software; you can redistribute it and/or modify
+ *    drm receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm plugin is distributed in the hope that it will be useful,
+ *    drm receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm plugin; if not, write to the Free Software
+ *    along with drm receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *	The Wiener algorithm used in this implementation is written 
@@ -53,40 +53,20 @@
 #include	"referenceframe.h"
 #include	"basics.h"
 #include	"equalizer-1.h"
-#include	"estimator-1.h"
-#include	"estimator-eigen-2.h"
+#include	"estimator-2.h"
 #include	"matrix2.h"
 #include	"drm-decoder.h"
-
-//static
-//std::complex<float> cmul (std::complex<float> c, float f) {
-//	return std::complex<float> (real (c) * f, imag (c) * f);
-//}
-//
-//static
-//std::complex<float> cdiv (std::complex<float> c, float f) {
-//	return std::complex<float> (real (c) / f, imag (c) / f);
-//}
 
 #define	realSym(x)	((x + symbolsinFrame)% symbolsinFrame)
 
 		equalizer_1::equalizer_1 (drmDecoder	*parent,
-	                                  uint8_t	Mode,
-	                                  uint8_t	Spectrum,
-	                                  int		strength,
-	                                  int		f_cut_param,
-	                                  bool		linear,
-	                                  RingBuffer<std::complex<float>> *b):
+	                              uint8_t		Mode,
+	                              uint8_t		Spectrum,
+	                              RingBuffer<std::complex<float>> *b):
 	                                     equalizer_base (Mode, Spectrum) {
-int16_t	i, window;
 float	sigmaq_noise_list [] = {16.0, 14.0, 14.0, 12.0};
-float	sigmaq_noise	= pow (10.0, - sigmaq_noise_list [Mode - Mode_A] / 10.0);
-float	**PHI;
-float	**PHI_2;
-float	*THETA;
-
+	sigmaq_noise	= pow (10.0, - sigmaq_noise_list [Mode - Mode_A] / 10.0);
 	this	-> scopeMode	= SHOW_PILOTS;
-	this	-> linear	= linear;
 	this	-> eqBuffer	= b;
 	connect (this, SIGNAL (show_eqsymbol (int)),
                  parent, SLOT (show_eqsymbol (int)));
@@ -95,31 +75,15 @@ float	*THETA;
 //	Based on table 92 ETSI ES 201980
 
 //	Just for experimentation, we added some alternatives
-//int16_t		symbols_per_window_list_0 []	= {4, 2, 2, 6};
-int16_t		symbols_per_window_list_0 []	= {6, 4, 4, 6};
-int16_t		symbols_per_window_list_1 []	= {10, 6, 8, 6};
-int16_t		symbols_per_window_list_2 []	= {12, 8, 8, 6};
-int16_t		symbols_per_window_list_3 []	= {14, 10, 8, 6};
-int16_t		symbols_per_window_list_4 []	= {15, 12, 10, 6};
-int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
+int16_t		symbols_per_window_list []	= {10, 6, 8, 6};
 //
 //	first shorthands 
-	symbols_per_window	=  strength == 0 ?
-	                              symbols_per_window_list_0 [Mode - Mode_A]:
-	                           strength == 1 ?
-	                              symbols_per_window_list_1 [Mode - Mode_A]:
-	                           strength == 2 ?
-	                              symbols_per_window_list_2 [Mode - Mode_A]:
-	                           strength == 3 ?
-	                              symbols_per_window_list_3 [Mode - Mode_A]:
-	                           strength == 4 ?
-	                              symbols_per_window_list_4 [Mode - Mode_A]:
-	                              symbols_per_window_list_5 [Mode - Mode_A];
-
-	symbols_to_delay	= floor (symbols_per_window / 2);
+	symbols_per_window	= symbols_per_window_list [Mode - Mode_A];
+	symbols_to_delay	= symbols_per_window / 2;
 	periodforSymbols	= groupsperFrame (Mode);
 	periodforPilots		= pilotDistance (Mode);
 	windowsinFrame		= groupsperFrame (Mode);
+
 	Ts			= Ts_of (Mode);
 	Tu			= Tu_of (Mode);
 	Tg			= Tg_of	(Mode);
@@ -131,7 +95,7 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 
 	theTrainers		. resize (windowsinFrame);
 	pilotEstimates		. resize (symbolsinFrame);
-	for (i = 0; i < symbolsinFrame; i ++)
+	for (int i = 0; i < symbolsinFrame; i ++)
 	   pilotEstimates. at (i). resize (carriersinSymbol);
 
 //	precompute 2-D-Wiener filter-matrix w.r.t. power boost
@@ -148,117 +112,73 @@ int16_t		symbols_per_window_list_5 []	= {15, 15, 15, 6};
 //
 //	values taken from diorama
 	f_cut_t = 0.0675 / symbols_to_delay;
-	f_cut_t = 0.0075 / symbols_to_delay;
-//	f_cut_k = 1.75 * (float) Tg / (float) Tu;
-	f_cut_k = f_cut_param / 100.0 * (float) Tg / (float) Tu;
+	f_cut_k = 1.75 * (float) Tg / (float) Tu;
 //
 //	This code is based on the diorama Matlab code, and a
 //	(complete)rewrite of the C translation of this Matlab code by Ties Bos.
 //
-//	first: create the vector of gain reference cells for the
-//	whole frame(s) of this mode
-//	Note that there is a periodicity such that the pilot structure
-//	can be described in just a few "windows"
-//	Now the handling: two loops, in the first one we create
-//	"trainers" for the particular window
-//	In the second one - a large loop - we build the filters
-//	
+//
+//	"Trainers" are formed by the regular gain cells for each window
 //	We build up the "trainers" as relative addresses of the pilots
-	for (window = 0; window < windowsinFrame; window ++) {
+	for (int window = 0; window < windowsinFrame; window ++)  {
 	   buildTrainers (window);
-	   trainers_per_window [window] = theTrainers. at (window). size ();
-
-	   int16_t	trainers_in_window	= trainers_per_window [window];
-	   trainer	*currentTrainers	= theTrainers [window] . data ();
-	   int16_t	trainer_1, trainer_2, carrier;
-//
-	   W_symbol_blk [window]	= new double  *[carriersinSymbol];
-	   for (i = 0; i < carriersinSymbol; i ++)
-	      W_symbol_blk [window][i] = new double [trainers_in_window];
-
-	   PHI		= new float *[trainers_in_window];
-	   PHI_2	= new float *[trainers_in_window];
-	   int cc;
-	   for (cc = 0; cc < trainers_in_window; cc ++) {
-	      PHI [cc] = new float [trainers_in_window];
-	      PHI_2 [cc] = new float [trainers_in_window];
-	   }
-	   THETA	= new float [trainers_in_window];
-//
-//	No need to set the PHI and THETA to zero, first access
-//	is a normal assigment
-//	Calculating PHI for the current "window"
-//	Note that the symbol positions here are the positions
-//	within the window (sym, car), sym relative
-           for (trainer_1 = 0;
-                trainer_1 < trainers_in_window; trainer_1 ++) {
-	      int16_t sym_1	= currentTrainers [trainer_1]. symbol;
-	      int16_t car_1	= currentTrainers [trainer_1]. carrier;
-              for (trainer_2 = 0;
-                   trainer_2 < trainers_in_window; trainer_2 ++) {
-	         int16_t sym_2	= currentTrainers [trainer_2]. symbol;
-	         int16_t car_2	= currentTrainers [trainer_2]. carrier;
-	         PHI_2 [trainer_1][trainer_2] = sinc ((car_1 - car_2) * f_cut_k)
-	                                      * sinc ((sym_1 - sym_2) * f_cut_t);
-              }
-	   }	// end of trainer_1 loop
-
-//	add the noise to the diagonals
-	   for (trainer_1 = 0; trainer_1 < trainers_in_window; trainer_1++) {
-	      int16_t sym	= currentTrainers [trainer_1]. symbol;
-	      int16_t car	= currentTrainers [trainer_1]. carrier;
-	      std::complex<float> v = getPilotValue (Mode, Spectrum,
-	                                             sym + window, car);
-	      float amp = real (v * conj (v));
-	      PHI_2 [trainer_1][trainer_1] += sigmaq_noise * 2.0 / amp;
-	   }
-//
-//	   inverse (PHI, trainers_in_window);
-	   gjinv (PHI_2, trainers_in_window, PHI);
-//
-//	Note that from now on, PHI is actually PHI_INV. A "local"
-//	implementation of inverse is used to avoid linking libraries
-//	Now for Theta's
-	   for (carrier = K_min; carrier <= K_max; carrier++) {
-	      int16_t j, k;
-	      if (carrier == 0)
-	         continue;
-	// first a new THETA
-	      for (trainer_1 = 0;
-	           trainer_1 < trainers_in_window; trainer_1 ++) {
-	         int16_t pilotSymbol, pilotCarrier;
-	         pilotSymbol	= currentTrainers [trainer_1]. symbol;
-	         pilotCarrier	= currentTrainers [trainer_1]. carrier;
-//	THETA = cross covariance-vector
-	         THETA [trainer_1] = sinc ((carrier - pilotCarrier) * f_cut_k)
-	                           * sinc ((symbols_to_delay - pilotSymbol) * f_cut_t);
-	      }		// end of trainer_1 loop
-
-//      calc matrix product  W_symbol_blk [w] [car] = THETA * PHI_INV
-//	in-line coded to avoid libraries
-	      for (j = 0; j < trainers_in_window; j++) {
-	         W_symbol_blk [window][indexFor (carrier)][j] = 0.0;
-	         for (k = 0; k < trainers_in_window; k++)
-	            W_symbol_blk [window][indexFor (carrier)][j] +=
-	                          THETA [k] * PHI [k][j];
-	      }
-	   } /* end carrier-loop, W_symbol_blk done for this carrier */
-//
-//	   done with the THETA and the PHI
-	   delete [] THETA;
-	   for (i = 0; i < trainers_in_window; i ++)  {
-	      delete [] PHI [i];
-	      delete [] PHI_2 [i];
-	   }
-	   delete [] PHI;
-	   delete [] PHI_2;
+	   trainers_per_window [window] = theTrainers [window]. size ();
 	}
 //
+//	The idea is to create a 3D matrix with for 
+//	* each window
+//	* and for each carrier in such a window,
+//	  a vector with size "trainers" (from that window)
+//	  with elements from Phi * Theta
+//	* thereby is Phi a 2 dimensional matrix, one built for each window and
+//	  Theta a once dimensional vector dependent, one built
+//	  for each window and each carrier
+//
+	for (int window = 0; window < windowsinFrame; window ++) {
+	   
+	   W_symbol_blk [window] = new double *[carriersinSymbol];
+	   for (int cs = 0; cs < carriersinSymbol; cs ++)
+	      W_symbol_blk [window][cs] =
+	                new double [theTrainers [window]. size ()];
+	   int trainersInWindow		= trainers_per_window [window];
+//	allocate a Phi and Theta
+	   float *Theta = new float [trainersInWindow];
+	   float **Phi	= new float *[trainersInWindow];
+	   for (int Phi_el = 0;
+	          Phi_el < trainersInWindow; Phi_el ++)
+	      Phi [Phi_el] = new float [trainersInWindow];
+//
+//	as said, we create a Phi for each window
+	   makePhi (Phi, window, f_cut_k, f_cut_t);
+
+	   for (int carrier = K_min; carrier <= K_max; carrier ++) {	   
+	      if (carrier == 0)
+	         continue;
+
+//	      and a Theta for each window and carrier
+	      makeTheta (Theta, window, carrier, f_cut_k, f_cut_t);
+//
+//	   Given the Phi and Theta, we can fill one the vectors
+//	   in the W_symbol_bl matrix.	
+//	   W_symbol_blk [window, carrier] = Theta * Phi;
+	      for (int j = 0; j < trainers_per_window [window]; j ++) {
+	         W_symbol_blk [window][indexFor (carrier)][j] = 0;
+	         for (int k = 0; k < trainers_per_window [window]; k ++)
+	            W_symbol_blk [window][indexFor (carrier)][j] +=
+	                                     Theta [k] * Phi [k][j];
+	      }
+	   }	// end carrier, W_symbol_blk done for this carrier
+
+	   delete [] Theta;
+	   for (int k = 0; k < trainers_per_window [window]; k ++)
+	      delete [] Phi [k];
+	   delete [] Phi;
+	}	// end of loop over windows
 //	The W_symbol_blk filters are ready now
 //
 //	and finally, the estimators
 	estimators	= new estimator_2 *[symbolsinFrame];
-	for (i = 0; i < symbolsinFrame; i ++)
+	for (int i = 0; i < symbolsinFrame; i ++)
 	   estimators [i] = new estimator_2 (refFrame, Mode, Spectrum, i);
 	estimator_channel = new estimator_2 (refFrame, Mode, Spectrum, 1);
 }
@@ -277,7 +197,52 @@ int16_t	i;
 	   delete [] W_symbol_blk [window];
 	}
 }
+
 //
+//	We create one dimensional vector for theta, one
+//	for each combination of window and carrier
+void equalizer_1::makeTheta (float *Theta, int window,
+	                        int carrier, float f_cut_k, float f_cut_t) {
+trainer *currentTrainers = theTrainers [window]. data ();
+
+	for (int trainer_1 = 0;
+	            trainer_1 < theTrainers [window]. size (); trainer_1 ++) {
+	   int16_t pilotSymbol	= currentTrainers [trainer_1]. symbol;
+	   int16_t pilotCarrier	= currentTrainers [trainer_1]. carrier;
+	   Theta [trainer_1] = sinc ((carrier - pilotCarrier) * f_cut_k)
+                            * sinc ((symbols_to_delay - pilotSymbol) * f_cut_t);
+	}
+}
+
+//	with PHI we create a 2 dim matrix over the trainter/trainer pairs
+void	equalizer_1::makePhi (float **Phi, int window,
+	                               float f_cut_k, float f_cut_t) {
+int numOfTrainers	= theTrainers [window]. size ();
+float *Phi_temp [numOfTrainers];
+	for (int i = 0; i < numOfTrainers; i ++) 
+	      Phi_temp  [i] = new float [numOfTrainers];
+
+	trainer	*currentTrainers = theTrainers [window]. data ();
+	for (int trainer_1 = 0; trainer_1 < numOfTrainers; trainer_1 ++) {
+	   int16_t sym_1	= currentTrainers [trainer_1]. symbol;
+	   int16_t car_1	= currentTrainers [trainer_1]. carrier;
+	   for (int trainer_2 = 0; trainer_2 < numOfTrainers; trainer_2 ++) {
+	      int16_t sym_2 = currentTrainers [trainer_2]. symbol;
+	      int16_t car_2 = currentTrainers [trainer_2]. carrier;
+	      Phi_temp [trainer_1][trainer_2] =
+	                       sinc ((car_1 - car_2) * f_cut_k) *
+	                       sinc ((sym_1 - sym_2) * f_cut_t);
+	   }
+	   std::complex<float> v = getPilotValue (Mode, Spectrum,
+	                                             window + sym_1, car_1);
+	   float amp = real (v * conj (v));
+	   Phi_temp [trainer_1][trainer_1] += sigmaq_noise * 2.0 / amp;
+	}
+	gjinv (Phi_temp, numOfTrainers, Phi);
+
+	for (int i = 0; i < theTrainers [window]. size (); i ++)
+	   delete [] Phi_temp [i];
+}
 //	The "trainers" are built over the "regular" pilots, i.e.
 //	those pilots that appear in the regular pilot pattern.
 //	"Trainers" are encoded as a pair, with the symbol relative
@@ -313,7 +278,7 @@ int16_t	symbol_to_process;
 int16_t	i;
 
 //	First, we copy the incoming vector to the appropriate vector
-//	in the testFrame. Next we compute the estimates for the
+//	in the testFrame. Next we compute the estimates for the 
 //	channels of the pilots.
 //
 //	Tracking the freqency offset is done by looking at the
@@ -400,22 +365,13 @@ int16_t	i;
 	*delta_freq_offset	=  arg (offs7) / periodforSymbols;
 //	*delta_freq_offset	= (arg (offs1) + arg (offs7) / periodforSymbols) / 2;
 
-	std::vector<std::complex<float>> VV;
-	std::vector<std::complex<float>> DD;
-	if ((newSymbol == 2) && (scopeMode == SHOW_CHANNEL)) {
-	   estimator_channel  -> estimate (testFrame [2],
-	                                   pilotEstimates [2]. data (), VV, DD);
-	   std::complex<float> xx [VV. size ()];
-	   for (int index = 0; index < VV. size (); index ++) {
-	      xx [index] = VV [index];
-	   }
-	   eqBuffer -> putDataIntoBuffer (xx, VV. size ());
-	   show_eqsymbol (VV. size ());
-	}
+//
+//	If asked for we show (input/reference)
+//
+//	It took a while, but here it really begins
 	estimators [newSymbol] ->
 	              estimate (testFrame [newSymbol],
-	                        pilotEstimates [newSymbol]. data (), VV, DD);
-//	                        pilotEstimates [newSymbol]. data ());
+	                        pilotEstimates [newSymbol]. data ());
 
 //	For equalizing symbol X, we need the pilotvalues
 //	from the symbols X - symbols_to_delay .. X + symbols_to_delay - 1
@@ -424,18 +380,19 @@ int16_t	i;
 //	the symbol "symbols_to_delay" back.
 //	
 	symbol_to_process = realSym (newSymbol - symbols_to_delay);
+	
+	if ((symbol_to_process == 1) && (scopeMode == SHOW_CHANNEL)) {
+	   std::complex<float> result [K_max - K_min + 1];
+	   for (int i = 0; i < K_max - K_min + 1; i ++)
+	      result [i] = 0;
+	   estimator_channel -> estimate_2 (testFrame [newSymbol], result);
+	   eqBuffer -> putDataIntoBuffer (result, K_max - K_min + 1);
+	   show_eqsymbol (K_max - K_min + 1);
+	}
 
 	processSymbol (symbol_to_process,
 	               outFrame -> element (symbol_to_process),
 	               v);
-	if (linear) {
-	   std::vector<std::complex<float>> hulpV (K_max - K_min + 1);
-	   estimators [symbol_to_process] ->
-	              estimate (testFrame [symbol_to_process], hulpV. data (), VV, DD);
-	   for (int i = 0; i < hulpV. size (); i ++)
-	      outFrame -> element (symbol_to_process) [i]. signalValue =
-	                 testFrame [symbol_to_process] [i] / DD [i];
-	}
 
 	if ((symbol_to_process == 3)  && (scopeMode == SHOW_ERROR)) {
 	   std::complex<float> xx [K_max - K_min + 1];
@@ -443,10 +400,12 @@ int16_t	i;
 	   for (int carrier = K_min; carrier <= K_max; carrier ++) {
 	      if ((carrier != 0) &&
 	          (isPilotCell (Mode, symbol_to_process, carrier))) {
-	         xx [carrier - K_min] =
+	         std::complex<float> nom =
                     outFrame -> element (symbol_to_process)
-	                                  [indexFor (carrier)]. signalValue -
+	                                  [indexFor (carrier)]. signalValue;
+	         std::complex<float>denom =
 	                  getPilotValue (Mode, Spectrum, symbol_to_process, carrier);
+	         xx [carrier - K_min] = (nom * conj (denom));
 	         teller ++;
 	      }
 	      else
@@ -464,15 +423,10 @@ bool	equalizer_1::equalize (std::complex<float> *testRow,
 	                       int16_t newSymbol,
 	                       myArray<theSignal>*outFrame,
 	                       std::vector<std::complex<float>> &v) {
-int16_t	carrier;
-int16_t	symbol_to_process;
-
-//	First, we copy the incoming vector to the appropriate vector
-//	in the testFrame. Next we compute the estimates for the
-//	channels of the pilots.
-//	This is the most simple approach: the channels of the pilots
-//	are obtained by dividing the value observed by the pilot value.
-	for (carrier = K_min; carrier <= K_max; carrier ++) {
+//	Copy the incoming vector to the appropriate vector
+//	in the testFrame. and compute the channel estimated for
+//	the pilots.
+	for (int carrier = K_min; carrier <= K_max; carrier ++) {
 	   if (carrier == 0)
 	      continue;
 	   testFrame [newSymbol][indexFor (carrier)] =
@@ -482,7 +436,6 @@ int16_t	symbol_to_process;
 	                  testRow [indexFor (carrier)] /
 	                    getPilotValue (Mode, Spectrum, newSymbol, carrier);
 	}
-
 //
 //	For equalizing symbol X, we need the pilotvalues
 //	from the symbols X - symbols_to_delay .. X + symbols_to_delay - 1
@@ -490,17 +443,40 @@ int16_t	symbol_to_process;
 //	We added the symbol at loc newSymbol, so we can equalize
 //	the symbol "symbols_to_delay - 1" back.
 //	
-	symbol_to_process = realSym (newSymbol - symbols_to_delay);
+	int symbol_to_process = realSym (newSymbol - symbols_to_delay);
 	processSymbol (symbol_to_process,
 	               outFrame -> element (symbol_to_process), v);
 //	If we have a frame full of output: return true
 	return symbol_to_process == symbolsinFrame - 1;
 }
-//
+
+
+//      Build a corrector for carrier "carrier" in the real Window
+
+std::complex<float> equalizer_1::build_corrector (int symbol, int carrier,
+	                                    int windowBase, int realWindow) {
+trainer *trainers = theTrainers [windowBase]. data ();
+std::complex<float>   res     = 0;
+float	sum	= 0;
+        for (int currentTrainer = 0;
+             currentTrainer < theTrainers [windowBase]. size ();  currentTrainer ++) {
+           int16_t relSym       = trainers [currentTrainer]. symbol;
+           int16_t actualSymbol = realSym (relSym + realWindow);
+           int16_t pilotCarrier = trainers [currentTrainer]. carrier;
+
+           res += cmul (pilotEstimates [actualSymbol][indexFor (pilotCarrier)],
+                        W_symbol_blk [windowBase][indexFor (carrier)]
+                                                            [currentTrainer]);
+           sum += W_symbol_blk [windowBase][indexFor (carrier)][currentTrainer];
+        }  
+        return cdiv (res, sum);
+}
+
+//	we have a symbol number (i.e. an index in the DRM frame)
 //	process symbol "symbol", 
 void	equalizer_1::processSymbol (int16_t symbol,
-	                                theSignal *outVector,
-	                                std::vector<std::complex<float>> &v) {
+	                            theSignal *outVector,
+	                            std::vector<std::complex<float>> &v) {
 //	"ntwee" will indicate the "model" of the window, we deal with
 //	while windowBase indicates the REAL window, i.e. the
 //	the first symbol of the window as appearing in the frame.
@@ -510,8 +486,6 @@ int16_t	windowBase		= realSym (symbol +
 int16_t	ntwee			= windowBase % windowsinFrame;
 int16_t	nrTrainers		= trainers_per_window [ntwee];
 trainer *currentTrainers	= theTrainers [ntwee]. data ();
-int16_t	currentTrainer;
-int16_t	carrier;
 
 //	The trainers are over N subsequent symbols in the frame, starting
 //	at windowBase. The "model" is to be found at ntwee.
@@ -523,34 +497,20 @@ int16_t	carrier;
 //	filtering,
 //	the inner loop loops over the pilots (aka trainers) for
 //	the reference window
-	for (carrier = K_min; carrier <= K_max; carrier ++) {
+	for (int carrier = K_min; carrier <= K_max; carrier ++) {
 	   double sum = 0;
 	   if (carrier == 0)
 	      continue;
-
-	   refFrame [symbol] [indexFor (carrier)] = 0;
-	   for (currentTrainer = 0;
-	        currentTrainer < nrTrainers;  currentTrainer ++) {
-	      int16_t relSym	= currentTrainers [currentTrainer]. symbol;
-	      int16_t pilotCarrier = currentTrainers [currentTrainer]. carrier;
-	      int16_t actualSymbol = realSym (relSym + windowBase);
-
-	      refFrame [symbol] [indexFor (carrier)] +=
-	           cmul (pilotEstimates [actualSymbol][indexFor (pilotCarrier)],
-	                 W_symbol_blk [ntwee][indexFor (carrier)]
-	                                                    [currentTrainer]);
-	      sum += W_symbol_blk [ntwee][indexFor (carrier)][currentTrainer];
-	   }
-//	and normalize the value
 	   refFrame [symbol][indexFor (carrier)] =
-	                cdiv (refFrame [symbol][indexFor (carrier)], sum);
+	                build_corrector (symbol, carrier, ntwee, windowBase);
 	}
 
 	if ((symbol == 4) && (scopeMode == SHOW_PILOTS)) {
 	   std::complex<float> xx [K_max - K_min + 1];
 	   for (int carrier = K_min; carrier <= K_max; carrier ++)
 	      if (isPilotCell (Mode, symbol, carrier)) 
-	         xx [carrier - K_min] = refFrame [symbol][carrier - K_min];
+	         xx [carrier - K_min] = refFrame [symbol][carrier - K_min] *
+	                    conj (getPilotValue (Mode, Spectrum, symbol, carrier));
 	      else
 	         xx [carrier - K_min] = std::complex<float> (0, 0);
 	   eqBuffer -> putDataIntoBuffer (xx, K_max - K_min + 1);
@@ -559,7 +519,7 @@ int16_t	carrier;
 
 //	The transfer function is now there, stored in the appropriate
 //	entry in the refFrame, so let us equalize
-	for (carrier = K_min; carrier <= K_max; carrier ++) {
+	for (int carrier = K_min; carrier <= K_max; carrier ++) {
 	   std::complex<float> temp	=
 	                   refFrame [symbol] [indexFor (carrier)];
 	   if (carrier == 0)

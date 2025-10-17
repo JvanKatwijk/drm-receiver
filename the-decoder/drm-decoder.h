@@ -131,8 +131,6 @@ private:
 private slots:
 	void		select_channel_1	();
 	void		select_channel_2	();
-	void            handle_strengthSelector (int);
-        void            handle_f_cutSelector    (int);
         void            handle_modeSelector     (const QString &);
 	void		handle_reset		();
 

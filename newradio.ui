@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>744</width>
-    <height>290</height>
+    <width>629</width>
+    <height>293</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>drm-radio</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -31,7 +31,7 @@
          <string>©</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -51,7 +51,7 @@
          <number>9</number>
         </property>
         <property name="segmentStyle">
-         <enum>QLCDNumber::Flat</enum>
+         <enum>QLCDNumber::SegmentStyle::Flat</enum>
         </property>
        </widget>
       </item>
@@ -76,16 +76,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="mouse_Inc">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mouse Increment. The amount of Hz that will change when moving the mousewheel is set here.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QComboBox" name="streamOutSelector">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;select an audio output device. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -99,10 +89,10 @@
       <item>
        <widget class="QLabel" name="timeDisplay">
         <property name="frameShape">
-         <enum>QFrame::Panel</enum>
+         <enum>QFrame::Shape::Panel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <property name="text">
          <string/>
@@ -112,10 +102,10 @@
       <item>
        <widget class="QLabel" name="bandLabel">
         <property name="frameShape">
-         <enum>QFrame::Panel</enum>
+         <enum>QFrame::Shape::Panel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <property name="text">
          <string>TextLabel</string>
@@ -125,26 +115,84 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QSlider" name="hfScopeSlider">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSlider" name="hfScopeSlider">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QwtPlot" name="hfSpectrum">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>171</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Main Spectrum Window. This window shows the spectrum of the signal arriving from the selected input device, decimated to the selected inputrate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QwtPlot" name="hfSpectrum">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>171</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Main Spectrum Window. This window shows the spectrum of the signal arriving from the selected input device, decimated to the selected inputrate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="upButton">
+          <property name="text">
+           <string>upButton</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>38</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="mouse_Inc">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mouse Increment. The amount of Hz that will change when moving the mousewheel is set here.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="value">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>18</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="downButton">
+          <property name="text">
+           <string>downButton</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
